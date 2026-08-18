@@ -9,6 +9,28 @@
 
 date_default_timezone_set('America/Bogota');
 
+// Sincronización automática de código de landings desde bundled_landings hacia el volumen persistente de Railway
+(function() {
+    $bundled = __DIR__ . '/bundled_landings';
+    $dest = __DIR__ . '/landings';
+    if (!is_dir($bundled)) return;
+
+    $script = $_SERVER['SCRIPT_FILENAME'] ?? '';
+    if (strpos($script, 'landings') !== false && strpos($script, 'bundled_landings') === false) {
+        $slug = basename(dirname($script));
+        $bundledIndex = $bundled . '/' . $slug . '/index.php';
+        if (file_exists($bundledIndex) && file_exists($script)) {
+            $currentSize = filesize($script);
+            $bundledSize = filesize($bundledIndex);
+            if ($currentSize !== $bundledSize || filemtime($bundledIndex) > filemtime($script)) {
+                @copy($bundledIndex, $script);
+                header("Refresh:0");
+                exit;
+            }
+        }
+    }
+})();
+
 /* =========================================
    HOSTS CONFIGURATION (MICROSERVICES)
 ========================================= */

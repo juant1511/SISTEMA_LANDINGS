@@ -315,8 +315,7 @@ if (empty(\$otros_productos) && is_dir(__DIR__ . '/../')) {
             body { padding-bottom: 85px; }
         }
 
-        /* ─── TOP ANNOUNCEMENT BAR (SIEMPRE ENVÍOS GRATIS A COLOMBIA) ─── */
-                        .navbar {
+        .navbar {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -1793,7 +1792,7 @@ if (empty(\$otros_productos) && is_dir(__DIR__ . '/../')) {
         <p style="margin-top: 14px; font-family: var(--font-heading); font-weight: 700; font-size: 14px;">Preparando tu pedido seguro...</p>
     </div>
 
-            <!-- 1. TOP ANNOUNCEMENT BAR TICKER -->
+                <!-- 1. TOP ANNOUNCEMENT BAR TICKER -->
     <div class="top-announcement">
         <div class="topbar-marquee-track">
             <div class="marquee-content">

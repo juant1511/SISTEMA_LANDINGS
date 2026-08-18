@@ -336,7 +336,7 @@ try {
         <p style="margin-top: 14px; font-family: var(--font-heading); font-weight: 700; font-size: 14px;">Preparando tu pedido seguro...</p>
     </div>
 
-                <!-- 1. TOP ANNOUNCEMENT BAR TICKER -->
+                    <!-- 1. TOP ANNOUNCEMENT BAR TICKER -->
         <!-- 1. TOP ANNOUNCEMENT BAR TICKER -->
     <div class="top-announcement">
         <div class="topbar-marquee-track">
