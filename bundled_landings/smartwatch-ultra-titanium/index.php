@@ -1052,14 +1052,13 @@ try {
             const activeBtn = btn || document.querySelector('.btn-add-desktop') || document.getElementById('btnAddToCart');
             const origBtnHtml = activeBtn ? activeBtn.innerHTML : '';
 
-            // 1. Mostrar animación Lottie oficial dentro del botón presionado
+            // 1. Mostrar icono animado Lottie oficial grande y centrado (sin texto)
             if (activeBtn) {
                 activeBtn.style.transition = 'all 0.2s ease';
                 activeBtn.style.transform = 'scale(0.97)';
                 activeBtn.innerHTML = `
-                    <div style="display:flex; align-items:center; justify-content:center; gap:8px; width:100%; height:100%;">
-                        <dotlottie-player src="https://lottie.host/b86261fc-a05c-4c50-a871-4f9ed870ec53/OwNQtMEoZd.lottie" background="transparent" speed="1.1" style="width:34px; height:34px;" autoplay></dotlottie-player>
-                        <span style="font-weight:800;">¡Agregando al carrito...</span>
+                    <div style="display:flex; align-items:center; justify-content:center; width:100%; height:100%; overflow:hidden;">
+                        <dotlottie-player src="https://lottie.host/b86261fc-a05c-4c50-a871-4f9ed870ec53/OwNQtMEoZd.lottie" background="transparent" speed="1.2" style="width:48px; height:48px;" autoplay></dotlottie-player>
                     </div>
                 `;
                 setTimeout(() => { if (activeBtn) activeBtn.style.transform = 'scale(1)'; }, 180);
