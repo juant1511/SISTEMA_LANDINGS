@@ -480,6 +480,16 @@ try {
         #landing-loader { display: none; position: fixed; inset: 0; background: rgba(255, 255, 255, 0.95); z-index: 99999; flex-direction: column; justify-content: center; align-items: center; }
         .spinner { width: 44px; height: 44px; border: 3px solid #f3f4f6; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+        @keyframes cartBadgeBounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.45); }
+            100% { transform: scale(1); }
+        }
+        .cart-badge-bounce {
+            animation: cartBadgeBounce 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
     </style>
 </head>
 <body class="<?= $es_modo_edicion ? 'modo-edicion-activo' : '' ?>" style="<?= $es_modo_edicion ? 'margin-top: 50px;' : '' ?>">
@@ -993,14 +1003,68 @@ try {
             renderCart();
         }
 
+        function animarVueloAlCarrito(callback) {
+            const mainImg = document.getElementById('mainImage');
+            const cartTrigger = document.querySelector('.cart-trigger');
+            if (!mainImg || !cartTrigger) {
+                if (callback) callback();
+                return;
+            }
+
+            const imgRect = mainImg.getBoundingClientRect();
+            const cartRect = cartTrigger.getBoundingClientRect();
+
+            const flyImg = document.createElement('img');
+            flyImg.src = mainImg.src;
+            flyImg.style.position = 'fixed';
+            flyImg.style.left = imgRect.left + 'px';
+            flyImg.style.top = imgRect.top + 'px';
+            flyImg.style.width = imgRect.width + 'px';
+            flyImg.style.height = imgRect.height + 'px';
+            flyImg.style.borderRadius = '16px';
+            flyImg.style.objectFit = 'cover';
+            flyImg.style.zIndex = '999999';
+            flyImg.style.pointerEvents = 'none';
+            flyImg.style.boxShadow = '0 10px 30px rgba(0,0,0,0.35)';
+            flyImg.style.transition = 'all 0.6s cubic-bezier(0.2, 0.8, 0.25, 1)';
+            flyImg.style.opacity = '1';
+            document.body.appendChild(flyImg);
+
+            requestAnimationFrame(() => {
+                const targetX = cartRect.left + (cartRect.width / 2) - 18;
+                const targetY = cartRect.top + (cartRect.height / 2) - 18;
+                flyImg.style.left = targetX + 'px';
+                flyImg.style.top = targetY + 'px';
+                flyImg.style.width = '36px';
+                flyImg.style.height = '36px';
+                flyImg.style.borderRadius = '50%';
+                flyImg.style.opacity = '0.3';
+                flyImg.style.transform = 'scale(0.5) rotate(15deg)';
+            });
+
+            setTimeout(() => {
+                if (flyImg.parentNode) flyImg.parentNode.removeChild(flyImg);
+
+                cartTrigger.style.transition = 'transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                cartTrigger.style.transform = 'scale(1.35)';
+                setTimeout(() => {
+                    cartTrigger.style.transform = 'scale(1)';
+                }, 250);
+
+                if (callback) callback();
+            }, 550);
+        }
+
         function agregarAlCarrito() {
             if (ES_MODO_EDICION) return;
-            renderCart();
-            const overlay = document.getElementById('cartOverlay');
-            if (overlay && !overlay.classList.contains('open')) {
-                overlay.classList.add('open');
-                document.body.style.overflow = 'hidden';
-            }
+            animarVueloAlCarrito(() => {
+                renderCart();
+                const overlay = document.getElementById('cartOverlay');
+                if (overlay && !overlay.classList.contains('open')) {
+                    overlay.classList.add('open');
+                    document.body.style.overflow = 'hidden';
+                }
+            });
         }
 
         function cambiarCantidad(delta) {
