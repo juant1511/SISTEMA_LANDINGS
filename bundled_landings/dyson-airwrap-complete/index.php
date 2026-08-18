@@ -481,13 +481,52 @@ try {
         .spinner { width: 44px; height: 44px; border: 3px solid #f3f4f6; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     
-        @keyframes cartBadgeBounce {
+        
+
+    
+        /* ─── ANIMACIONES PROFESIONALES DEL CARRITO ─── */
+        .cart-trigger {
+            position: relative;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #111827;
+            padding: 6px;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .cart-pop-active {
+            animation: cartPopBounce 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        }
+        @keyframes cartPopBounce {
             0% { transform: scale(1); }
-            50% { transform: scale(1.45); }
+            35% { transform: scale(1.4); }
+            70% { transform: scale(0.92); }
             100% { transform: scale(1); }
         }
+        .cart-ripple-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 44px;
+            height: 44px;
+            margin-left: -22px;
+            margin-top: -22px;
+            border-radius: 50%;
+            border: 2.5px solid var(--primary, #111111);
+            pointer-events: none;
+            animation: cartRippleAnim 0.65s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+        @keyframes cartRippleAnim {
+            0% { transform: scale(0.4); opacity: 0.95; }
+            100% { transform: scale(1.8); opacity: 0; }
+        }
         .cart-badge-bounce {
-            animation: cartBadgeBounce 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: cartBadgeBounce 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes cartBadgeBounce {
+            0% { transform: scale(1); }
+            45% { transform: scale(1.5); }
+            100% { transform: scale(1); }
         }
 
     </style>
@@ -1006,53 +1045,97 @@ try {
         function animarVueloAlCarrito(callback) {
             const mainImg = document.getElementById('mainImage');
             const cartTrigger = document.querySelector('.cart-trigger');
+            const mobileBtn = document.getElementById('btnAddToCart');
+            const desktopBtn = document.querySelector('.btn-add-desktop');
+
+            // 1. Feedback visual inmediato y profesional en los botones
+            const origMobileHtml = mobileBtn ? mobileBtn.innerHTML : '';
+            const origDesktopHtml = desktopBtn ? desktopBtn.innerHTML : '';
+
+            if (mobileBtn) {
+                mobileBtn.style.transition = 'all 0.22s ease';
+                mobileBtn.style.transform = 'scale(0.96)';
+                mobileBtn.innerHTML = '✓ ¡Agregado al Carrito!';
+                setTimeout(() => { if (mobileBtn) mobileBtn.style.transform = 'scale(1)'; }, 200);
+            }
+            if (desktopBtn) {
+                desktopBtn.style.transition = 'all 0.22s ease';
+                desktopBtn.style.transform = 'scale(0.96)';
+                desktopBtn.innerHTML = '✓ ¡Agregado al Carrito!';
+                setTimeout(() => { if (desktopBtn) desktopBtn.style.transform = 'scale(1)'; }, 200);
+            }
+
             if (!mainImg || !cartTrigger) {
-                if (callback) callback();
+                setTimeout(() => {
+                    if (mobileBtn) mobileBtn.innerHTML = origMobileHtml;
+                    if (desktopBtn) desktopBtn.innerHTML = origDesktopHtml;
+                    if (callback) callback();
+                }, 600);
                 return;
             }
 
             const imgRect = mainImg.getBoundingClientRect();
             const cartRect = cartTrigger.getBoundingClientRect();
 
+            // Contenedor volante para trayecto elástico suave en eje X
+            const flyWrap = document.createElement('div');
+            flyWrap.style.position = 'fixed';
+            flyWrap.style.left = '0';
+            flyWrap.style.top = '0';
+            flyWrap.style.zIndex = '999999';
+            flyWrap.style.pointerEvents = 'none';
+            flyWrap.style.transform = `translate3d(${imgRect.left}px, ${imgRect.top}px, 0)`;
+            flyWrap.style.transition = 'transform 0.75s cubic-bezier(0.16, 1, 0.3, 1)';
+
+            // Imagen interna con halo, reducción suave y rotación
             const flyImg = document.createElement('img');
             flyImg.src = mainImg.src;
-            flyImg.style.position = 'fixed';
-            flyImg.style.left = imgRect.left + 'px';
-            flyImg.style.top = imgRect.top + 'px';
             flyImg.style.width = imgRect.width + 'px';
             flyImg.style.height = imgRect.height + 'px';
             flyImg.style.borderRadius = '16px';
             flyImg.style.objectFit = 'cover';
-            flyImg.style.zIndex = '999999';
-            flyImg.style.pointerEvents = 'none';
-            flyImg.style.boxShadow = '0 10px 30px rgba(0,0,0,0.35)';
-            flyImg.style.transition = 'all 0.6s cubic-bezier(0.2, 0.8, 0.25, 1)';
-            flyImg.style.opacity = '1';
-            document.body.appendChild(flyImg);
+            flyImg.style.border = '2px solid rgba(255,255,255,0.85)';
+            flyImg.style.boxShadow = '0 16px 40px rgba(0, 0, 0, 0.3)';
+            flyImg.style.transition = 'transform 0.75s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.75s cubic-bezier(0.8, 0, 1, 1), border-radius 0.75s ease';
+            flyImg.style.transformOrigin = 'center center';
 
+            flyWrap.appendChild(flyImg);
+            document.body.appendChild(flyWrap);
+
+            // Iniciar trayectoria parabólica fluida
             requestAnimationFrame(() => {
-                const targetX = cartRect.left + (cartRect.width / 2) - 18;
-                const targetY = cartRect.top + (cartRect.height / 2) - 18;
-                flyImg.style.left = targetX + 'px';
-                flyImg.style.top = targetY + 'px';
-                flyImg.style.width = '36px';
-                flyImg.style.height = '36px';
+                const destX = cartRect.left + (cartRect.width / 2) - 20;
+                const destY = cartRect.top + (cartRect.height / 2) - 20;
+                const scale = 40 / imgRect.width;
+
+                flyWrap.style.transform = `translate3d(${destX}px, ${destY}px, 0)`;
+                flyImg.style.transform = `scale(${scale}) rotate(10deg)`;
+                flyImg.style.opacity = '0.35';
                 flyImg.style.borderRadius = '50%';
-                flyImg.style.opacity = '0.3';
-                flyImg.style.transform = 'scale(0.5) rotate(15deg)';
+                flyImg.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
             });
 
+            // Impacto y onda de llegada al carrito
             setTimeout(() => {
-                if (flyImg.parentNode) flyImg.parentNode.removeChild(flyImg);
+                if (flyWrap.parentNode) flyWrap.parentNode.removeChild(flyWrap);
 
-                cartTrigger.style.transition = 'transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                cartTrigger.style.transform = 'scale(1.35)';
-                setTimeout(() => {
-                    cartTrigger.style.transform = 'scale(1)';
-                }, 250);
+                // Onda expansiva en el carrito (Ripple)
+                const ripple = document.createElement('div');
+                ripple.className = 'cart-ripple-effect';
+                cartTrigger.appendChild(ripple);
+                setTimeout(() => { if (ripple.parentNode) ripple.parentNode.removeChild(ripple); }, 650);
 
+                // Rebote elástico en el botón del carrito
+                cartTrigger.classList.add('cart-pop-active');
+                setTimeout(() => { cartTrigger.classList.remove('cart-pop-active'); }, 450);
+
+                // Restaurar botones de producto
+                if (mobileBtn) mobileBtn.innerHTML = origMobileHtml;
+                if (desktopBtn) desktopBtn.innerHTML = origDesktopHtml;
+
+                // Proceder a abrir el sidebar
                 if (callback) callback();
-            }, 550);
+            }, 750);
         }
 
         function agregarAlCarrito() {
@@ -1065,6 +1148,7 @@ try {
                     document.body.style.overflow = 'hidden';
                 }
             });
+        });
         }
 
         function cambiarCantidad(delta) {
