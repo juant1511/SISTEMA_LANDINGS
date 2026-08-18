@@ -13,7 +13,7 @@ function syncBundledLandings() {
         if ($f === '.' || $f === '..') continue;
         $srcPath = $bundled . '/' . $f;
         $dstPath = $dest . '/' . $f;
-        if (is_dir($srcPath) && (!is_dir($dstPath) || !file_exists($dstPath . '/index.php'))) {
+        if (is_dir($srcPath)) {
             copyRecursive($srcPath, $dstPath);
         }
     }
