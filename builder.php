@@ -271,6 +271,9 @@ if (empty(\$otros_productos) && is_dir(__DIR__ . '/../')) {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{$titulo_pagina}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -313,16 +316,81 @@ if (empty(\$otros_productos) && is_dir(__DIR__ . '/../')) {
         }
 
         /* ─── TOP ANNOUNCEMENT BAR (SIEMPRE ENVÍOS GRATIS A COLOMBIA) ─── */
-        .top-announcement {
+                .top-announcement {
             background-color: var(--topbar-bg);
             color: #ffffff;
             font-family: var(--font-heading);
-            font-size: 11px;
+            font-size: 11.5px;
             font-weight: 800;
-            text-align: center;
-            padding: 9px 16px;
-            letter-spacing: 1px;
+            padding: 8px 0;
+            letter-spacing: 1.2px;
             text-transform: uppercase;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+            width: 100%;
+        }
+        .topbar-marquee-track {
+            display: inline-flex;
+            white-space: nowrap;
+            animation: topbarMarquee 20s linear infinite;
+        }
+        .topbar-marquee-track:hover {
+            animation-play-state: paused;
+        }
+        .topbar-marquee-track span {
+            padding-right: 28px;
+            display: inline-block;
+        }
+        @keyframes topbarMarquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .gallery-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 42px;
+            height: 42px;
+            background: rgba(255, 255, 255, 0.25) !important;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.4) !important;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            color: #ffffff !important;
+            font-size: 18px;
+            font-weight: 700;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            outline: none;
+        }
+        .gallery-arrow:hover, .gallery-arrow:active, .gallery-arrow.active {
+            background: #ffffff !important;
+            border-color: #ffffff !important;
+            color: #111111 !important;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+        }
+        .gallery-arrow.prev { left: 14px; }
+        .gallery-arrow.next { right: 14px; }
+
+        @media (min-width: 1025px) and (hover: hover) {
+            .main-image-wrap:hover img {
+                transform: scale(1.04);
+            }
+        }
+        @media (max-width: 1024px) {
+            .main-image-wrap {
+                cursor: default;
+            }
+            .main-image-wrap img {
+                transform: none !important;
+            }
         }
 
         /* ─── BRAND CATEGORY TABS ─── */

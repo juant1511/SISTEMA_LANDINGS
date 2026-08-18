@@ -35,6 +35,9 @@ try {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title><?= htmlspecialchars("DJI Osmo Pocket 3 Creator Combo | Cámara Gimbal 4K 120fps Sensor 1\"") ?></title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -65,7 +68,82 @@ try {
         body { font-family: var(--font-body); background-color: var(--body-bg); color: var(--text-main); line-height: 1.4; padding-bottom: 0; overflow-x: hidden; }
         @media (max-width: 991px) { body { padding-bottom: 85px; } }
 
-        .top-announcement { background-color: var(--topbar-bg); color: #ffffff; font-family: var(--font-heading); font-size: 11.5px; font-weight: 800; text-align: center; padding: 10px 16px; letter-spacing: 1.2px; text-transform: uppercase; }
+                .top-announcement {
+            background-color: var(--topbar-bg);
+            color: #ffffff;
+            font-family: var(--font-heading);
+            font-size: 11.5px;
+            font-weight: 800;
+            padding: 8px 0;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+            width: 100%;
+        }
+        .topbar-marquee-track {
+            display: inline-flex;
+            white-space: nowrap;
+            animation: topbarMarquee 20s linear infinite;
+        }
+        .topbar-marquee-track:hover {
+            animation-play-state: paused;
+        }
+        .topbar-marquee-track span {
+            padding-right: 28px;
+            display: inline-block;
+        }
+        @keyframes topbarMarquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .gallery-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 42px;
+            height: 42px;
+            background: rgba(255, 255, 255, 0.25) !important;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.4) !important;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            color: #ffffff !important;
+            font-size: 18px;
+            font-weight: 700;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            outline: none;
+        }
+        .gallery-arrow:hover, .gallery-arrow:active, .gallery-arrow.active {
+            background: #ffffff !important;
+            border-color: #ffffff !important;
+            color: #111111 !important;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+        }
+        .gallery-arrow.prev { left: 14px; }
+        .gallery-arrow.next { right: 14px; }
+
+        @media (min-width: 1025px) and (hover: hover) {
+            .main-image-wrap:hover img {
+                transform: scale(1.04);
+            }
+        }
+        @media (max-width: 1024px) {
+            .main-image-wrap {
+                cursor: default;
+            }
+            .main-image-wrap img {
+                transform: none !important;
+            }
+        }
 
         .category-switcher { display: flex; justify-content: center; gap: 10px; padding: 10px 16px; background-color: #ffffff; border-bottom: 1px solid #f3f4f6; }
         .category-pill { padding: 6px 18px; border-radius: 25px; font-family: var(--font-heading); font-size: 11px; font-weight: 800; text-decoration: none; letter-spacing: 0.5px; transition: all 0.2s ease; text-align: center; }
@@ -312,9 +390,16 @@ try {
         <p style="margin-top: 14px; font-family: var(--font-heading); font-weight: 700; font-size: 14px;">Preparando tu pedido seguro...</p>
     </div>
 
-    <!-- 1. TOP ANNOUNCEMENT BAR -->
-    <div class="top-announcement" data-editable="true">
-        ENVÍOS GRATIS A COLOMBIA
+        <!-- 1. TOP ANNOUNCEMENT BAR TICKER -->
+        <!-- 1. TOP ANNOUNCEMENT BAR TICKER -->
+    <div class="top-announcement">
+        <div class="topbar-marquee-track">
+            <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL &bull;&nbsp;</span>
+            <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL &bull;&nbsp;</span>
+            <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL &bull;&nbsp;</span>
+            <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL &bull;&nbsp;</span>
+        </div>
+    </div>
     </div>
 
     <!-- 2. BRAND CATEGORY TABS -->
@@ -359,10 +444,10 @@ try {
 
             <!-- COLUMNA 1: GALERÍA -->
             <section class="gallery-wrapper-desktop">
-                <div class="main-image-wrap" onclick="abrirLightbox(activeImgIndex)" title="Haz clic para ampliar">
-                    <button class="gallery-arrow prev" onclick="event.stopPropagation(); cambiarImagenRelativa(-1)">❮</button>
+                <div class="main-image-wrap" onclick="if(window.matchMedia('(min-width: 1025px)').matches) abrirLightbox(activeImgIndex)" title="Haz clic para ampliar">
+                    <button class="gallery-arrow prev" onclick="event.stopPropagation(); this.classList.add('active'); setTimeout(()=>this.classList.remove('active'), 350); cambiarImagenRelativa(-1)">❮</button>
                     <img id="mainImage" src="img/img_1.jpg" alt="<?= htmlspecialchars("DJI Osmo Pocket 3 Creator Combo | Cámara Gimbal 4K 120fps Sensor 1\"") ?>">
-                    <button class="gallery-arrow next" onclick="event.stopPropagation(); cambiarImagenRelativa(1)">❯</button>
+                    <button class="gallery-arrow next" onclick="event.stopPropagation(); this.classList.add('active'); setTimeout(()=>this.classList.remove('active'), 350); cambiarImagenRelativa(1)">❯</button>
                 </div>
 
                 <div class="thumbnails-strip" id="thumbnailsStrip"></div>
@@ -731,6 +816,7 @@ try {
         }
 
         function toggleLightboxZoom(e) {
+            if (!window.matchMedia('(min-width: 1025px) and (hover: hover)').matches) return;
             const img = document.getElementById('lightboxImage');
             if (!img) return;
             img.classList.toggle('zoomed');
