@@ -2567,6 +2567,46 @@ HTML;
             renderReviews();
             initModoEdicion();
         });
+    
+        // ─── GESTOS TÁCTILES (SWIPE) PARA MÓVIL EN GALERÍA Y LIGHTBOX ───
+        (function() {
+            function habilitarSwipe(elem, accionIzquierda, accionDerecha) {
+                if (!elem) return;
+                let startX = 0, startY = 0;
+                elem.addEventListener('touchstart', function(e) {
+                    if (e.touches && e.touches.length === 1) {
+                        startX = e.touches[0].clientX;
+                        startY = e.touches[0].clientY;
+                    }
+                }, { passive: true });
+                elem.addEventListener('touchend', function(e) {
+                    if (e.changedTouches && e.changedTouches.length === 1) {
+                        let diffX = e.changedTouches[0].clientX - startX;
+                        let diffY = e.changedTouches[0].clientY - startY;
+                        if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+                            if (diffX < 0) {
+                                accionIzquierda();
+                            } else {
+                                accionDerecha();
+                            }
+                        }
+                    }
+                }, { passive: true });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const mainWrap = document.querySelector('.main-image-wrap');
+                if (mainWrap) {
+                    habilitarSwipe(mainWrap, () => cambiarImagenRelativa(1), () => cambiarImagenRelativa(-1));
+                }
+
+                const lbView = document.getElementById('imageLightbox');
+                if (lbView) {
+                    habilitarSwipe(lbView, () => cambiarImagenLightbox(1), () => cambiarImagenLightbox(-1));
+                }
+            });
+        })();
+
     </script>
 </body>
 </html>

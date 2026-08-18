@@ -142,40 +142,37 @@ try {
         .main-image-wrap { order: 1; width: 100%; aspect-ratio: 1 / 1; background-color: #fafafa; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04); cursor: zoom-in; }
         .main-image-wrap img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.25s ease, transform 0.3s ease; }
         
-        /* ─── FLECHAS DE GALERÍA: TRANSLÚCIDAS AFUERA Y BLANCAS AL INTERACTUAR ─── */
+                /* ─── FLECHAS DE GALERÍA: SIEMPRE VISIBLES TODO EL TIEMPO SIN HOVER ─── */
         .gallery-arrow {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            width: 42px;
-            height: 42px;
-            background: rgba(255, 255, 255, 0.25) !important;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.4) !important;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.95) !important;
+            border: 1px solid rgba(0, 0, 0, 0.12) !important;
             border-radius: 50%;
-            display: flex;
+            display: flex !important;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 10;
-            color: #ffffff !important;
-            font-size: 18px;
-            font-weight: 700;
-            transition: all 0.25s ease;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-            outline: none;
-        }
-        .gallery-arrow:hover, .gallery-arrow:active, .gallery-arrow.active {
-            background: #ffffff !important;
-            border-color: #ffffff !important;
             color: #111111 !important;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+            font-size: 18px;
+            font-weight: 800;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            outline: none;
+            opacity: 1 !important;
+            visibility: visible !important;
+            transition: transform 0.15s ease;
         }
-        .gallery-arrow.prev { left: 14px; }
-        .gallery-arrow.next { right: 14px; }
+        .gallery-arrow:active {
+            transform: translateY(-50%) scale(0.92);
+        }
+        .gallery-arrow.prev { left: 12px; }
+        .gallery-arrow.next { right: 12px; }
 
-        /* ─── BOTONES DE GALERÍA EXPANDIDA / LIGHTBOX: BLANCOS SÓLIDOS ─── */
+        /* ─── BOTONES DE GALERÍA EXPANDIDA / LIGHTBOX: BLANCOS SÓLIDOS Y SIEMPRE VISIBLES ─── */
         .lightbox-nav-btn {
             position: absolute;
             top: 50%;
@@ -186,18 +183,26 @@ try {
             border: none;
             border-radius: 50%;
             color: #111111 !important;
-            font-size: 24px;
-            font-weight: 700;
+            font-size: 22px;
+            font-weight: 800;
             cursor: pointer;
-            display: flex;
+            display: flex !important;
             align-items: center;
             justify-content: center;
-            transition: transform 0.2s, box-shadow 0.2s;
             z-index: 20;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+            opacity: 1 !important;
+            visibility: visible !important;
+            transition: transform 0.15s ease;
         }
-        .lightbox-nav-btn:hover {
-            transform: translateY(-50%) scale(1.08);
+        .lightbox-nav-btn:active {
+            transform: translateY(-50%) scale(0.92);
+        }
+        .lightbox-nav-btn.prev { left: 16px; }
+        .lightbox-nav-btn.next { right: 16px; }
+        @media (min-width: 992px) {
+            .lightbox-nav-btn.prev { left: 30px; }
+            .lightbox-nav-btn.next { right: 30px; }
         }
 
         @media (min-width: 1025px) and (hover: hover) {
@@ -474,10 +479,10 @@ try {
 
             <!-- COLUMNA 1: GALERÍA -->
             <section class="gallery-wrapper-desktop">
-                <div class="main-image-wrap" onclick="if(window.matchMedia('(min-width: 1025px)').matches) abrirLightbox(activeImgIndex)" title="Haz clic para ampliar">
-                    <button class="gallery-arrow prev" onclick="event.stopPropagation(); this.classList.add('active'); setTimeout(()=>this.classList.remove('active'), 350); cambiarImagenRelativa(-1)">❮</button>
+                <div class="main-image-wrap" onclick="abrirLightbox(activeImgIndex)" title="Haz clic para ampliar">
+                    <button class="gallery-arrow prev" onclick="event.stopPropagation(); cambiarImagenRelativa(-1)">❮</button>
                     <img id="mainImage" src="img/img_1.jpg" alt="<?= htmlspecialchars("Dyson Airwrap Multi-Styler Complete Long | Moldeador de Cabello de Alta Gama") ?>">
-                    <button class="gallery-arrow next" onclick="event.stopPropagation(); this.classList.add('active'); setTimeout(()=>this.classList.remove('active'), 350); cambiarImagenRelativa(1)">❯</button>
+                    <button class="gallery-arrow next" onclick="event.stopPropagation(); cambiarImagenRelativa(1)">❯</button>
                 </div>
 
                 <div class="thumbnails-strip" id="thumbnailsStrip"></div>
@@ -1118,6 +1123,46 @@ try {
             renderReviews();
             initModoEdicion();
         });
+    
+        // ─── GESTOS TÁCTILES (SWIPE) PARA MÓVIL EN GALERÍA Y LIGHTBOX ───
+        (function() {
+            function habilitarSwipe(elem, accionIzquierda, accionDerecha) {
+                if (!elem) return;
+                let startX = 0, startY = 0;
+                elem.addEventListener('touchstart', function(e) {
+                    if (e.touches && e.touches.length === 1) {
+                        startX = e.touches[0].clientX;
+                        startY = e.touches[0].clientY;
+                    }
+                }, { passive: true });
+                elem.addEventListener('touchend', function(e) {
+                    if (e.changedTouches && e.changedTouches.length === 1) {
+                        let diffX = e.changedTouches[0].clientX - startX;
+                        let diffY = e.changedTouches[0].clientY - startY;
+                        if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+                            if (diffX < 0) {
+                                accionIzquierda();
+                            } else {
+                                accionDerecha();
+                            }
+                        }
+                    }
+                }, { passive: true });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const mainWrap = document.querySelector('.main-image-wrap');
+                if (mainWrap) {
+                    habilitarSwipe(mainWrap, () => cambiarImagenRelativa(1), () => cambiarImagenRelativa(-1));
+                }
+
+                const lbView = document.getElementById('imageLightbox');
+                if (lbView) {
+                    habilitarSwipe(lbView, () => cambiarImagenLightbox(1), () => cambiarImagenLightbox(-1));
+                }
+            });
+        })();
+
     </script>
 </body>
 </html>
