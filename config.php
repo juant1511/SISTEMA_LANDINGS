@@ -13,10 +13,10 @@ date_default_timezone_set('America/Bogota');
    HOSTS CONFIGURATION (MICROSERVICES)
 ========================================= */
 // URL Base donde se aloja el SISTEMA_LANDINGS (usado para formar URLs absolutas de imágenes)
-define('URL_LANDINGS', 'http://localhost/TRIDENTE_LANDINGS/SISTEMA_LANDINGS');
+define('URL_LANDINGS', 'https://sistemalandings-production.up.railway.app');
 
 // URL Base donde se aloja el SISTEMA_PASARELA (usado para redirigir al checkout)
-define('URL_PASARELA', 'http://localhost/TRIDENTE_LANDINGS/SISTEMA_PASARELA');
+define('URL_PASARELA', 'https://sistemapasarela-production.up.railway.app');
 
 /* =========================================
    BASE DE DATOS — Supabase (PostgreSQL)
