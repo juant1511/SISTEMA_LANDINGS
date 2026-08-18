@@ -68,8 +68,9 @@ try {
         body { font-family: var(--font-body); background-color: var(--body-bg); color: var(--text-main); line-height: 1.4; padding-bottom: 0; overflow-x: hidden; }
         @media (max-width: 991px) { body { padding-bottom: 85px; } }
 
-                .top-announcement {
-            background-color: var(--topbar-bg);
+                        /* ─── TOPBAR TICKER INFINITO EN MOVIMIENTO CONTINUO ─── */
+        .top-announcement {
+            background-color: var(--topbar-bg, #000000);
             color: #ffffff;
             font-family: var(--font-heading);
             font-size: 11.5px;
@@ -81,22 +82,29 @@ try {
             white-space: nowrap;
             position: relative;
             width: 100%;
+            display: flex;
         }
         .topbar-marquee-track {
-            display: inline-flex;
-            white-space: nowrap;
-            animation: topbarMarquee 20s linear infinite;
+            display: flex;
+            width: max-content;
+            animation: topbarMarqueeScroll 18s linear infinite;
+            will-change: transform;
         }
         .topbar-marquee-track:hover {
             animation-play-state: paused;
         }
-        .topbar-marquee-track span {
-            padding-right: 28px;
+        .marquee-content {
+            display: flex;
+            flex-shrink: 0;
+            align-items: center;
+        }
+        .marquee-content span {
+            padding: 0 18px;
             display: inline-block;
         }
-        @keyframes topbarMarquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
+        @keyframes topbarMarqueeScroll {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
         }
 
         .gallery-arrow {
@@ -145,10 +153,20 @@ try {
             }
         }
 
-        .category-switcher { display: flex; justify-content: center; gap: 10px; padding: 10px 16px; background-color: #ffffff; border-bottom: 1px solid #f3f4f6; }
-        .category-pill { padding: 6px 18px; border-radius: 25px; font-family: var(--font-heading); font-size: 11px; font-weight: 800; text-decoration: none; letter-spacing: 0.5px; transition: all 0.2s ease; text-align: center; }
-        .category-pill.active { background-color: var(--primary); color: #ffffff; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15); }
-        .category-pill.inactive { background-color: #ffffff; color: #4b5563; border: 1px solid var(--border-color); }
+        .main-image-wrap:hover img {
+                transform: scale(1.04);
+            }
+        }
+        @media (max-width: 1024px) {
+            .main-image-wrap {
+                cursor: default;
+            }
+            .main-image-wrap img {
+                transform: none !important;
+            }
+        }
+
+        
 
         /* ─── NAVBAR CON LOGO GRANDE Y CENTRADO ─── */
         .navbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; background-color: #ffffff; border-bottom: 1px solid #f3f4f6; position: sticky; top: 0; z-index: 100; min-height: 75px; }
@@ -390,31 +408,28 @@ try {
         <p style="margin-top: 14px; font-family: var(--font-heading); font-weight: 700; font-size: 14px;">Preparando tu pedido seguro...</p>
     </div>
 
-        <!-- 1. TOP ANNOUNCEMENT BAR TICKER -->
+            <!-- 1. TOP ANNOUNCEMENT BAR TICKER -->
         <!-- 1. TOP ANNOUNCEMENT BAR TICKER -->
     <div class="top-announcement">
         <div class="topbar-marquee-track">
-            <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL &bull;&nbsp;</span>
-            <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL &bull;&nbsp;</span>
-            <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL &bull;&nbsp;</span>
-            <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL &bull;&nbsp;</span>
+            <div class="marquee-content">
+                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL</span>
+                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL</span>
+                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL</span>
+                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL</span>
+            </div>
+            <div class="marquee-content" aria-hidden="true">
+                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL</span>
+                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL</span>
+                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL</span>
+                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL</span>
+            </div>
         </div>
-    </div>
-    </div>
-
-    <!-- 2. BRAND CATEGORY TABS -->
-    <div class="category-switcher">
-        <a href="#cat1" class="category-pill active" data-editable="true">SKINCARE</a>
-        <a href="#cat2" class="category-pill inactive" data-editable="true">FACIAL CARE</a>
     </div>
 
     <!-- 3. NAVBAR CON LOGO GRANDE CENTRADO -->
     <nav class="navbar">
-        <div class="nav-left">
-            <button class="nav-btn-icon" onclick="history.back()" title="Volver">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-            </button>
-        </div>
+        <div class="nav-left" style="width: 44px;"></div>
 
         <div class="nav-center-logo">
             <?php if (file_exists(__DIR__ . '/logo.svg')): ?>
