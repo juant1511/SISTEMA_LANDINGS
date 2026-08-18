@@ -2635,14 +2635,30 @@ HTML;
     }
 }
 
-// ─── Listar landings existentes ───
+// ─── Listar landings existentes (en disco, bundled y Supabase) ───
 $landings_existentes = [];
-if (is_dir($base_dir)) {
-    foreach (scandir($base_dir) as $d) {
-        if ($d !== '.' && $d !== '..' && is_dir($base_dir . $d) && file_exists($base_dir . $d . '/index.php')) {
-            $landings_existentes[] = $d;
+$check_dirs = [__DIR__ . '/landings/', __DIR__ . '/bundled_landings/'];
+foreach ($check_dirs as $b_dir) {
+    if (is_dir($b_dir)) {
+        foreach (scandir($b_dir) as $d) {
+            if ($d !== '.' && $d !== '..' && $d !== 'uploads' && is_dir($b_dir . $d) && file_exists($b_dir . $d . '/index.php')) {
+                if (!in_array($d, $landings_existentes)) {
+                    $landings_existentes[] = $d;
+                }
+            }
         }
     }
+}
+
+if (isset($pdo)) {
+    try {
+        $stmt_l = $pdo->query("SELECT slug FROM landings ORDER BY id DESC");
+        while ($row_l = $stmt_l->fetch(PDO::FETCH_ASSOC)) {
+            if (!empty($row_l['slug']) && !in_array($row_l['slug'], $landings_existentes)) {
+                $landings_existentes[] = $row_l['slug'];
+            }
+        }
+    } catch (Exception $e) {}
 }
 ?>
 <!DOCTYPE html>
