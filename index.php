@@ -1,12 +1,18 @@
 <?php
-// Router inteligente y servidor de recursos estáticos para Railway y servidores Apache/Nginx
+// 1. Compatibilidad con servidor interno de PHP (Nixpacks / Railway / CLI-Server)
+if (php_sapi_name() === 'cli-server') {
+    $uriPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+    $filePath = __DIR__ . $uriPath;
+    if ($uriPath !== '/' && $uriPath !== '' && is_file($filePath)) {
+        return false; // PHP sirve la imagen / archivo estático directamente
+    }
+}
+
 $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $uri = urldecode($uri);
-
-// Normalizar ruta
 $filePath = __DIR__ . $uri;
 
-// 1. Si es un archivo físico en disco (imágenes, scripts, estilos)
+// 2. Si es un archivo físico existente en disco
 if ($uri !== '/' && $uri !== '' && $uri !== '/index.php' && file_exists($filePath) && !is_dir($filePath)) {
     $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
     $mimes = [
@@ -36,18 +42,18 @@ if ($uri !== '/' && $uri !== '' && $uri !== '/index.php' && file_exists($filePat
     }
 }
 
-// 2. Si es una carpeta de landing (ej: /landings/dji-osmo-pocket-3 o /landings/dji-osmo-pocket-3/)
+// 3. Si es una carpeta de landing (ej: /landings/dji-osmo-pocket-3/)
 $trimmedUri = rtrim($filePath, '/');
 if (is_dir($trimmedUri) && file_exists($trimmedUri . '/index.php')) {
     require $trimmedUri . '/index.php';
     exit;
 }
 
-// 3. Si se solicita builder directamente
+// 4. Si se solicita builder directamente
 if ($uri === '/builder.php' || $uri === '/builder') {
     require_once __DIR__ . '/builder.php';
     exit;
 }
 
-// 4. Por defecto en la raíz: cargar builder.php
+// 5. Cargar builder.php directamente
 require_once __DIR__ . '/builder.php';
