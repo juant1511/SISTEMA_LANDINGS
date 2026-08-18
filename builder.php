@@ -210,28 +210,18 @@ try {
         \$stmt->execute([\$landing_slug]);
         \$rows = \$stmt->fetchAll(PDO::FETCH_ASSOC);
         foreach (\$rows as \$r) {
-            if (!is_dir(__DIR__ . '/../' . \$r['slug'])) continue;
-
-            \$imgs = is_array(\$r['imagenes']) ? \$r['imagenes'] : (json_decode(\$r['imagenes'] ?? '{}', true) ?: []);
-            \$raw_img = \$imgs['img_1'] ?? (\$imgs['producto'] ?? (\$imgs['desktop'] ?? ''));
             \$other_slug = \$r['slug'];
-            \$other_dir = __DIR__ . '/../' . \$other_slug;
-            if (empty(\$raw_img) && file_exists(\$other_dir . '/img/img_1.jpg')) {
-                \$raw_img = 'img/img_1.jpg';
-            } elseif (empty(\$raw_img) && file_exists(\$other_dir . '/producto.png')) {
-                \$raw_img = 'producto.png';
-            }
+            \$imgs = is_array(\$r['imagenes']) ? \$r['imagenes'] : (json_decode(\$r['imagenes'] ?? '{}', true) ?: []);
+            \$raw_img = \$imgs['img_1'] ?? (\$imgs['producto'] ?? (\$imgs['desktop'] ?? 'img/img_1.jpg'));
 
-            if (!empty(\$raw_img)) {
-                \$final_img = (strpos(\$raw_img, 'http') === 0) ? \$raw_img : "../{\$other_slug}/" . ltrim(\$raw_img, '/');
-                \$otros_productos[] = [
-                    'slug'   => \$other_slug,
-                    'nombre' => \$r['producto'],
-                    'precio' => '$ ' . number_format(\$r['precio'], 0, ',', '.'),
-                    'url'    => "../{\$other_slug}/",
-                    'img'    => \$final_img
-                ];
-            }
+            \$final_img = (strpos(\$raw_img, 'http') === 0) ? \$raw_img : "../{\$other_slug}/" . ltrim(\$raw_img, '/');
+            \$otros_productos[] = [
+                'slug'   => \$other_slug,
+                'nombre' => \$r['producto'],
+                'precio' => '$ ' . number_format(\$r['precio'], 0, ',', '.'),
+                'url'    => "../{\$other_slug}/",
+                'img'    => \$final_img
+            ];
             if (count(\$otros_productos) >= 6) break;
         }
     }
