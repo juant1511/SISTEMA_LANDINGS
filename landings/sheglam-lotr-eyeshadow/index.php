@@ -1136,7 +1136,7 @@ try {
             }, 1100);
         }
 
-        function agregarAlCarrito(e) {
+                        function agregarAlCarrito(e) {
             if (ES_MODO_EDICION) return;
             let clickedBtn = null;
             if (e) {
@@ -1154,8 +1154,6 @@ try {
                     document.body.style.overflow = 'hidden';
                 }
             });
-        });
-        });
         }
 
         function cambiarCantidad(delta) {
