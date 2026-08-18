@@ -16,7 +16,7 @@ try {
         foreach ($rows as $r) {
             $other_slug = $r['slug'];
             $imgs = is_array($r['imagenes']) ? $r['imagenes'] : (json_decode($r['imagenes'] ?? '{}', true) ?: []);
-            $raw_img = $imgs['img_1'] ?? ($imgs['producto'] ?? ($imgs['desktop'] ?? 'img/img_1.jpg'));
+            $raw_img = $imgs['img_1'] ?? ($imgs['producto'] ?? ($imgs['desktop'] ?? 'img/img_1.webp'));
             
             $final_img = (strpos($raw_img, 'http') === 0) ? $raw_img : "../{$other_slug}/" . ltrim($raw_img, '/');
             $otros_productos[] = [
@@ -577,8 +577,8 @@ try {
         <div class="nav-center-logo">
             <?php if (file_exists(__DIR__ . '/logo.svg')): ?>
                 <img src="logo.svg" class="brand-logo-img" alt="<?= htmlspecialchars("ULTRA WATCH") ?>">
-            <?php elseif (file_exists(__DIR__ . '/logo.png')): ?>
-                <img src="logo.png" class="brand-logo-img" alt="<?= htmlspecialchars("ULTRA WATCH") ?>">
+            <?php elseif (file_exists(__DIR__ . '/logo.webp')): ?>
+                <img src="logo.webp" class="brand-logo-img" alt="<?= htmlspecialchars("ULTRA WATCH") ?>">
             <?php else: ?>
                 <span class="brand-logo-text" data-editable="true"><?= htmlspecialchars("ULTRA WATCH") ?></span>
             <?php endif; ?>
@@ -604,7 +604,7 @@ try {
             <section class="gallery-wrapper-desktop">
                 <div class="main-image-wrap" onclick="abrirLightbox(activeImgIndex)" title="Haz clic para ampliar">
                     <button class="gallery-arrow prev" onclick="event.stopPropagation(); cambiarImagenRelativa(-1)">❮</button>
-                    <img id="mainImage" src="img/img_1.jpg" alt="<?= htmlspecialchars("Smartwatch Ultra 2 Titanium GPS | Pantalla AMOLED 49mm IP68 Sumergible") ?>">
+                    <img id="mainImage" src="img/img_1.webp" alt="<?= htmlspecialchars("Smartwatch Ultra 2 Titanium GPS | Pantalla AMOLED 49mm IP68 Sumergible") ?>">
                     <button class="gallery-arrow next" onclick="event.stopPropagation(); cambiarImagenRelativa(1)">❯</button>
                 </div>
 
@@ -884,7 +884,7 @@ try {
 
     <!-- 11. JAVASCRIPT ROBUSTO CON ZOOM Y PAGINACIÓN DE OPINIONES -->
     <script>
-        const IMAGENES = ["img/img_1.jpg","img/img_2.jpg","img/img_3.jpg","img/img_4.jpg"];
+        const IMAGENES = ["img/img_1.webp","img/img_2.webp","img/img_3.webp","img/img_4.webp"];
         const SWATCHES = ["#f97316","#374151","#059669","#ffffff"];
         const REVIEWS_LIST = [{"author":"S***h","color":"Titanium Orange","size":"49mm Dial","stars":"★★★★★","comment":"Pantalla súper brillante bajo el sol y resistente al agua.","date":"2026.04.14"},{"author":"r***l","color":"Titanium Orange","size":"49mm Dial","stars":"★★★★★","comment":"La batería dura fácilmente 4 días con uso continuo de notificaciones.","date":"2026.04.28"},{"author":"j***5","color":"Titanium Orange","size":"49mm Dial","stars":"★★★★★","comment":"Very nice, excelente relación calidad precio.","date":"2026.05.12"},{"author":"T***m","color":"Titanium Orange","size":"49mm Dial","stars":"★★★★★","comment":"Llegó en 48h con contraentrega.","date":"2026.05.25"},{"author":"B***i","color":"Titanium Orange","size":"49mm Dial","stars":"★★★★★","comment":"Caja de titanio sólida y correa deportiva muy cómoda.","date":"2026.06.09"}];
         const PRECIO_UNITARIO = 129900;
@@ -1047,7 +1047,7 @@ try {
         function animarVueloAlCarrito(btn, callback) {
             const cartTrigger = document.querySelector('.cart-trigger');
             const mainImg = document.getElementById('mainImage');
-            const imgSrc = mainImg ? mainImg.src : 'img/img_1.jpg';
+            const imgSrc = mainImg ? mainImg.src : 'img/img_1.webp';
 
             const activeBtn = btn || document.querySelector('.btn-add-desktop') || document.getElementById('btnAddToCart');
             const origBtnHtml = activeBtn ? activeBtn.innerHTML : '';

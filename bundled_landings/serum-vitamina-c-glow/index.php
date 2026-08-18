@@ -16,7 +16,7 @@ try {
         foreach ($rows as $r) {
             $other_slug = $r['slug'];
             $imgs = is_array($r['imagenes']) ? $r['imagenes'] : (json_decode($r['imagenes'] ?? '{}', true) ?: []);
-            $raw_img = $imgs['img_1'] ?? ($imgs['producto'] ?? ($imgs['desktop'] ?? 'img/img_1.jpg'));
+            $raw_img = $imgs['img_1'] ?? ($imgs['producto'] ?? ($imgs['desktop'] ?? 'img/img_1.webp'));
             
             $final_img = (strpos($raw_img, 'http') === 0) ? $raw_img : "../{$other_slug}/" . ltrim($raw_img, '/');
             $otros_productos[] = [
@@ -577,8 +577,8 @@ try {
         <div class="nav-center-logo">
             <?php if (file_exists(__DIR__ . '/logo.svg')): ?>
                 <img src="logo.svg" class="brand-logo-img" alt="<?= htmlspecialchars("GLOW LABS") ?>">
-            <?php elseif (file_exists(__DIR__ . '/logo.png')): ?>
-                <img src="logo.png" class="brand-logo-img" alt="<?= htmlspecialchars("GLOW LABS") ?>">
+            <?php elseif (file_exists(__DIR__ . '/logo.webp')): ?>
+                <img src="logo.webp" class="brand-logo-img" alt="<?= htmlspecialchars("GLOW LABS") ?>">
             <?php else: ?>
                 <span class="brand-logo-text" data-editable="true"><?= htmlspecialchars("GLOW LABS") ?></span>
             <?php endif; ?>
@@ -604,7 +604,7 @@ try {
             <section class="gallery-wrapper-desktop">
                 <div class="main-image-wrap" onclick="abrirLightbox(activeImgIndex)" title="Haz clic para ampliar">
                     <button class="gallery-arrow prev" onclick="event.stopPropagation(); cambiarImagenRelativa(-1)">❮</button>
-                    <img id="mainImage" src="img/img_1.jpg" alt="<?= htmlspecialchars("Sérum Facial Vitamina C Pura 15% + Ácido Hialurónico Anti-Manchas & Glow") ?>">
+                    <img id="mainImage" src="img/img_1.webp" alt="<?= htmlspecialchars("Sérum Facial Vitamina C Pura 15% + Ácido Hialurónico Anti-Manchas & Glow") ?>">
                     <button class="gallery-arrow next" onclick="event.stopPropagation(); cambiarImagenRelativa(1)">❯</button>
                 </div>
 
@@ -884,7 +884,7 @@ try {
 
     <!-- 11. JAVASCRIPT ROBUSTO CON ZOOM Y PAGINACIÓN DE OPINIONES -->
     <script>
-        const IMAGENES = ["img/img_1.jpg","img/img_2.jpg","img/img_3.jpg","img/img_4.jpg"];
+        const IMAGENES = ["img/img_1.webp","img/img_2.webp","img/img_3.webp","img/img_4.webp"];
         const SWATCHES = ["#f59e0b","#d97706","#92400e"];
         const REVIEWS_LIST = [{"author":"S***h","color":"Fórmula Concentrada","size":"30ml","stars":"★★★★★","comment":"Textura ligera, no deja sensación grasosa y da un glow hermoso.","date":"2026.04.11"},{"author":"v***a","color":"Fórmula Concentrada","size":"30ml","stars":"★★★★★","comment":"En 2 semanas las manchitas del acné se aclararon notablemente.","date":"2026.04.25"},{"author":"j***5","color":"Fórmula Concentrada","size":"30ml","stars":"★★★★★","comment":"Very nice serum.","date":"2026.05.10"},{"author":"T***m","color":"Fórmula Concentrada","size":"30ml","stars":"★★★★★","comment":"Llegó en caja sellada con gotero dosificador.","date":"2026.05.28"},{"author":"B***i","color":"Fórmula Concentrada","size":"30ml","stars":"★★★★★","comment":"100% recomendado para usar todas las mañanas antes del bloqueador.","date":"2026.06.12"}];
         const PRECIO_UNITARIO = 45000;
@@ -1047,7 +1047,7 @@ try {
         function animarVueloAlCarrito(btn, callback) {
             const cartTrigger = document.querySelector('.cart-trigger');
             const mainImg = document.getElementById('mainImage');
-            const imgSrc = mainImg ? mainImg.src : 'img/img_1.jpg';
+            const imgSrc = mainImg ? mainImg.src : 'img/img_1.webp';
 
             const activeBtn = btn || document.querySelector('.btn-add-desktop') || document.getElementById('btnAddToCart');
             const origBtnHtml = activeBtn ? activeBtn.innerHTML : '';

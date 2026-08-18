@@ -16,7 +16,7 @@ try {
         foreach ($rows as $r) {
             $other_slug = $r['slug'];
             $imgs = is_array($r['imagenes']) ? $r['imagenes'] : (json_decode($r['imagenes'] ?? '{}', true) ?: []);
-            $raw_img = $imgs['img_1'] ?? ($imgs['producto'] ?? ($imgs['desktop'] ?? 'img/img_1.jpg'));
+            $raw_img = $imgs['img_1'] ?? ($imgs['producto'] ?? ($imgs['desktop'] ?? 'img/img_1.webp'));
             
             $final_img = (strpos($raw_img, 'http') === 0) ? $raw_img : "../{$other_slug}/" . ltrim($raw_img, '/');
             $otros_productos[] = [
@@ -577,8 +577,8 @@ try {
         <div class="nav-center-logo">
             <?php if (file_exists(__DIR__ . '/logo.svg')): ?>
                 <img src="logo.svg" class="brand-logo-img" alt="<?= htmlspecialchars("DYSON") ?>">
-            <?php elseif (file_exists(__DIR__ . '/logo.png')): ?>
-                <img src="logo.png" class="brand-logo-img" alt="<?= htmlspecialchars("DYSON") ?>">
+            <?php elseif (file_exists(__DIR__ . '/logo.webp')): ?>
+                <img src="logo.webp" class="brand-logo-img" alt="<?= htmlspecialchars("DYSON") ?>">
             <?php else: ?>
                 <span class="brand-logo-text" data-editable="true"><?= htmlspecialchars("DYSON") ?></span>
             <?php endif; ?>
@@ -604,7 +604,7 @@ try {
             <section class="gallery-wrapper-desktop">
                 <div class="main-image-wrap" onclick="abrirLightbox(activeImgIndex)" title="Haz clic para ampliar">
                     <button class="gallery-arrow prev" onclick="event.stopPropagation(); cambiarImagenRelativa(-1)">❮</button>
-                    <img id="mainImage" src="img/img_1.jpg" alt="<?= htmlspecialchars("Dyson Airwrap Multi-Styler Complete Long | Moldeador de Cabello de Alta Gama") ?>">
+                    <img id="mainImage" src="img/img_1.webp" alt="<?= htmlspecialchars("Dyson Airwrap Multi-Styler Complete Long | Moldeador de Cabello de Alta Gama") ?>">
                     <button class="gallery-arrow next" onclick="event.stopPropagation(); cambiarImagenRelativa(1)">❯</button>
                 </div>
 
@@ -884,7 +884,7 @@ try {
 
     <!-- 11. JAVASCRIPT ROBUSTO CON ZOOM Y PAGINACIÓN DE OPINIONES -->
     <script>
-        const IMAGENES = ["img/img_1.jpg","img/img_2.jpg","img/img_3.jpg","img/img_4.jpg"];
+        const IMAGENES = ["img/img_1.webp","img/img_2.webp","img/img_3.webp","img/img_4.webp"];
         const SWATCHES = ["#d84a75","#c59b6d","#374151"];
         const REVIEWS_LIST = [{"author":"S***h","color":"Nickel & Copper","size":"Kit 6 en 1","stars":"★★★★★","comment":"Deja el cabello brillante y sedoso sin maltratarlo con calor extremo.","date":"2026.03.15"},{"author":"c***a","color":"Nickel & Copper","size":"Kit 6 en 1","stars":"★★★★★","comment":"Los rizos automáticos con el efecto Coanda duran todo el día.","date":"2026.04.01"},{"author":"j***5","color":"Nickel & Copper","size":"Kit 6 en 1","stars":"★★★★★","comment":"Very nice, secado y peinado en 10 minutos.","date":"2026.04.18"},{"author":"T***m","color":"Nickel & Copper","size":"Kit 6 en 1","stars":"★★★★★","comment":"El mejor regalo, excelente presentación y estuche.","date":"2026.05.05"},{"author":"B***i","color":"Nickel & Copper","size":"Kit 6 en 1","stars":"★★★★★","comment":"Dyson es siempre calidad asegurada.","date":"2026.05.29"},{"author":"G***a","color":"Nickel & Copper","size":"Kit 6 en 1","stars":"★★★★★","comment":"Fácil de usar, los accesorios magnéticos se ajustan al instante.","date":"2026.06.15"}];
         const PRECIO_UNITARIO = 320000;
@@ -1047,7 +1047,7 @@ try {
         function animarVueloAlCarrito(btn, callback) {
             const cartTrigger = document.querySelector('.cart-trigger');
             const mainImg = document.getElementById('mainImage');
-            const imgSrc = mainImg ? mainImg.src : 'img/img_1.jpg';
+            const imgSrc = mainImg ? mainImg.src : 'img/img_1.webp';
 
             const activeBtn = btn || document.querySelector('.btn-add-desktop') || document.getElementById('btnAddToCart');
             const origBtnHtml = activeBtn ? activeBtn.innerHTML : '';

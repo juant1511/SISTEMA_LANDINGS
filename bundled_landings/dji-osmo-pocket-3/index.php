@@ -16,7 +16,7 @@ try {
         foreach ($rows as $r) {
             $other_slug = $r['slug'];
             $imgs = is_array($r['imagenes']) ? $r['imagenes'] : (json_decode($r['imagenes'] ?? '{}', true) ?: []);
-            $raw_img = $imgs['img_1'] ?? ($imgs['producto'] ?? ($imgs['desktop'] ?? 'img/img_1.jpg'));
+            $raw_img = $imgs['img_1'] ?? ($imgs['producto'] ?? ($imgs['desktop'] ?? 'img/img_1.webp'));
             
             $final_img = (strpos($raw_img, 'http') === 0) ? $raw_img : "../{$other_slug}/" . ltrim($raw_img, '/');
             $otros_productos[] = [
@@ -577,8 +577,8 @@ try {
         <div class="nav-center-logo">
             <?php if (file_exists(__DIR__ . '/logo.svg')): ?>
                 <img src="logo.svg" class="brand-logo-img" alt="<?= htmlspecialchars("DJI") ?>">
-            <?php elseif (file_exists(__DIR__ . '/logo.png')): ?>
-                <img src="logo.png" class="brand-logo-img" alt="<?= htmlspecialchars("DJI") ?>">
+            <?php elseif (file_exists(__DIR__ . '/logo.webp')): ?>
+                <img src="logo.webp" class="brand-logo-img" alt="<?= htmlspecialchars("DJI") ?>">
             <?php else: ?>
                 <span class="brand-logo-text" data-editable="true"><?= htmlspecialchars("DJI") ?></span>
             <?php endif; ?>
@@ -604,7 +604,7 @@ try {
             <section class="gallery-wrapper-desktop">
                 <div class="main-image-wrap" onclick="abrirLightbox(activeImgIndex)" title="Haz clic para ampliar">
                     <button class="gallery-arrow prev" onclick="event.stopPropagation(); cambiarImagenRelativa(-1)">❮</button>
-                    <img id="mainImage" src="img/img_1.jpg" alt="<?= htmlspecialchars("DJI Osmo Pocket 3 Creator Combo | Cámara Gimbal 4K 120fps Sensor 1\"") ?>">
+                    <img id="mainImage" src="img/img_1.webp" alt="<?= htmlspecialchars("DJI Osmo Pocket 3 Creator Combo | Cámara Gimbal 4K 120fps Sensor 1\"") ?>">
                     <button class="gallery-arrow next" onclick="event.stopPropagation(); cambiarImagenRelativa(1)">❯</button>
                 </div>
 
@@ -884,7 +884,7 @@ try {
 
     <!-- 11. JAVASCRIPT ROBUSTO CON ZOOM Y PAGINACIÓN DE OPINIONES -->
     <script>
-        const IMAGENES = ["img/img_1.jpg","img/img_2.jpg","img/img_3.jpg","img/img_4.jpg"];
+        const IMAGENES = ["img/img_1.webp","img/img_2.webp","img/img_3.webp","img/img_4.webp"];
         const SWATCHES = ["#111111","#374151","#9ca3af"];
         const REVIEWS_LIST = [{"author":"S***h","color":"Creator Combo","size":"Kit Completo 6 en 1","stars":"★★★★★","comment":"La estabilización mecánica en 3 ejes y la calidad nocturna del sensor de 1 pulgada superan cualquier expectativa. Para vlogs y viajes es insuperable.","date":"2026.04.12"},{"author":"s***m","color":"Creator Combo","size":"Kit Completo 6 en 1","stars":"★★★★★","comment":"El micrófono inalámbrico DJI Mic 2 se empareja de inmediato y el audio es súper profesional. Llegó rapidísimo en Bogotá.","date":"2026.05.02"},{"author":"j***5","color":"Creator Combo","size":"Kit Completo 6 en 1","stars":"★★★★★","comment":"Very nice, la rotación de pantalla horizontal a vertical enciende la cámara en 1 segundo. Seguimiento ActiveTrack 6.0 perfecto.","date":"2026.05.18"},{"author":"T***m","color":"Creator Combo","size":"Kit Completo 6 en 1","stars":"★★★★★","comment":"Pagué contraentrega cuando lo recibí en mi casa. Empaque 100% sellado y original con garantía directa.","date":"2026.06.01"},{"author":"B***i","color":"Creator Combo","size":"Kit Completo 6 en 1","stars":"★★★★★","comment":"Ultra portátil, cabe en el bolsillo de la chaqueta y graba en D-Log M de 10 bits con colores cinematográficos. DJI nunca decepciona.","date":"2026.06.14"},{"author":"A***r","color":"Creator Combo","size":"Kit Completo 6 en 1","stars":"★★★★★","comment":"Increíble rendimiento con poca luz. Los colores se ven vivos y naturales sin necesidad de edición pesada.","date":"2026.06.20"},{"author":"K***y","color":"Creator Combo","size":"Kit Completo 6 en 1","stars":"★★★★★","comment":"El mango con batería extra duplica la duración. Hice un viaje completo de fin de semana sin preocuparme por cargador.","date":"2026.06.28"},{"author":"M***o","color":"Creator Combo","size":"Kit Completo 6 en 1","stars":"★★★★★","comment":"El modo vertical nativo para TikTok e Instagram Reels ahorra horas de edición. 10 de 10.","date":"2026.07.05"},{"author":"F***e","color":"Creator Combo","size":"Kit Completo 6 en 1","stars":"★★★★★","comment":"Envío seguro y atención impecable por WhatsApp. Producto 100% original.","date":"2026.07.12"},{"author":"L***a","color":"Creator Combo","size":"Kit Completo 6 en 1","stars":"★★★★★","comment":"Excelente producto, la calidad de construcción en aleación y el tacto del joystick son de gama premium.","date":"2026.07.19"}];
         const PRECIO_UNITARIO = 1850000;
@@ -1047,7 +1047,7 @@ try {
         function animarVueloAlCarrito(btn, callback) {
             const cartTrigger = document.querySelector('.cart-trigger');
             const mainImg = document.getElementById('mainImage');
-            const imgSrc = mainImg ? mainImg.src : 'img/img_1.jpg';
+            const imgSrc = mainImg ? mainImg.src : 'img/img_1.webp';
 
             const activeBtn = btn || document.querySelector('.btn-add-desktop') || document.getElementById('btnAddToCart');
             const origBtnHtml = activeBtn ? activeBtn.innerHTML : '';

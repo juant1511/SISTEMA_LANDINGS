@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generar'])) {
         if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
             $ext_logo = strtolower(pathinfo($_FILES['logo']['name'], PATHINFO_EXTENSION));
             if (in_array($ext_logo, ['png', 'jpg', 'jpeg', 'webp', 'svg', 'gif'])) {
-                move_uploaded_file($_FILES['logo']['tmp_name'], $dest . 'logo.png');
+                move_uploaded_file($_FILES['logo']['tmp_name'], $dest . 'logo.webp');
             }
         }
 
@@ -212,7 +212,7 @@ try {
         foreach (\$rows as \$r) {
             \$other_slug = \$r['slug'];
             \$imgs = is_array(\$r['imagenes']) ? \$r['imagenes'] : (json_decode(\$r['imagenes'] ?? '{}', true) ?: []);
-            \$raw_img = \$imgs['img_1'] ?? (\$imgs['producto'] ?? (\$imgs['desktop'] ?? 'img/img_1.jpg'));
+            \$raw_img = \$imgs['img_1'] ?? (\$imgs['producto'] ?? (\$imgs['desktop'] ?? 'img/img_1.webp'));
 
             \$final_img = (strpos(\$raw_img, 'http') === 0) ? \$raw_img : "../{\$other_slug}/" . ltrim(\$raw_img, '/');
             \$otros_productos[] = [
@@ -1899,8 +1899,8 @@ if (empty(\$otros_productos) && is_dir(__DIR__ . '/../')) {
         <div class="nav-center-logo">
             <?php if (file_exists(__DIR__ . '/logo.svg')): ?>
                 <img src="logo.svg" class="brand-logo-img" alt="{$marca}">
-            <?php elseif (file_exists(__DIR__ . '/logo.png')): ?>
-                <img src="logo.png" class="brand-logo-img" alt="{$marca}">
+            <?php elseif (file_exists(__DIR__ . '/logo.webp')): ?>
+                <img src="logo.webp" class="brand-logo-img" alt="{$marca}">
             <?php else: ?>
                 <span class="brand-logo-text" data-editable="true">{$marca}</span>
             <?php endif; ?>
@@ -2435,7 +2435,7 @@ HTML;
         function animarVueloAlCarrito(btn, callback) {
             const cartTrigger = document.querySelector('.cart-trigger');
             const mainImg = document.getElementById('mainImage');
-            const imgSrc = mainImg ? mainImg.src : 'img/img_1.jpg';
+            const imgSrc = mainImg ? mainImg.src : 'img/img_1.webp';
 
             const activeBtn = btn || document.querySelector('.btn-add-desktop') || document.getElementById('btnAddToCart');
             const origBtnHtml = activeBtn ? activeBtn.innerHTML : '';
