@@ -484,7 +484,8 @@ try {
         
 
     
-        /* ─── ANIMACIONES PROFESIONALES DEL CARRITO ─── */
+        
+        /* ─── ANIMACIONES PROFESIONALES DEL CARRITO Y LOTTIE ─── */
         .cart-trigger {
             position: relative;
             background: none;
@@ -507,10 +508,10 @@ try {
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 44px;
-            height: 44px;
-            margin-left: -22px;
-            margin-top: -22px;
+            width: 46px;
+            height: 46px;
+            margin-left: -23px;
+            margin-top: -23px;
             border-radius: 50%;
             border: 2.5px solid var(--primary, #111111);
             pointer-events: none;
@@ -518,7 +519,7 @@ try {
         }
         @keyframes cartRippleAnim {
             0% { transform: scale(0.4); opacity: 0.95; }
-            100% { transform: scale(1.8); opacity: 0; }
+            100% { transform: scale(1.85); opacity: 0; }
         }
         .cart-badge-bounce {
             animation: cartBadgeBounce 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -530,6 +531,7 @@ try {
         }
 
     </style>
+    <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
 </head>
 <body class="<?= $es_modo_edicion ? 'modo-edicion-activo' : '' ?>" style="<?= $es_modo_edicion ? 'margin-top: 50px;' : '' ?>">
 
@@ -644,7 +646,7 @@ try {
                         <span class="qty-val-desktop" id="qtyDesktopDisplay">1</span>
                         <button class="qty-btn-desktop" onclick="cambiarCantidad(1)">+</button>
                     </div>
-                    <button class="btn-add-desktop" onclick="agregarAlCarrito()" data-editable="true">
+                    <button class="btn-add-desktop" onclick="agregarAlCarrito(event)" data-editable="true">
                         Add to Cart - $ 320.000
                     </button>
                 </div>
@@ -838,7 +840,7 @@ try {
             </svg>
         </a>
 
-        <button class="btn-add-to-cart" id="btnAddToCart" onclick="agregarAlCarrito()" data-editable="true">
+        <button class="btn-add-to-cart" id="btnAddToCart" onclick="agregarAlCarrito(event)" data-editable="true">
             Add to Cart - $ 320.000
         </button>
     </div>
@@ -1042,105 +1044,109 @@ try {
             renderCart();
         }
 
-        function animarVueloAlCarrito(callback) {
-            const mainImg = document.getElementById('mainImage');
+        function animarVueloAlCarrito(btn, callback) {
             const cartTrigger = document.querySelector('.cart-trigger');
-            const mobileBtn = document.getElementById('btnAddToCart');
-            const desktopBtn = document.querySelector('.btn-add-desktop');
+            const mainImg = document.getElementById('mainImage');
+            const imgSrc = mainImg ? mainImg.src : 'img/img_1.jpg';
 
-            // 1. Feedback visual inmediato y profesional en los botones
-            const origMobileHtml = mobileBtn ? mobileBtn.innerHTML : '';
-            const origDesktopHtml = desktopBtn ? desktopBtn.innerHTML : '';
+            const activeBtn = btn || document.querySelector('.btn-add-desktop') || document.getElementById('btnAddToCart');
+            const origBtnHtml = activeBtn ? activeBtn.innerHTML : '';
 
-            if (mobileBtn) {
-                mobileBtn.style.transition = 'all 0.22s ease';
-                mobileBtn.style.transform = 'scale(0.96)';
-                mobileBtn.innerHTML = '✓ ¡Agregado al Carrito!';
-                setTimeout(() => { if (mobileBtn) mobileBtn.style.transform = 'scale(1)'; }, 200);
-            }
-            if (desktopBtn) {
-                desktopBtn.style.transition = 'all 0.22s ease';
-                desktopBtn.style.transform = 'scale(0.96)';
-                desktopBtn.innerHTML = '✓ ¡Agregado al Carrito!';
-                setTimeout(() => { if (desktopBtn) desktopBtn.style.transform = 'scale(1)'; }, 200);
-            }
-
-            if (!mainImg || !cartTrigger) {
-                setTimeout(() => {
-                    if (mobileBtn) mobileBtn.innerHTML = origMobileHtml;
-                    if (desktopBtn) desktopBtn.innerHTML = origDesktopHtml;
-                    if (callback) callback();
-                }, 600);
-                return;
+            // 1. Mostrar animación Lottie oficial dentro del botón presionado
+            if (activeBtn) {
+                activeBtn.style.transition = 'all 0.2s ease';
+                activeBtn.style.transform = 'scale(0.97)';
+                activeBtn.innerHTML = `
+                    <div style="display:flex; align-items:center; justify-content:center; gap:8px; width:100%; height:100%;">
+                        <dotlottie-player src="https://lottie.host/b86261fc-a05c-4c50-a871-4f9ed870ec53/OwNQtMEoZd.lottie" background="transparent" speed="1.1" style="width:34px; height:34px;" autoplay></dotlottie-player>
+                        <span style="font-weight:800;">¡Agregando al carrito...</span>
+                    </div>
+                `;
+                setTimeout(() => { if (activeBtn) activeBtn.style.transform = 'scale(1)'; }, 180);
             }
 
-            const imgRect = mainImg.getBoundingClientRect();
-            const cartRect = cartTrigger.getBoundingClientRect();
+            // 2. Origen exacto del vuelo: DESDE EL BOTÓN PRESIONADO
+            const btnRect = activeBtn ? activeBtn.getBoundingClientRect() : { left: window.innerWidth / 2, top: window.innerHeight / 2, width: 60, height: 60 };
+            const startX = btnRect.left + (btnRect.width / 2) - 35;
+            const startY = btnRect.top + (btnRect.height / 2) - 35;
 
-            // Contenedor volante para trayecto elástico suave en eje X
             const flyWrap = document.createElement('div');
             flyWrap.style.position = 'fixed';
             flyWrap.style.left = '0';
             flyWrap.style.top = '0';
             flyWrap.style.zIndex = '999999';
             flyWrap.style.pointerEvents = 'none';
-            flyWrap.style.transform = `translate3d(${imgRect.left}px, ${imgRect.top}px, 0)`;
-            flyWrap.style.transition = 'transform 0.75s cubic-bezier(0.16, 1, 0.3, 1)';
+            flyWrap.style.transform = `translate3d(${startX}px, ${startY}px, 0) scale(0.6)`;
+            flyWrap.style.opacity = '0';
+            flyWrap.style.transition = 'transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease';
 
-            // Imagen interna con halo, reducción suave y rotación
             const flyImg = document.createElement('img');
-            flyImg.src = mainImg.src;
-            flyImg.style.width = imgRect.width + 'px';
-            flyImg.style.height = imgRect.height + 'px';
+            flyImg.src = imgSrc;
+            flyImg.style.width = '70px';
+            flyImg.style.height = '70px';
             flyImg.style.borderRadius = '16px';
             flyImg.style.objectFit = 'cover';
-            flyImg.style.border = '2px solid rgba(255,255,255,0.85)';
-            flyImg.style.boxShadow = '0 16px 40px rgba(0, 0, 0, 0.3)';
-            flyImg.style.transition = 'transform 0.75s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.75s cubic-bezier(0.8, 0, 1, 1), border-radius 0.75s ease';
+            flyImg.style.border = '2.5px solid #ffffff';
+            flyImg.style.boxShadow = '0 16px 40px rgba(0, 0, 0, 0.35)';
+            flyImg.style.transition = 'transform 0.85s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.85s ease, opacity 0.85s ease';
             flyImg.style.transformOrigin = 'center center';
 
             flyWrap.appendChild(flyImg);
             document.body.appendChild(flyWrap);
 
-            // Iniciar trayectoria parabólica fluida
-            requestAnimationFrame(() => {
-                const destX = cartRect.left + (cartRect.width / 2) - 20;
-                const destY = cartRect.top + (cartRect.height / 2) - 20;
-                const scale = 40 / imgRect.width;
+            // 3. Inicio del vuelo parabólico hacia el carrito después de mostrar el Lottie
+            setTimeout(() => {
+                flyWrap.style.opacity = '1';
+                flyWrap.style.transform = `translate3d(${startX}px, ${startY}px, 0) scale(1)`;
 
-                flyWrap.style.transform = `translate3d(${destX}px, ${destY}px, 0)`;
-                flyImg.style.transform = `scale(${scale}) rotate(10deg)`;
-                flyImg.style.opacity = '0.35';
-                flyImg.style.borderRadius = '50%';
-                flyImg.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-            });
+                requestAnimationFrame(() => {
+                    const cartRect = cartTrigger ? cartTrigger.getBoundingClientRect() : { left: window.innerWidth - 60, top: 20, width: 40, height: 40 };
+                    const destX = cartRect.left + (cartRect.width / 2) - 18;
+                    const destY = cartRect.top + (cartRect.height / 2) - 18;
 
-            // Impacto y onda de llegada al carrito
+                    flyWrap.style.transform = `translate3d(${destX}px, ${destY}px, 0) scale(0.45)`;
+                    flyImg.style.borderRadius = '50%';
+                    flyImg.style.transform = 'rotate(18deg)';
+                    flyImg.style.opacity = '0.35';
+                });
+            }, 300);
+
+            // 4. Impacto en el carrito y apertura del sidebar
             setTimeout(() => {
                 if (flyWrap.parentNode) flyWrap.parentNode.removeChild(flyWrap);
 
-                // Onda expansiva en el carrito (Ripple)
-                const ripple = document.createElement('div');
-                ripple.className = 'cart-ripple-effect';
-                cartTrigger.appendChild(ripple);
-                setTimeout(() => { if (ripple.parentNode) ripple.parentNode.removeChild(ripple); }, 650);
+                // Onda expansiva en el carrito
+                if (cartTrigger) {
+                    const ripple = document.createElement('div');
+                    ripple.className = 'cart-ripple-effect';
+                    cartTrigger.appendChild(ripple);
+                    setTimeout(() => { if (ripple.parentNode) ripple.parentNode.removeChild(ripple); }, 650);
 
-                // Rebote elástico en el botón del carrito
-                cartTrigger.classList.add('cart-pop-active');
-                setTimeout(() => { cartTrigger.classList.remove('cart-pop-active'); }, 450);
+                    cartTrigger.classList.add('cart-pop-active');
+                    setTimeout(() => { cartTrigger.classList.remove('cart-pop-active'); }, 450);
+                }
 
-                // Restaurar botones de producto
-                if (mobileBtn) mobileBtn.innerHTML = origMobileHtml;
-                if (desktopBtn) desktopBtn.innerHTML = origDesktopHtml;
+                // Restaurar contenido del botón
+                if (activeBtn) {
+                    activeBtn.innerHTML = origBtnHtml;
+                }
 
-                // Proceder a abrir el sidebar
+                // Desplegar el sidebar drawer
                 if (callback) callback();
-            }, 750);
+            }, 1100);
         }
 
-        function agregarAlCarrito() {
+        function agregarAlCarrito(e) {
             if (ES_MODO_EDICION) return;
-            animarVueloAlCarrito(() => {
+            let clickedBtn = null;
+            if (e) {
+                clickedBtn = e.currentTarget || (e.target ? e.target.closest('button') : null);
+            }
+            if (!clickedBtn) {
+                clickedBtn = document.querySelector('.btn-add-desktop') || document.getElementById('btnAddToCart');
+            }
+
+            animarVueloAlCarrito(clickedBtn, () => {
                 renderCart();
                 const overlay = document.getElementById('cartOverlay');
                 if (overlay && !overlay.classList.contains('open')) {
@@ -1148,6 +1154,7 @@ try {
                     document.body.style.overflow = 'hidden';
                 }
             });
+        });
         });
         }
 
