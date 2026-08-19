@@ -2393,7 +2393,7 @@ HTML;
             }
         }
 
-                        const CART_STORAGE_KEY = 'tridente_global_cart';
+                                const CART_STORAGE_KEY = 'tridente_global_cart';
         let globalCart = [];
 
         function cargarCarritoStorage() {
@@ -2402,16 +2402,27 @@ HTML;
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (Array.isArray(parsed)) {
-                        globalCart = parsed.filter(item => item && item.token && item.qty > 0).map(item => ({
-                            token: item.token,
-                            slug: item.slug || '',
-                            title: item.title || 'Producto',
-                            price: Number(item.price) || 0,
-                            image: item.image || '',
-                            variant: item.variant || '',
-                            size: item.size || '',
-                            qty: Math.min(10, Math.max(1, Number(item.qty) || 1))
-                        }));
+                        globalCart = parsed.filter(item => item && item.token && item.qty > 0).map(item => {
+                            let itemImg = item.image || '';
+                            if (itemImg && !itemImg.startsWith('http://') && !itemImg.startsWith('https://') && !itemImg.startsWith('/')) {
+                                if (item.slug) {
+                                    const pathSegments = window.location.pathname.split('/');
+                                    // Detect if bundled_landings or landings
+                                    const dirFolder = pathSegments.includes('bundled_landings') ? 'bundled_landings' : 'landings';
+                                    itemImg = window.location.origin + '/' + dirFolder + '/' + item.slug + '/' + itemImg.replace(/^\.\//, '');
+                                }
+                            }
+                            return {
+                                token: item.token,
+                                slug: item.slug || '',
+                                title: item.title || 'Producto',
+                                price: Number(item.price) || 0,
+                                image: itemImg,
+                                variant: item.variant || '',
+                                size: item.size || '',
+                                qty: Math.min(10, Math.max(1, Number(item.qty) || 1))
+                            };
+                        });
                         return;
                     }
                 }
@@ -2441,7 +2452,8 @@ HTML;
         function animarVueloAlCarrito(btn, callback) {
             const cartTrigger = document.querySelector('.cart-trigger');
             const mainImg = document.getElementById('mainImage');
-            const imgSrc = mainImg ? mainImg.src : 'img/img_1.webp';
+            let imgSrc = mainImg ? mainImg.src : ((typeof IMAGENES !== 'undefined' && IMAGENES.length > 0) ? IMAGENES[0] : 'producto.png');
+            try { imgSrc = new URL(imgSrc, window.location.href).href; } catch(e) {}
 
             const activeBtn = btn || document.querySelector('.btn-add-desktop') || document.getElementById('btnAddToCart');
             const origBtnHtml = activeBtn ? activeBtn.innerHTML : '';
@@ -2532,7 +2544,10 @@ HTML;
                 clickedBtn = document.querySelector('.btn-add-desktop') || document.getElementById('btnAddToCart');
             }
 
-            const primerImg = (typeof IMAGENES !== 'undefined' && IMAGENES.length > 0) ? IMAGENES[0] : '';
+            const mainImg = document.getElementById('mainImage');
+            let imgSrc = mainImg ? mainImg.src : ((typeof IMAGENES !== 'undefined' && IMAGENES.length > 0) ? IMAGENES[0] : 'producto.png');
+            try { imgSrc = new URL(imgSrc, window.location.href).href; } catch(e) {}
+
             const prodTitulo = (typeof PRODUCTO_TITULO !== 'undefined') ? PRODUCTO_TITULO : 'Producto';
             const precioUnit = (typeof PRECIO_UNITARIO !== 'undefined') ? PRECIO_UNITARIO : 0;
             const variantVal = (typeof cartState !== 'undefined' && cartState.variant) ? cartState.variant : 'Estándar';
@@ -2545,6 +2560,7 @@ HTML;
                 } else {
                     globalCart[existingIndex].qty = 10;
                 }
+                globalCart[existingIndex].image = imgSrc; // Asegurar miniatura absoluta
                 globalCart[existingIndex].variant = variantVal;
                 globalCart[existingIndex].size = sizeVal;
             } else {
@@ -2553,7 +2569,7 @@ HTML;
                     slug: typeof LANDING_SLUG !== 'undefined' ? LANDING_SLUG : '',
                     title: prodTitulo,
                     price: precioUnit,
-                    image: primerImg,
+                    image: imgSrc,
                     variant: variantVal,
                     size: sizeVal,
                     qty: 1
@@ -2700,9 +2716,6 @@ HTML;
             setTimeout(() => { window.location.href = targetUrl; }, 350);
         }
 
-        
-
-        /* ─── PAGINACIÓN Y FILTRADO REAL DE RESEÑAS ─── */
         function renderReviews() {
             const container = document.getElementById('reviewsListContainer');
             const paginationContainer = document.getElementById('reviewsPaginationContainer');
