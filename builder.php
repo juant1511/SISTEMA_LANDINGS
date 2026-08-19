@@ -323,10 +323,11 @@ if (empty(\$otros_productos) && is_dir(__DIR__ . '/../')) {
             background-color: var(--topbar-bg, #000000);
             color: #ffffff;
             font-family: var(--font-heading);
-            font-size: 11.5px;
-            font-weight: 800;
-            padding: 8px 0;
-            letter-spacing: 1.2px;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4.5px 0;
+            line-height: 1.2;
+            letter-spacing: 0.8px;
             text-transform: uppercase;
             overflow: hidden !important;
             white-space: nowrap;
@@ -335,6 +336,7 @@ if (empty(\$otros_productos) && is_dir(__DIR__ . '/../')) {
             max-width: 100% !important;
             box-sizing: border-box;
             display: flex;
+            align-items: center;
         }
         .topbar-marquee-track {
             display: flex;
@@ -364,30 +366,28 @@ if (empty(\$otros_productos) && is_dir(__DIR__ . '/../')) {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 18px;
+            padding: 10px 18px;
             background-color: #ffffff;
             border-bottom: 1px solid #f3f4f6;
             position: sticky;
             top: 0;
             z-index: 100;
-            min-height: 68px;
+            min-height: 74px;
             width: 100% !important;
             max-width: 100% !important;
             box-sizing: border-box;
         }
-        .nav-left { width: 44px; }
-        .nav-center-logo { flex: 1; display: flex; justify-content: center; align-items: center; }
-        .brand-logo-img { max-height: 52px; max-width: 200px; object-fit: contain; transition: transform 0.2s ease; }
+        .nav-left { width: 44px; flex-shrink: 0; }
+        .nav-center-logo { flex: 1; display: flex; justify-content: center; align-items: center; text-align: center; }
+        .brand-logo-img { height: 58px; max-height: 62px; max-width: 220px; width: auto; object-fit: contain; transition: transform 0.2s ease; display: block; margin: 0 auto; }
         .brand-logo-img:hover { transform: scale(1.03); }
-        .brand-logo-text { font-family: var(--font-heading); font-size: 24px; font-weight: 900; letter-spacing: 3px; color: #111111; text-transform: uppercase; text-decoration: none; }
-        .nav-right { width: 44px; display: flex; justify-content: flex-end; align-items: center; }
+        .brand-logo-text { font-family: var(--font-heading); font-size: 28px; font-weight: 900; letter-spacing: 3px; color: #111111; text-transform: uppercase; text-decoration: none; display: inline-block; }
+        .nav-right { width: 44px; display: flex; justify-content: flex-end; align-items: center; flex-shrink: 0; }
         .cart-trigger { position: relative; background: none; border: none; cursor: pointer; color: #111827; padding: 6px; }
-        .cart-badge-count { position: absolute; top: -2px; right: -4px; background-color: var(--primary); color: #ffffff; font-size: 10px; font-weight: 800; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #ffffff; }
-
-        @media (min-width: 768px) {
-            .navbar { padding: 14px 24px; min-height: 75px; }
-            .brand-logo-img { max-height: 66px; max-width: 260px; }
-            .brand-logo-text { font-size: 30px; letter-spacing: 3.5px; }
+        .cart-badge-count { position: absolute; top: -2px; right: -4px; background-color: var(--primary); color: #ffffff; font-size: 10px; font-weight: 800; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #ffffff; }@media (min-width: 768px) {
+            .navbar { padding: 12px 28px; min-height: 86px; }
+            .brand-logo-img { height: 72px; max-height: 76px; max-width: 300px; }
+            .brand-logo-text { font-size: 34px; letter-spacing: 3.5px; }
         }
 
         .landing-container {
@@ -1890,7 +1890,7 @@ if (empty(\$otros_productos) && is_dir(__DIR__ . '/../')) {
                     <circle cx="20" cy="21" r="1"></circle>
                     <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                 </svg>
-                <span class="cart-badge-count" id="cartBadge">1</span>
+                <span class="cart-badge-count" id="cartBadge" style="display:none;">0</span>
             </button>
         </div>
     </nav>
@@ -2188,7 +2188,7 @@ HTML;
     <div class="cart-overlay" id="cartOverlay" onclick="if(event.target===this) toggleCart()">
         <div class="cart-drawer">
             <div class="cart-header">
-                <h3 id="cartDrawerTitle">Tu Carrito (1)</h3>
+                <h3 id="cartDrawerTitle">Tu Carrito (0)</h3>
                 <button class="close-cart-btn" onclick="toggleCart()">✕</button>
             </div>
 
