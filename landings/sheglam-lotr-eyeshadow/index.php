@@ -412,8 +412,8 @@ try {
         .sticky-footer-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #ffffff; border-top: 1px solid var(--border-color); padding: 10px 16px 14px 16px; display: flex; align-items: center; gap: 12px; z-index: 900; box-shadow: 0 -4px 15px rgba(0,0,0,0.06); max-width: 540px; margin: 0 auto; }
         .support-btn { width: 46px; height: 46px; border-radius: 10px; border: 1px solid var(--border-color); background: #ffffff; display: flex; align-items: center; justify-content: center; color: #111111; text-decoration: none; flex-shrink: 0; }
         .btn-add-to-cart { flex: 1; height: 48px; background-color: var(--btn-bg); color: #ffffff; border: none; border-radius: 12px; font-family: var(--font-heading); font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .floating-promo-tag { position: absolute; top: -42px; right: 16px; background: #000000; color: #ffffff; font-size: 11px; font-weight: 800; padding: 8px 14px; border-radius: 20px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.25); animation: bounceSoft 2.5s infinite ease-in-out; cursor: pointer; }
-        @keyframes bounceSoft { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        
+         50% { transform: translateY(-5px); } }
 
         @media (min-width: 992px) {
             .product-grid-layout { display: grid; grid-template-columns: 1.15fr 1fr; gap: 50px; align-items: start; }
@@ -827,11 +827,7 @@ try {
 
     <!-- 8. STICKY BOTTOM ACTION BAR (MOBILE ONLY) -->
     <div class="sticky-footer-bar">
-        <div class="floating-promo-tag" onclick="aplicarDescuentoExtra()">
-            <span>🎁</span>
-            <span data-editable="true">GET 5% OFF</span>
-            <span class="close-tag" onclick="event.stopPropagation(); this.parentElement.style.display='none'">✕</span>
-        </div>
+        
 
         <a href="https://wa.me/573000000000?text=Hola,%20tengo%20una%20consulta" target="_blank" class="support-btn" title="Atención al Cliente">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -876,7 +872,11 @@ try {
                 <div class="cart-summary-row"><span>Envío</span><span style="color:#059669; font-weight:700;">GRATIS</span></div>
                 <div class="cart-summary-row total"><span>Total</span><span id="cartTotal">$ 15.658</span></div>
                 <button class="btn-checkout" onclick="procederAlCheckout()">
-                    <span>Finalizar Compra Segura</span><span>➔</span>
+                    <span>Finalizar Compra Segura</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
                 </button>
             </div>
         </div>
@@ -898,7 +898,7 @@ try {
         let lightboxIndex = 0;
         let currentReviewPage = 1;
         const REVIEWS_PER_PAGE = 5;
-        let cartState = { qty: 1, hasAdded: false, variant: "Loyalty & Courage", size: "4.2g" };
+        let cartState = { qty: 0, hasAdded: false, variant: "Creator Combo", size: "Kit Completo 6 en 1" };
 
         function initGallery() {
             const mainImg = document.getElementById('mainImage');
@@ -1135,7 +1135,34 @@ try {
             }, 1100);
         }
 
-                        function agregarAlCarrito(e) {
+                        const CART_STORAGE_KEY = 'landing_cart_' + (typeof LANDING_SLUG !== 'undefined' ? LANDING_SLUG : 'default');
+
+        function cargarCarritoStorage() {
+            try {
+                const saved = localStorage.getItem(CART_STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed && typeof parsed.qty === 'number') {
+                        cartState.qty = Math.min(10, Math.max(0, parsed.qty));
+                        cartState.hasAdded = cartState.qty > 0;
+                        if (parsed.variant) cartState.variant = parsed.variant;
+                        if (parsed.size) cartState.size = parsed.size;
+                        return;
+                    }
+                }
+            } catch (e) {}
+            // Por defecto en primer ingreso: Carrito completamente vacío
+            cartState.qty = 0;
+            cartState.hasAdded = false;
+        }
+
+        function guardarCarritoEnStorage() {
+            try {
+                localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartState));
+            } catch (e) {}
+        }
+
+        function agregarAlCarrito(e) {
             if (ES_MODO_EDICION) return;
             let clickedBtn = null;
             if (e) {
@@ -1146,18 +1173,24 @@ try {
             }
 
             if (cartState.hasAdded && cartState.qty > 0) {
-                cartState.qty += 1;
+                if (cartState.qty < 10) {
+                    cartState.qty += 1;
+                } else {
+                    cartState.qty = 10;
+                }
             } else {
                 cartState.hasAdded = true;
-                if (cartState.qty < 1) cartState.qty = 1;
+                cartState.qty = 1;
             }
 
+            guardarCarritoEnStorage();
+
             const desktopQty = document.getElementById('qtyDesktopDisplay');
-            if (desktopQty) desktopQty.textContent = cartState.qty;
+            if (desktopQty) desktopQty.textContent = Math.max(1, cartState.qty);
             const mobileBtn = document.getElementById('btnAddToCart');
-            if (mobileBtn) mobileBtn.textContent = 'Add to Cart - ' + formatMoney(cartState.qty * PRECIO_UNITARIO);
+            if (mobileBtn) mobileBtn.textContent = 'Add to Cart - ' + formatMoney((cartState.qty > 0 ? cartState.qty : 1) * PRECIO_UNITARIO);
             const desktopBtn = document.querySelector('.btn-add-desktop');
-            if (desktopBtn) desktopBtn.textContent = 'Add to Cart - ' + formatMoney(cartState.qty * PRECIO_UNITARIO);
+            if (desktopBtn) desktopBtn.textContent = 'Add to Cart - ' + formatMoney((cartState.qty > 0 ? cartState.qty : 1) * PRECIO_UNITARIO);
 
             animarVueloAlCarrito(clickedBtn, () => {
                 renderCart();
@@ -1170,25 +1203,26 @@ try {
         }
 
         function cambiarCantidad(delta) {
-            cartState.qty = Math.max(0, cartState.qty + delta);
+            let newQty = cartState.qty + delta;
+            if (newQty > 10) newQty = 10;
+            if (newQty < 0) newQty = 0;
+            cartState.qty = newQty;
             if (cartState.qty === 0) {
                 cartState.hasAdded = false;
             }
+            guardarCarritoEnStorage();
+
             const desktopQty = document.getElementById('qtyDesktopDisplay');
             if (desktopQty) desktopQty.textContent = Math.max(1, cartState.qty);
             const mobileBtn = document.getElementById('btnAddToCart');
             if (mobileBtn) {
-                mobileBtn.textContent = cartState.qty > 0 ? ('Add to Cart - ' + formatMoney(cartState.qty * PRECIO_UNITARIO)) : ('Add to Cart - ' + formatMoney(PRECIO_UNITARIO));
+                mobileBtn.textContent = 'Add to Cart - ' + formatMoney((cartState.qty > 0 ? cartState.qty : 1) * PRECIO_UNITARIO);
             }
             const desktopBtn = document.querySelector('.btn-add-desktop');
             if (desktopBtn) {
-                desktopBtn.textContent = cartState.qty > 0 ? ('Add to Cart - ' + formatMoney(cartState.qty * PRECIO_UNITARIO)) : ('Add to Cart - ' + formatMoney(PRECIO_UNITARIO));
+                desktopBtn.textContent = 'Add to Cart - ' + formatMoney((cartState.qty > 0 ? cartState.qty : 1) * PRECIO_UNITARIO);
             }
             renderCart();
-        }
-
-        function formatMoney(num) {
-            return '$ ' + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
         function renderCart() {
@@ -1213,13 +1247,60 @@ try {
                 if (cartState.qty <= 0) {
                     checkoutBtn.style.opacity = '0.45';
                     checkoutBtn.style.pointerEvents = 'none';
-                    checkoutBtn.textContent = 'Carrito Vacío';
+                    checkoutBtn.innerHTML = `<span>Carrito Vacío</span>`;
                 } else {
                     checkoutBtn.style.opacity = '1';
                     checkoutBtn.style.pointerEvents = 'auto';
-                    checkoutBtn.textContent = 'Pagar Contraentrega / Checkout 🔒';
+                    checkoutBtn.innerHTML = `
+                        <span>Finalizar Compra Segura</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    `;
                 }
             }
+
+            const primerImg = (typeof IMAGENES !== 'undefined' && IMAGENES.length > 0) ? IMAGENES[0] : '';
+            const prodTitulo = (typeof PRODUCTO_TITULO !== 'undefined') ? PRODUCTO_TITULO : 'Producto';
+            const precioUnit = (typeof PRECIO_UNITARIO !== 'undefined') ? PRECIO_UNITARIO : 0;
+
+            if (container) {
+                if (cartState.qty <= 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 48px 20px; color: var(--text-muted);">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 12px auto; display: block; opacity: 0.4;">
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                            </svg>
+                            <p style="font-size: 15px; font-weight: 700; margin: 0 0 6px 0; color: var(--text-main);">Tu carrito está vacío</p>
+                            <p style="font-size: 13px; margin: 0;">Agrega productos para continuar con tu compra.</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div class="cart-item">
+                            <img src="${primerImg}" class="cart-item-img" alt="${prodTitulo}">
+                            <div class="cart-item-info">
+                                <div>
+                                    <div class="cart-item-title">${prodTitulo}</div>
+                                    <div class="cart-item-variant">Variante: ${cartState.variant} | ${cartState.size}</div>
+                                </div>
+                                <div class="cart-item-bottom">
+                                    <div class="cart-item-price">${formatMoney(precioUnit)}</div>
+                                    <div class="qty-controls">
+                                        <button class="qty-btn" onclick="cambiarCantidad(-1)">-</button>
+                                        <span class="qty-value">${cartState.qty}</span>
+                                        <button class="qty-btn" onclick="cambiarCantidad(1)" ${cartState.qty >= 10 ? 'style="opacity:0.4;cursor:not-allowed;"' : ''}>+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        }
 
             const primerImg = (typeof IMAGENES !== 'undefined' && IMAGENES.length > 0) ? IMAGENES[0] : '';
             const prodTitulo = (typeof PRODUCTO_TITULO !== 'undefined') ? PRODUCTO_TITULO : 'Producto';
@@ -1269,11 +1350,7 @@ try {
             setTimeout(() => { window.location.href = CHECKOUT_URL + '&qty=' + cartState.qty; }, 350);
         }
 
-        function aplicarDescuentoExtra() {
-            if (ES_MODO_EDICION) return;
-            alert("¡Felicidades! Se ha activado un 5% de descuento especial en el carrito.");
-            toggleCart();
-        }
+        
 
         function renderReviews() {
             const container = document.getElementById('reviewsListContainer');
@@ -1395,6 +1472,7 @@ try {
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            cargarCarritoStorage();
             initGallery();
             initSwatches();
             renderCart();
