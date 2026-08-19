@@ -108,7 +108,7 @@ try {
         .topbar-marquee-track {
             display: flex;
             width: max-content;
-            animation: topbarMarqueeScroll 18s linear infinite;
+            animation: topbarMarqueeScroll 35s linear infinite;
             will-change: transform;
         }
         .topbar-marquee-track:hover {
@@ -557,16 +557,16 @@ try {
     <div class="top-announcement">
         <div class="topbar-marquee-track">
             <div class="marquee-content">
-                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL</span>
-                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL</span>
-                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL</span>
-                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL</span>
+                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA DE 3 AÑOS</span>
+                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA DE 3 AÑOS</span>
+                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA DE 3 AÑOS</span>
+                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA DE 3 AÑOS</span>
             </div>
             <div class="marquee-content" aria-hidden="true">
-                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL</span>
-                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL</span>
-                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL</span>
-                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA OFICIAL</span>
+                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA DE 3 AÑOS</span>
+                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA DE 3 AÑOS</span>
+                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA DE 3 AÑOS</span>
+                <span>ENVÍO GRATIS A TODA COLOMBIA &bull; PAGO CONTRAENTREGA &bull; GARANTÍA DE 3 AÑOS</span>
             </div>
         </div>
     </div>
@@ -898,7 +898,7 @@ try {
         let lightboxIndex = 0;
         let currentReviewPage = 1;
         const REVIEWS_PER_PAGE = 5;
-        let cartState = { qty: 1, variant: "Titanium Orange", size: "49mm Dial" };
+        let cartState = { qty: 1, hasAdded: false, variant: "Titanium Orange", size: "49mm Dial" };
 
         function initGallery() {
             const mainImg = document.getElementById('mainImage');
@@ -1145,6 +1145,20 @@ try {
                 clickedBtn = document.querySelector('.btn-add-desktop') || document.getElementById('btnAddToCart');
             }
 
+            if (cartState.hasAdded && cartState.qty > 0) {
+                cartState.qty += 1;
+            } else {
+                cartState.hasAdded = true;
+                if (cartState.qty < 1) cartState.qty = 1;
+            }
+
+            const desktopQty = document.getElementById('qtyDesktopDisplay');
+            if (desktopQty) desktopQty.textContent = cartState.qty;
+            const mobileBtn = document.getElementById('btnAddToCart');
+            if (mobileBtn) mobileBtn.textContent = 'Add to Cart - ' + formatMoney(cartState.qty * PRECIO_UNITARIO);
+            const desktopBtn = document.querySelector('.btn-add-desktop');
+            if (desktopBtn) desktopBtn.textContent = 'Add to Cart - ' + formatMoney(cartState.qty * PRECIO_UNITARIO);
+
             animarVueloAlCarrito(clickedBtn, () => {
                 renderCart();
                 const overlay = document.getElementById('cartOverlay');
@@ -1156,13 +1170,20 @@ try {
         }
 
         function cambiarCantidad(delta) {
-            cartState.qty = Math.max(1, cartState.qty + delta);
+            cartState.qty = Math.max(0, cartState.qty + delta);
+            if (cartState.qty === 0) {
+                cartState.hasAdded = false;
+            }
             const desktopQty = document.getElementById('qtyDesktopDisplay');
-            if (desktopQty) desktopQty.textContent = cartState.qty;
+            if (desktopQty) desktopQty.textContent = Math.max(1, cartState.qty);
             const mobileBtn = document.getElementById('btnAddToCart');
-            if (mobileBtn) mobileBtn.textContent = 'Add to Cart - ' + formatMoney(cartState.qty * PRECIO_UNITARIO);
+            if (mobileBtn) {
+                mobileBtn.textContent = cartState.qty > 0 ? ('Add to Cart - ' + formatMoney(cartState.qty * PRECIO_UNITARIO)) : ('Add to Cart - ' + formatMoney(PRECIO_UNITARIO));
+            }
             const desktopBtn = document.querySelector('.btn-add-desktop');
-            if (desktopBtn) desktopBtn.textContent = 'Add to Cart - ' + formatMoney(cartState.qty * PRECIO_UNITARIO);
+            if (desktopBtn) {
+                desktopBtn.textContent = cartState.qty > 0 ? ('Add to Cart - ' + formatMoney(cartState.qty * PRECIO_UNITARIO)) : ('Add to Cart - ' + formatMoney(PRECIO_UNITARIO));
+            }
             renderCart();
         }
 
@@ -1176,7 +1197,10 @@ try {
             const fmtTotal = formatMoney(total);
 
             const badge = document.getElementById('cartBadge');
-            if (badge) badge.textContent = cartState.qty;
+            if (badge) {
+                badge.textContent = cartState.qty;
+                badge.style.display = cartState.qty > 0 ? 'flex' : 'none';
+            }
             const drawerTitle = document.getElementById('cartDrawerTitle');
             if (drawerTitle) drawerTitle.textContent = `Tu Carrito (${cartState.qty})`;
             const subtotalEl = document.getElementById('cartSubtotal');
@@ -1184,32 +1208,62 @@ try {
             const totalEl = document.getElementById('cartTotal');
             if (totalEl) totalEl.textContent = fmtTotal;
 
-            const primerImg = IMAGENES.length > 0 ? IMAGENES[0] : '';
+            const checkoutBtn = document.querySelector('.btn-checkout');
+            if (checkoutBtn) {
+                if (cartState.qty <= 0) {
+                    checkoutBtn.style.opacity = '0.45';
+                    checkoutBtn.style.pointerEvents = 'none';
+                    checkoutBtn.textContent = 'Carrito Vacío';
+                } else {
+                    checkoutBtn.style.opacity = '1';
+                    checkoutBtn.style.pointerEvents = 'auto';
+                    checkoutBtn.textContent = 'Pagar Contraentrega / Checkout 🔒';
+                }
+            }
+
+            const primerImg = (typeof IMAGENES !== 'undefined' && IMAGENES.length > 0) ? IMAGENES[0] : '';
+            const prodTitulo = (typeof PRODUCTO_TITULO !== 'undefined') ? PRODUCTO_TITULO : 'Producto';
+            const precioUnit = (typeof PRECIO_UNITARIO !== 'undefined') ? PRECIO_UNITARIO : 0;
 
             if (container) {
-                container.innerHTML = `
-                    <div class="cart-item">
-                        <img src="${primerImg}" class="cart-item-img" alt="${PRODUCTO_TITULO}">
-                        <div class="cart-item-info">
-                            <div>
-                                <div class="cart-item-title">${PRODUCTO_TITULO}</div>
-                                <div class="cart-item-variant">Variante: ${cartState.variant} | ${cartState.size}</div>
-                            </div>
-                            <div class="cart-item-bottom">
-                                <div class="cart-item-price">${formatMoney(PRECIO_UNITARIO)}</div>
-                                <div class="qty-controls">
-                                    <button class="qty-btn" onclick="cambiarCantidad(-1)">-</button>
-                                    <span class="qty-value">${cartState.qty}</span>
-                                    <button class="qty-btn" onclick="cambiarCantidad(1)">+</button>
+                if (cartState.qty <= 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 48px 20px; color: var(--text-muted);">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 12px auto; display: block; opacity: 0.4;">
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                            </svg>
+                            <p style="font-size: 15px; font-weight: 700; margin: 0 0 6px 0; color: var(--text-main);">Tu carrito está vacío</p>
+                            <p style="font-size: 13px; margin: 0;">Agrega productos para continuar con tu compra.</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div class="cart-item">
+                            <img src="${primerImg}" class="cart-item-img" alt="${prodTitulo}">
+                            <div class="cart-item-info">
+                                <div>
+                                    <div class="cart-item-title">${prodTitulo}</div>
+                                    <div class="cart-item-variant">Variante: ${cartState.variant} | ${cartState.size}</div>
+                                </div>
+                                <div class="cart-item-bottom">
+                                    <div class="cart-item-price">${formatMoney(precioUnit)}</div>
+                                    <div class="qty-controls">
+                                        <button class="qty-btn" onclick="cambiarCantidad(-1)">-</button>
+                                        <span class="qty-value">${cartState.qty}</span>
+                                        <button class="qty-btn" onclick="cambiarCantidad(1)">+</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
             }
         }
 
         function procederAlCheckout() {
+            if (cartState.qty <= 0) return;
             const loader = document.getElementById('landing-loader');
             if (loader) loader.style.display = 'flex';
             setTimeout(() => { window.location.href = CHECKOUT_URL + '&qty=' + cartState.qty; }, 350);
