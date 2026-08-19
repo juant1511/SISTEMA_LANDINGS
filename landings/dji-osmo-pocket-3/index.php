@@ -412,8 +412,6 @@ try {
         .sticky-footer-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #ffffff; border-top: 1px solid var(--border-color); padding: 10px 16px 14px 16px; display: flex; align-items: center; gap: 12px; z-index: 900; box-shadow: 0 -4px 15px rgba(0,0,0,0.06); max-width: 540px; margin: 0 auto; }
         .support-btn { width: 46px; height: 46px; border-radius: 10px; border: 1px solid var(--border-color); background: #ffffff; display: flex; align-items: center; justify-content: center; color: #111111; text-decoration: none; flex-shrink: 0; }
         .btn-add-to-cart { flex: 1; height: 48px; background-color: var(--btn-bg); color: #ffffff; border: none; border-radius: 12px; font-family: var(--font-heading); font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        
-         50% { transform: translateY(-5px); } }
 
         @media (min-width: 992px) {
             .product-grid-layout { display: grid; grid-template-columns: 1.15fr 1fr; gap: 50px; align-items: start; }
@@ -1035,6 +1033,33 @@ try {
             }
         }
 
+                const CART_STORAGE_KEY = 'landing_cart_' + (typeof LANDING_SLUG !== 'undefined' ? LANDING_SLUG : 'default');
+
+        function cargarCarritoStorage() {
+            try {
+                const saved = localStorage.getItem(CART_STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed && typeof parsed.qty === 'number') {
+                        cartState.qty = Math.min(10, Math.max(0, parsed.qty));
+                        cartState.hasAdded = cartState.qty > 0;
+                        if (parsed.variant) cartState.variant = parsed.variant;
+                        if (parsed.size) cartState.size = parsed.size;
+                        return;
+                    }
+                }
+            } catch (e) {}
+            // Por defecto en primer ingreso: Carrito completamente vacío
+            cartState.qty = 0;
+            cartState.hasAdded = false;
+        }
+
+        function guardarCarritoEnStorage() {
+            try {
+                localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartState));
+            } catch (e) {}
+        }
+
         function toggleCart() {
             if (ES_MODO_EDICION) return;
             const overlay = document.getElementById('cartOverlay');
@@ -1052,7 +1077,6 @@ try {
             const activeBtn = btn || document.querySelector('.btn-add-desktop') || document.getElementById('btnAddToCart');
             const origBtnHtml = activeBtn ? activeBtn.innerHTML : '';
 
-            // 1. Mostrar icono animado Lottie oficial grande y centrado (sin texto)
             if (activeBtn) {
                 activeBtn.style.transition = 'all 0.2s ease';
                 activeBtn.style.transform = 'scale(0.97)';
@@ -1064,7 +1088,6 @@ try {
                 setTimeout(() => { if (activeBtn) activeBtn.style.transform = 'scale(1)'; }, 180);
             }
 
-            // 2. Origen exacto del vuelo: DESDE EL BOTÓN PRESIONADO
             const btnRect = activeBtn ? activeBtn.getBoundingClientRect() : { left: window.innerWidth / 2, top: window.innerHeight / 2, width: 60, height: 60 };
             const startX = btnRect.left + (btnRect.width / 2) - 35;
             const startY = btnRect.top + (btnRect.height / 2) - 35;
@@ -1093,7 +1116,6 @@ try {
             flyWrap.appendChild(flyImg);
             document.body.appendChild(flyWrap);
 
-            // 3. Inicio del vuelo parabólico hacia el carrito después de mostrar el Lottie
             setTimeout(() => {
                 flyWrap.style.opacity = '1';
                 flyWrap.style.transform = `translate3d(${startX}px, ${startY}px, 0) scale(1)`;
@@ -1110,11 +1132,9 @@ try {
                 });
             }, 300);
 
-            // 4. Impacto en el carrito y apertura del sidebar
             setTimeout(() => {
                 if (flyWrap.parentNode) flyWrap.parentNode.removeChild(flyWrap);
 
-                // Onda expansiva en el carrito
                 if (cartTrigger) {
                     const ripple = document.createElement('div');
                     ripple.className = 'cart-ripple-effect';
@@ -1125,41 +1145,12 @@ try {
                     setTimeout(() => { cartTrigger.classList.remove('cart-pop-active'); }, 450);
                 }
 
-                // Restaurar contenido del botón
                 if (activeBtn) {
                     activeBtn.innerHTML = origBtnHtml;
                 }
 
-                // Desplegar el sidebar drawer
                 if (callback) callback();
             }, 1100);
-        }
-
-                        const CART_STORAGE_KEY = 'landing_cart_' + (typeof LANDING_SLUG !== 'undefined' ? LANDING_SLUG : 'default');
-
-        function cargarCarritoStorage() {
-            try {
-                const saved = localStorage.getItem(CART_STORAGE_KEY);
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    if (parsed && typeof parsed.qty === 'number') {
-                        cartState.qty = Math.min(10, Math.max(0, parsed.qty));
-                        cartState.hasAdded = cartState.qty > 0;
-                        if (parsed.variant) cartState.variant = parsed.variant;
-                        if (parsed.size) cartState.size = parsed.size;
-                        return;
-                    }
-                }
-            } catch (e) {}
-            // Por defecto en primer ingreso: Carrito completamente vacío
-            cartState.qty = 0;
-            cartState.hasAdded = false;
-        }
-
-        function guardarCarritoEnStorage() {
-            try {
-                localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartState));
-            } catch (e) {}
         }
 
         function agregarAlCarrito(e) {
@@ -1223,6 +1214,10 @@ try {
                 desktopBtn.textContent = 'Add to Cart - ' + formatMoney((cartState.qty > 0 ? cartState.qty : 1) * PRECIO_UNITARIO);
             }
             renderCart();
+        }
+
+        function formatMoney(num) {
+            return '$ ' + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
         function renderCart() {
@@ -1293,47 +1288,6 @@ try {
                                         <button class="qty-btn" onclick="cambiarCantidad(-1)">-</button>
                                         <span class="qty-value">${cartState.qty}</span>
                                         <button class="qty-btn" onclick="cambiarCantidad(1)" ${cartState.qty >= 10 ? 'style="opacity:0.4;cursor:not-allowed;"' : ''}>+</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-        }
-
-            const primerImg = (typeof IMAGENES !== 'undefined' && IMAGENES.length > 0) ? IMAGENES[0] : '';
-            const prodTitulo = (typeof PRODUCTO_TITULO !== 'undefined') ? PRODUCTO_TITULO : 'Producto';
-            const precioUnit = (typeof PRECIO_UNITARIO !== 'undefined') ? PRECIO_UNITARIO : 0;
-
-            if (container) {
-                if (cartState.qty <= 0) {
-                    container.innerHTML = `
-                        <div style="text-align: center; padding: 48px 20px; color: var(--text-muted);">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 12px auto; display: block; opacity: 0.4;">
-                                <circle cx="9" cy="21" r="1"></circle>
-                                <circle cx="20" cy="21" r="1"></circle>
-                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                            </svg>
-                            <p style="font-size: 15px; font-weight: 700; margin: 0 0 6px 0; color: var(--text-main);">Tu carrito está vacío</p>
-                            <p style="font-size: 13px; margin: 0;">Agrega productos para continuar con tu compra.</p>
-                        </div>
-                    `;
-                } else {
-                    container.innerHTML = `
-                        <div class="cart-item">
-                            <img src="${primerImg}" class="cart-item-img" alt="${prodTitulo}">
-                            <div class="cart-item-info">
-                                <div>
-                                    <div class="cart-item-title">${prodTitulo}</div>
-                                    <div class="cart-item-variant">Variante: ${cartState.variant} | ${cartState.size}</div>
-                                </div>
-                                <div class="cart-item-bottom">
-                                    <div class="cart-item-price">${formatMoney(precioUnit)}</div>
-                                    <div class="qty-controls">
-                                        <button class="qty-btn" onclick="cambiarCantidad(-1)">-</button>
-                                        <span class="qty-value">${cartState.qty}</span>
-                                        <button class="qty-btn" onclick="cambiarCantidad(1)">+</button>
                                     </div>
                                 </div>
                             </div>
