@@ -827,12 +827,7 @@ try {
     <div class="sticky-footer-bar">
         
 
-        <a href="https://wa.me/573000000000?text=Hola,%20tengo%20una%20consulta" target="_blank" class="support-btn" title="Atención al Cliente">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
-                <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 0-2-2H3z"></path>
-            </svg>
-        </a>
+        
 
         <button class="btn-add-to-cart" id="btnAddToCart" onclick="agregarAlCarrito(event)" data-editable="true">
             Add to Cart - $ 320.000
@@ -1033,31 +1028,40 @@ try {
             }
         }
 
-                const CART_STORAGE_KEY = 'landing_cart_' + (typeof LANDING_SLUG !== 'undefined' ? LANDING_SLUG : 'default');
+                        const CART_STORAGE_KEY = 'tridente_global_cart';
+        let globalCart = [];
 
         function cargarCarritoStorage() {
             try {
                 const saved = localStorage.getItem(CART_STORAGE_KEY);
                 if (saved) {
                     const parsed = JSON.parse(saved);
-                    if (parsed && typeof parsed.qty === 'number') {
-                        cartState.qty = Math.min(10, Math.max(0, parsed.qty));
-                        cartState.hasAdded = cartState.qty > 0;
-                        if (parsed.variant) cartState.variant = parsed.variant;
-                        if (parsed.size) cartState.size = parsed.size;
+                    if (Array.isArray(parsed)) {
+                        globalCart = parsed.filter(item => item && item.token && item.qty > 0).map(item => ({
+                            token: item.token,
+                            slug: item.slug || '',
+                            title: item.title || 'Producto',
+                            price: Number(item.price) || 0,
+                            image: item.image || '',
+                            variant: item.variant || '',
+                            size: item.size || '',
+                            qty: Math.min(10, Math.max(1, Number(item.qty) || 1))
+                        }));
                         return;
                     }
                 }
             } catch (e) {}
-            // Por defecto en primer ingreso: Carrito completamente vacío
-            cartState.qty = 0;
-            cartState.hasAdded = false;
+            globalCart = [];
         }
 
         function guardarCarritoEnStorage() {
             try {
-                localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartState));
+                localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(globalCart));
             } catch (e) {}
+        }
+
+        function obtenerItemActual() {
+            return globalCart.find(i => i.token === LANDING_TOKEN);
         }
 
         function toggleCart() {
@@ -1163,25 +1167,36 @@ try {
                 clickedBtn = document.querySelector('.btn-add-desktop') || document.getElementById('btnAddToCart');
             }
 
-            if (cartState.hasAdded && cartState.qty > 0) {
-                if (cartState.qty < 10) {
-                    cartState.qty += 1;
+            const primerImg = (typeof IMAGENES !== 'undefined' && IMAGENES.length > 0) ? IMAGENES[0] : '';
+            const prodTitulo = (typeof PRODUCTO_TITULO !== 'undefined') ? PRODUCTO_TITULO : 'Producto';
+            const precioUnit = (typeof PRECIO_UNITARIO !== 'undefined') ? PRECIO_UNITARIO : 0;
+            const variantVal = (typeof cartState !== 'undefined' && cartState.variant) ? cartState.variant : 'Estándar';
+            const sizeVal = (typeof cartState !== 'undefined' && cartState.size) ? cartState.size : 'Único';
+
+            let existingIndex = globalCart.findIndex(i => i.token === LANDING_TOKEN);
+            if (existingIndex !== -1) {
+                if (globalCart[existingIndex].qty < 10) {
+                    globalCart[existingIndex].qty += 1;
                 } else {
-                    cartState.qty = 10;
+                    globalCart[existingIndex].qty = 10;
                 }
+                globalCart[existingIndex].variant = variantVal;
+                globalCart[existingIndex].size = sizeVal;
             } else {
-                cartState.hasAdded = true;
-                cartState.qty = 1;
+                globalCart.push({
+                    token: LANDING_TOKEN,
+                    slug: typeof LANDING_SLUG !== 'undefined' ? LANDING_SLUG : '',
+                    title: prodTitulo,
+                    price: precioUnit,
+                    image: primerImg,
+                    variant: variantVal,
+                    size: sizeVal,
+                    qty: 1
+                });
             }
 
             guardarCarritoEnStorage();
-
-            const desktopQty = document.getElementById('qtyDesktopDisplay');
-            if (desktopQty) desktopQty.textContent = Math.max(1, cartState.qty);
-            const mobileBtn = document.getElementById('btnAddToCart');
-            if (mobileBtn) mobileBtn.textContent = 'Add to Cart - ' + formatMoney((cartState.qty > 0 ? cartState.qty : 1) * PRECIO_UNITARIO);
-            const desktopBtn = document.querySelector('.btn-add-desktop');
-            if (desktopBtn) desktopBtn.textContent = 'Add to Cart - ' + formatMoney((cartState.qty > 0 ? cartState.qty : 1) * PRECIO_UNITARIO);
+            actualizarControlesPagina();
 
             animarVueloAlCarrito(clickedBtn, () => {
                 renderCart();
@@ -1193,27 +1208,41 @@ try {
             });
         }
 
-        function cambiarCantidad(delta) {
-            let newQty = cartState.qty + delta;
-            if (newQty > 10) newQty = 10;
-            if (newQty < 0) newQty = 0;
-            cartState.qty = newQty;
-            if (cartState.qty === 0) {
-                cartState.hasAdded = false;
+        function cambiarCantidadItem(token, delta) {
+            let idx = globalCart.findIndex(i => i.token === token);
+            if (idx !== -1) {
+                let newQty = globalCart[idx].qty + delta;
+                if (newQty > 10) newQty = 10;
+                if (newQty <= 0) {
+                    globalCart.splice(idx, 1);
+                } else {
+                    globalCart[idx].qty = newQty;
+                }
             }
             guardarCarritoEnStorage();
+            actualizarControlesPagina();
+            renderCart();
+        }
+
+        function cambiarCantidad(delta) {
+            cambiarCantidadItem(LANDING_TOKEN, delta);
+        }
+
+        function actualizarControlesPagina() {
+            const currentItem = obtenerItemActual();
+            const currentQty = currentItem ? currentItem.qty : 0;
 
             const desktopQty = document.getElementById('qtyDesktopDisplay');
-            if (desktopQty) desktopQty.textContent = Math.max(1, cartState.qty);
+            if (desktopQty) desktopQty.textContent = Math.max(1, currentQty);
+
             const mobileBtn = document.getElementById('btnAddToCart');
             if (mobileBtn) {
-                mobileBtn.textContent = 'Add to Cart - ' + formatMoney((cartState.qty > 0 ? cartState.qty : 1) * PRECIO_UNITARIO);
+                mobileBtn.textContent = 'Add to Cart - ' + formatMoney((currentQty > 0 ? currentQty : 1) * PRECIO_UNITARIO);
             }
             const desktopBtn = document.querySelector('.btn-add-desktop');
             if (desktopBtn) {
-                desktopBtn.textContent = 'Add to Cart - ' + formatMoney((cartState.qty > 0 ? cartState.qty : 1) * PRECIO_UNITARIO);
+                desktopBtn.textContent = 'Add to Cart - ' + formatMoney((currentQty > 0 ? currentQty : 1) * PRECIO_UNITARIO);
             }
-            renderCart();
         }
 
         function formatMoney(num) {
@@ -1222,16 +1251,17 @@ try {
 
         function renderCart() {
             const container = document.getElementById('cartItemsContainer');
-            const total = cartState.qty * PRECIO_UNITARIO;
-            const fmtTotal = formatMoney(total);
+            const totalUnits = globalCart.reduce((sum, item) => sum + (item.qty || 0), 0);
+            const subtotalMoney = globalCart.reduce((sum, item) => sum + ((item.price || 0) * (item.qty || 0)), 0);
+            const fmtTotal = formatMoney(subtotalMoney);
 
             const badge = document.getElementById('cartBadge');
             if (badge) {
-                badge.textContent = cartState.qty;
-                badge.style.display = cartState.qty > 0 ? 'flex' : 'none';
+                badge.textContent = totalUnits;
+                badge.style.display = totalUnits > 0 ? 'flex' : 'none';
             }
             const drawerTitle = document.getElementById('cartDrawerTitle');
-            if (drawerTitle) drawerTitle.textContent = `Tu Carrito (${cartState.qty})`;
+            if (drawerTitle) drawerTitle.textContent = `Tu Carrito (${totalUnits})`;
             const subtotalEl = document.getElementById('cartSubtotal');
             if (subtotalEl) subtotalEl.textContent = fmtTotal;
             const totalEl = document.getElementById('cartTotal');
@@ -1239,7 +1269,7 @@ try {
 
             const checkoutBtn = document.querySelector('.btn-checkout');
             if (checkoutBtn) {
-                if (cartState.qty <= 0) {
+                if (globalCart.length === 0 || totalUnits <= 0) {
                     checkoutBtn.style.opacity = '0.45';
                     checkoutBtn.style.pointerEvents = 'none';
                     checkoutBtn.innerHTML = `<span>Carrito Vacío</span>`;
@@ -1256,12 +1286,8 @@ try {
                 }
             }
 
-            const primerImg = (typeof IMAGENES !== 'undefined' && IMAGENES.length > 0) ? IMAGENES[0] : '';
-            const prodTitulo = (typeof PRODUCTO_TITULO !== 'undefined') ? PRODUCTO_TITULO : 'Producto';
-            const precioUnit = (typeof PRECIO_UNITARIO !== 'undefined') ? PRECIO_UNITARIO : 0;
-
             if (container) {
-                if (cartState.qty <= 0) {
+                if (globalCart.length === 0 || totalUnits <= 0) {
                     container.innerHTML = `
                         <div style="text-align: center; padding: 48px 20px; color: var(--text-muted);">
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 12px auto; display: block; opacity: 0.4;">
@@ -1274,34 +1300,39 @@ try {
                         </div>
                     `;
                 } else {
-                    container.innerHTML = `
-                        <div class="cart-item">
-                            <img src="${primerImg}" class="cart-item-img" alt="${prodTitulo}">
+                    container.innerHTML = globalCart.map(item => `
+                        <div class="cart-item" data-token="${item.token}">
+                            <img src="${item.image}" class="cart-item-img" alt="${item.title}">
                             <div class="cart-item-info">
                                 <div>
-                                    <div class="cart-item-title">${prodTitulo}</div>
-                                    <div class="cart-item-variant">Variante: ${cartState.variant} | ${cartState.size}</div>
+                                    <div class="cart-item-title">${item.title}</div>
+                                    <div class="cart-item-variant">Variante: ${item.variant} | ${item.size}</div>
                                 </div>
                                 <div class="cart-item-bottom">
-                                    <div class="cart-item-price">${formatMoney(precioUnit)}</div>
+                                    <div class="cart-item-price">${formatMoney(item.price)}</div>
                                     <div class="qty-controls">
-                                        <button class="qty-btn" onclick="cambiarCantidad(-1)">-</button>
-                                        <span class="qty-value">${cartState.qty}</span>
-                                        <button class="qty-btn" onclick="cambiarCantidad(1)" ${cartState.qty >= 10 ? 'style="opacity:0.4;cursor:not-allowed;"' : ''}>+</button>
+                                        <button class="qty-btn" onclick="cambiarCantidadItem('${item.token}', -1)">-</button>
+                                        <span class="qty-value">${item.qty}</span>
+                                        <button class="qty-btn" onclick="cambiarCantidadItem('${item.token}', 1)" ${item.qty >= 10 ? 'style="opacity:0.4;cursor:not-allowed;"' : ''}>+</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    `;
+                    `).join('');
                 }
             }
         }
 
         function procederAlCheckout() {
-            if (cartState.qty <= 0) return;
+            if (!globalCart || globalCart.length === 0) return;
             const loader = document.getElementById('landing-loader');
             if (loader) loader.style.display = 'flex';
-            setTimeout(() => { window.location.href = CHECKOUT_URL + '&qty=' + cartState.qty; }, 350);
+            
+            const primaryItem = globalCart.find(i => i.token === LANDING_TOKEN) || globalCart[0];
+            const tokensList = globalCart.map(i => `${i.token}:${i.qty}`).join(',');
+            
+            const targetUrl = CHECKOUT_URL + '&qty=' + primaryItem.qty + '&cart_tokens=' + encodeURIComponent(tokensList);
+            setTimeout(() => { window.location.href = targetUrl; }, 350);
         }
 
         
@@ -1427,6 +1458,7 @@ try {
 
         document.addEventListener('DOMContentLoaded', () => {
             cargarCarritoStorage();
+            actualizarControlesPagina();
             initGallery();
             initSwatches();
             renderCart();
