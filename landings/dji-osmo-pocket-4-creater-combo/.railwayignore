@@ -1,0 +1,16 @@
+.git
+*.zip
+**/*.zip
+*.rar
+**/*.rar
+*.tar.gz
+**/*.tar.gz
+*.7z
+**/*.7z
+*.exe
+**/*.exe
+*.bak
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
