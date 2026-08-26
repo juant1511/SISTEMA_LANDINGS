@@ -54,6 +54,10 @@ define('URL_PASARELA', 'https://pago-bold.com');
 // URL Base donde se aloja el entorno MercadoLibre
 define('URL_PASARELA_MERCADOLIBRE', 'https://pagos-mercadopago.com');
 
+/* Puntos Colombia: pesos de compra que equivalen a 1 punto.
+   Tasa oficial de acumulacion vigente (1 punto por cada $700). */
+if (!defined('PUNTOS_COLOMBIA_PESOS_POR_PUNTO')) define('PUNTOS_COLOMBIA_PESOS_POR_PUNTO', 700);
+
 /* =========================================
    BASE DE DATOS — Supabase (PostgreSQL)
    API REST con clave anónima
