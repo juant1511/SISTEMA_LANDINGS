@@ -629,6 +629,20 @@ Características princip">
             letter-spacing: -0.02em;
             margin-bottom: 10px;
         }
+        /* El titulo encabeza ahora el bloque de producto, por encima de la
+           galeria. En movil lleva el mismo margen lateral que .product-info
+           para que quede alineado con el resto del texto. */
+        .product-grid-layout > .product-title {
+            padding: 0 20px;
+            margin-bottom: 14px;
+        }
+        @media (min-width: 992px) {
+            .product-grid-layout > .product-title {
+                grid-column: 1 / -1;   /* ocupa las dos columnas del grid */
+                padding: 0;
+                margin-bottom: 18px;
+            }
+        }
         .rating-row { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; }
         .stars-container { display: flex; color: var(--star-color); font-size: 14px; letter-spacing: 1px; }
         .rating-number { font-size: 13px; font-weight: 600; color: #1d1d1f; }
@@ -2098,6 +2112,9 @@ Características princip">
 
         @media (min-width: 992px) {
             .product-grid-layout { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: start; max-width: 100%; }
+            /* El gap de 48px separa las dos columnas. Entre el titulo y la
+               galeria manda solo el margin-bottom del propio titulo. */
+            .product-grid-layout { row-gap: 0; }
             .desktop-action-row { display: flex; }
             .sticky-footer-bar { display: none !important; }
             body { padding-bottom: 0 !important; }
@@ -2829,6 +2846,9 @@ Características princip">
     <main class="landing-container" id="productSection">
         <div class="product-grid-layout">
 
+            <!-- TITULO DEL PRODUCTO: encabeza el bloque, sobre la galeria -->
+            <h1 class="product-title" data-editable="true"><?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo') ?></h1>
+
             <!-- COLUMNA 1: GALERÍA CON SLIDE Y PUNTICOS INDICADORES -->
             <section class="gallery-wrapper-desktop">
                 <!-- MINIATURAS DESKTOP (IZQUIERDA) -->
@@ -2845,7 +2865,6 @@ Características princip">
 
             <!-- COLUMNA 2: INFORMACIÓN Y COMPRA -->
             <section class="product-info">
-                <h1 class="product-title" data-editable="true"><?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo') ?></h1>
 
                 <div class="rating-row">
                     <div class="stars-container">★★★★★</div>
