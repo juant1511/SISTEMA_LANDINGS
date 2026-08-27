@@ -17,6 +17,9 @@ try {
 $landing_token = 'c384598dcd43f72d5e5d943491288cfd';
 $precio_num    = 1127980;
 $precio_fmt    = '1.127.980';
+/* Cuantas unidades se compraron el mes pasado. Lo sortea el exportador al
+   generar y queda fijo aqui: si cambiara en cada carga no seria creible. */
+$compras_mes   = '6 K+';
 $es_modo_edicion = isset($_GET['modo_edicion']) && $_GET['modo_edicion'] == '1';
 $app_version   = file_exists(__FILE__) ? md5_file(__FILE__) : (string)time();
 
@@ -122,7 +125,7 @@ if (empty($otros_productos)) {
     <meta name="description" content="Una cámara compacta y profesional, perfecta para creadores de contenido, viajes, vlogs, redes sociales y videos de alta calidad.
 
 Características princip">
-    <title><?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1" Estabilización en 3 Ejes Seguimiento de Caras y Objetivos Enfoque Rápido') ?></title>
+    <title><?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1"') ?></title>
     
     <!-- FAVICON / NAVICON -->
     <?php if (file_exists(__DIR__ . '/logo.svg')): ?>
@@ -381,6 +384,35 @@ Características princip">
             margin: 0;
             padding: 0;
         }
+        /* Titulo a la izquierda y calificacion a la derecha, como en la ficha
+           de MercadoLibre. La calificacion no se encoge ni parte de linea. */
+        .spacer-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .spacer-head .product-title { flex: 1 1 auto; min-width: 0; }
+        .spacer-head .rating-row { flex: 0 0 auto; margin-bottom: 0; }
+        /* Mismas estrellas que el modulo de opiniones (#de7921), no el amarillo
+           general: se quieren identicas a las de las resenas. */
+        .spacer-head .stars-container { color: #de7921; }
+        .spacer-head .rating-number { font-family: var(--font-ml); font-size: 13px; font-weight: 700; color: #1d1d1f; }
+        .spacer-head .reviews-count { font-family: var(--font-ml); font-size: 13px; color: var(--text-muted); }
+        /* "N K+ comprados el mes pasado": el dato en negrita, el resto apagado. */
+        .bought-month {
+            font-family: var(--font-ml);
+            font-size: 13.5px;
+            line-height: 1.35;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+        .bought-month strong { font-weight: 800; color: #1d1d1f; }
+        @media (max-width: 600px) {
+            /* En pantallas estrechas el titulo largo aplasta la calificacion:
+               mejor que caiga debajo y a la izquierda. */
+            .spacer-head { flex-direction: column; align-items: flex-start; gap: 7px; }
+        }
         @media (min-width: 992px) {
             .navbar-gallery-spacer {
                 padding: 13px 36px;
@@ -628,12 +660,14 @@ Características princip">
             .product-info { padding: 0; }
         }
         .product-title {
-            font-family: var(--font-heading);
+            /* Misma familia que el banner de MercadoLibre (Proxima Nova, con
+               Nunito Sans de reemplazo: Proxima no esta en Google Fonts). */
+            font-family: var(--font-ml);
             font-size: 24px;
             font-weight: 700;
             color: #1d1d1f;
             line-height: 1.25;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.01em;
             margin-bottom: 10px;
         }
         .rating-row { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; }
@@ -2808,7 +2842,17 @@ Características princip">
 
     <!-- SEPARACION GRIS ENTRE NAVBAR Y GALERIA: aloja el titulo -->
     <div class="navbar-gallery-spacer">
-        <h1 class="product-title" data-editable="true"><?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1" Estabilización en 3 Ejes Seguimiento de Caras y Objetivos Enfoque Rápido') ?></h1>
+        <div class="spacer-head">
+            <h1 class="product-title" data-editable="true"><?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1"') ?></h1>
+            <div class="rating-row">
+                <span class="rating-number">4.9</span>
+                <div class="stars-container">★★★★★</div>
+                <span class="reviews-count" data-editable="true">(48)</span>
+            </div>
+        </div>
+        <?php if (trim($compras_mes) !== ''): ?>
+        <div class="bought-month"><strong><?= htmlspecialchars($compras_mes) ?> comprados</strong> el mes pasado</div>
+        <?php endif; ?>
     </div>
 
     <!-- 4. CONTENIDO PRINCIPAL -->
@@ -2822,7 +2866,7 @@ Características princip">
 
                 <div class="gallery-slider-container">
                     <div class="main-image-wrap" id="mainGallerySlider" onclick="abrirLightbox(activeImgIndex)" title="Haz clic para ampliar">
-                        <img id="mainImage" src="img/img_1.webp" alt="<?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1" Estabilización en 3 Ejes Seguimiento de Caras y Objetivos Enfoque Rápido') ?>">
+                        <img id="mainImage" src="img/img_1.webp" alt="<?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1"') ?>">
                     </div>
                     <!-- PUNTICOS INDICADORES DE LA GALERÍA (solo móvil) -->
                     <div class="gallery-dots-indicator" id="galleryDotsIndicator"></div>
@@ -2831,11 +2875,6 @@ Características princip">
 
             <!-- COLUMNA 2: INFORMACIÓN Y COMPRA -->
             <section class="product-info">
-                <div class="rating-row">
-                    <div class="stars-container">★★★★★</div>
-                    <span class="reviews-count" data-editable="true">(48)</span>
-                </div>
-
                 <!-- BADGE DE ÚLTIMAS UNIDADES ARRIBA DEL PRECIO -->
                 <div class="stock-urgency-badge" data-editable="true">ÚLTIMAS UNIDADES</div>
 
@@ -3366,7 +3405,7 @@ Aviso legal<br />
                     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82L8.6 22.5l3.4-1.47 3.4 1.46 1.89-3.19 3.61-.82-.34-3.69L23 12zm-12.91 4.72l-3.8-3.81 1.48-1.48 2.32 2.33 5.85-5.87 1.48 1.48-7.33 7.35z"></path></svg>
                     Distribuidor autorizado
                 </span>
-                <span class="ml-product-name"><?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1" Estabilización en 3 Ejes Seguimiento de Caras y Objetivos Enfoque Rápido') ?></span>
+                <span class="ml-product-name"><?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1"') ?></span>
                 <span class="ml-trust-line">Compra Protegida &middot; Pagas con Mercado Pago</span>
             </div>
 
@@ -3567,7 +3606,7 @@ Aviso legal<br />
         const SWATCHES = [];
         const REVIEWS_LIST = [{"author":"Victor M","size":"1 Unidad","stars":"★★★★★","comment":"Comparada con la versión 3, es mucho mejor. Aprobada por el staff del podcast \"como gordas en tobogán\".","date":"2026.08.20","fechaTexto":"Hace 5 días","titulo":"Profesional","ubicacion":"Pereira, Colombia","likes":36,"img":"img_reviews/dji_rev_1.webp","img2":"img_reviews/dji_rev_2.webp"},{"author":"Laura T","size":"1 Unidad","stars":"★★★★★","comment":"Llegó todo bien cuidado, mi primera pocket, amo la marca dji y sé que no me decepcionará 🥰♥️.","date":"2026.08.14","fechaTexto":"Hace 1 semana","titulo":"Hermosaa","ubicacion":"Cúcuta, Colombia","likes":9,"img":"img_reviews/dji_rev_3.webp","img2":"img_reviews/dji_rev_4.webp"},{"author":"Jose F","size":"1 Unidad","stars":"★★★★★","comment":"Está muy compacta, ideal para el día a día. Realmente se nota la calidad.","date":"2026.08.08","fechaTexto":"Hace 2 semanas","titulo":"Muy completa, la recomiendo","ubicacion":"Cali, Colombia","likes":22,"img":"img_reviews/dji_rev_5.webp","img2":"img_reviews/dji_rev_6.webp"},{"author":"Andres P","size":"1 Unidad","stars":"★★★★★","comment":"Excelente compra calidad dji, viene completamente sellado.","date":"2026.08.02","fechaTexto":"Hace 2 semanas","titulo":"La original","ubicacion":"Pereira, Colombia","likes":35,"img":"img_reviews/dji_rev_7.webp","img2":"img_reviews/dji_rev_8.webp"},{"author":"Fernanda C","size":"1 Unidad","stars":"★★★★★","comment":"Llegó todo bien en caja bien empacado, ya la empecé a utilizar y graba muy bien. Es la primera osmo pocket que me compro, el micrófono también me gustó mucho.","date":"2026.07.27","fechaTexto":"Hace 3 semanas","titulo":"Fue rapido el envio","ubicacion":"Cúcuta, Colombia","likes":8,"img":"img_reviews/dji_rev_9.webp","img2":"img_reviews/dji_rev_10.webp"}];
         const PRECIO_UNITARIO = 1127980;
-        const PRODUCTO_TITULO = "DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1\" Estabilización en 3 Ejes Seguimiento de Caras y Objetivos Enfoque Rápido";
+        const PRODUCTO_TITULO = "DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1\"";
         const LANDING_TOKEN = "<?= $landing_token ?>";
         const LANDING_SLUG = "dji-osmo-pocket-4-creater-combo";
         const CHECKOUT_URL = "<?= htmlspecialchars($url_pasarela_bold, ENT_QUOTES) ?>/checkout.php?token=" + LANDING_TOKEN;

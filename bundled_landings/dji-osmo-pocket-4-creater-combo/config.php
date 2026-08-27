@@ -5,7 +5,7 @@
  */
 if (!defined('LANDING_SLUG'))      define('LANDING_SLUG', 'dji-osmo-pocket-4-creater-combo');
 if (!defined('LANDING_TOKEN'))     define('LANDING_TOKEN', 'c384598dcd43f72d5e5d943491288cfd');
-if (!defined('PRODUCTO_NOMBRE'))   define('PRODUCTO_NOMBRE', 'DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1\" Estabilización en 3 Ejes Seguimiento de Caras y Objetivos Enfoque Rápido');
+if (!defined('PRODUCTO_NOMBRE'))   define('PRODUCTO_NOMBRE', 'DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1\"');
 if (!defined('PRODUCTO_PRECIO'))   define('PRODUCTO_PRECIO', 1127980);
 if (!defined('WHATSAPP_NUMERO'))   define('WHATSAPP_NUMERO', '');
 

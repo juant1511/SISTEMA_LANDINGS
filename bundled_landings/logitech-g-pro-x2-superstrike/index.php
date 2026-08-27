@@ -17,6 +17,9 @@ try {
 $landing_token = '35fa348dd87249a49dd7b9ed28d6ca9f';
 $precio_num    = 249060;
 $precio_fmt    = '249.060';
+/* Cuantas unidades se compraron el mes pasado. Lo sortea el exportador al
+   generar y queda fijo aqui: si cambiara en cada carga no seria creible. */
+$compras_mes   = '9 K+';
 $es_modo_edicion = isset($_GET['modo_edicion']) && $_GET['modo_edicion'] == '1';
 $app_version   = file_exists(__FILE__) ? md5_file(__FILE__) : (string)time();
 /* ─── URLs de las pasarelas ───────────────────────────────────────────────
@@ -378,6 +381,35 @@ if (empty($otros_productos)) {
             margin: 0;
             padding: 0;
         }
+        /* Titulo a la izquierda y calificacion a la derecha, como en la ficha
+           de MercadoLibre. La calificacion no se encoge ni parte de linea. */
+        .spacer-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .spacer-head .product-title { flex: 1 1 auto; min-width: 0; }
+        .spacer-head .rating-row { flex: 0 0 auto; margin-bottom: 0; }
+        /* Mismas estrellas que el modulo de opiniones (#de7921), no el amarillo
+           general: se quieren identicas a las de las resenas. */
+        .spacer-head .stars-container { color: #de7921; }
+        .spacer-head .rating-number { font-family: var(--font-ml); font-size: 13px; font-weight: 700; color: #1d1d1f; }
+        .spacer-head .reviews-count { font-family: var(--font-ml); font-size: 13px; color: var(--text-muted); }
+        /* "N K+ comprados el mes pasado": el dato en negrita, el resto apagado. */
+        .bought-month {
+            font-family: var(--font-ml);
+            font-size: 13.5px;
+            line-height: 1.35;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+        .bought-month strong { font-weight: 800; color: #1d1d1f; }
+        @media (max-width: 600px) {
+            /* En pantallas estrechas el titulo largo aplasta la calificacion:
+               mejor que caiga debajo y a la izquierda. */
+            .spacer-head { flex-direction: column; align-items: flex-start; gap: 7px; }
+        }
         @media (min-width: 992px) {
             .navbar-gallery-spacer {
                 padding: 13px 36px;
@@ -625,12 +657,14 @@ if (empty($otros_productos)) {
             .product-info { padding: 0; }
         }
         .product-title {
-            font-family: var(--font-heading);
+            /* Misma familia que el banner de MercadoLibre (Proxima Nova, con
+               Nunito Sans de reemplazo: Proxima no esta en Google Fonts). */
+            font-family: var(--font-ml);
             font-size: 24px;
             font-weight: 700;
             color: #1d1d1f;
             line-height: 1.25;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.01em;
             margin-bottom: 10px;
         }
         .rating-row { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; }
@@ -2828,7 +2862,17 @@ if (empty($otros_productos)) {
 
     <!-- SEPARACION GRIS ENTRE NAVBAR Y GALERIA: aloja el titulo -->
     <div class="navbar-gallery-spacer">
-        <h1 class="product-title" data-editable="true"><?= htmlspecialchars('Logitech G PRO X2 SUPERSTRIKE') ?></h1>
+        <div class="spacer-head">
+            <h1 class="product-title" data-editable="true"><?= htmlspecialchars('Logitech G PRO X2 SUPERSTRIKE') ?></h1>
+            <div class="rating-row">
+                <span class="rating-number">4.5</span>
+                <div class="stars-container">★★★★★</div>
+                <span class="reviews-count" data-editable="true">(568)</span>
+            </div>
+        </div>
+        <?php if (trim($compras_mes) !== ''): ?>
+        <div class="bought-month"><strong><?= htmlspecialchars($compras_mes) ?> comprados</strong> el mes pasado</div>
+        <?php endif; ?>
     </div>
 
     <!-- 4. CONTENIDO PRINCIPAL -->
@@ -2851,11 +2895,6 @@ if (empty($otros_productos)) {
 
             <!-- COLUMNA 2: INFORMACIÓN Y COMPRA -->
             <section class="product-info">
-
-                <div class="rating-row">
-                    <div class="stars-container">★★★★★</div>
-                    <span class="reviews-count" data-editable="true">(568)</span>
-                </div>
 
                 <!-- BADGE DE ÚLTIMAS UNIDADES ARRIBA DEL PRECIO -->
                 <div class="stock-urgency-badge" data-editable="true">ÚLTIMAS UNIDADES</div>
