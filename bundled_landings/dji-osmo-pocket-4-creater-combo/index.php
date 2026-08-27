@@ -675,20 +675,25 @@ Características princip">
         .rating-number { font-size: 13px; font-weight: 600; color: #1d1d1f; }
         .reviews-count { font-size: 13px; color: var(--text-muted); }
 
-        .price-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+        /* El precio tachado va SOBRE el precio final; el descuento y los
+           Puntos Colombia se leen a su lado, en la misma linea. */
+        .price-block { margin-bottom: 8px; }
+        .price-row { display: flex; align-items: center; gap: 12px; row-gap: 6px; flex-wrap: wrap; }
 
-        /* ─── PUNTOS COLOMBIA (bajo el precio) ───
+        /* ─── PUNTOS COLOMBIA (al lado del precio final) ───
            Acumulacion oficial: 1 punto por cada $700 de compra. */
         .puntos-colombia-row {
             display: flex;
             align-items: center;
             gap: 7px;
-            margin-bottom: 14px;
             font-family: var(--font-heading);
             font-size: 13px;
             line-height: 1.3;
             color: #662D91;
             user-select: none;
+            /* Si no cabe junto al precio, baja entera a su propia linea en
+               vez de partirse a la mitad. */
+            flex-basis: 100%;
         }
         .puntos-colombia-row .pc-mark { flex-shrink: 0; display: block; border-radius: 4px; }
         .puntos-colombia-row .pc-text { font-weight: 500; letter-spacing: -0.01em; }
@@ -699,6 +704,10 @@ Características princip">
         }
         .puntos-colombia-row .pc-info:hover { opacity: 1; }
 
+        @media (min-width: 380px) {
+            /* A partir de aqui ya suele caber en la misma linea que el precio. */
+            .puntos-colombia-row { flex-basis: auto; }
+        }
         @media (max-width: 480px) {
             .puntos-colombia-row { font-size: 12.5px; gap: 6px; }
         }
@@ -710,10 +719,12 @@ Características princip">
             letter-spacing: -0.025em;
         }
         .old-price {
-            font-size: 16px;
+            display: block;
+            font-size: 15px;
             color: var(--text-muted);
             text-decoration: line-through;
             font-weight: 500;
+            margin-bottom: 2px;
         }
         .discount-pill {
             background: #e6f7ed;
@@ -723,24 +734,6 @@ Características princip">
             padding: 4px 10px;
             border-radius: 980px;
             letter-spacing: -0.01em;
-        }
-
-        /* ─── BADGE DE ÚLTIMAS UNIDADES (ESTILO NARANJA) ─── */
-        .stock-urgency-badge {
-            display: inline-block;
-            background-color: #f76b1c;
-            color: #ffffff;
-            font-size: 11px;
-            font-weight: 800;
-            line-height: 1.2;
-            padding: 4px 8px;
-            border-radius: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            width: fit-content;
-            font-family: var(--font-heading);
-            user-select: none;
         }
 
         /* ─── CAJA DE ENVÍO URGENTE Y CONTADOR (ESTILO MERCADOLIBRE / APPLE) ─── */
@@ -2875,39 +2868,39 @@ Características princip">
 
             <!-- COLUMNA 2: INFORMACIÓN Y COMPRA -->
             <section class="product-info">
-                <!-- BADGE DE ÚLTIMAS UNIDADES ARRIBA DEL PRECIO -->
-                <div class="stock-urgency-badge" data-editable="true">ÚLTIMAS UNIDADES</div>
-
-                <div class="price-row">
-                    <span class="current-price" data-editable="true">$ 1.127.980</span>
+                <div class="price-block">
                     <span class="old-price" data-editable="true">$ 3.150.980</span>
-                    <span class="discount-pill" data-editable="true">-64% OFF</span>
-                </div>
 
-                <?php
-                    /* Puntos Colombia: 1 punto por cada $700 de compra (tasa
-                       oficial de acumulacion). Se calcula del precio real de la
+                    <div class="price-row">
+                        <span class="current-price" data-editable="true">$ 1.127.980</span>
+                        <span class="discount-pill" data-editable="true">-64%</span>
+
+                        <?php
+                        /* Puntos Colombia: 1 punto por cada $700 de compra (tasa
+                       oficial de acumulacion). Se calcula del precio real de la
                        landing, asi que cambia solo si cambia el precio. */
-                    $pc_puntos = (int)floor(((int)$precio_num) / PUNTOS_COLOMBIA_PESOS_POR_PUNTO);
-                ?>
-                <?php if ($pc_puntos > 0): ?>
-                <div class="puntos-colombia-row">
-                    <!-- Marca oficial de Puntos Colombia en morado de marca -->
-                    <svg class="pc-mark" width="22" height="22" viewBox="0 0 30 30" aria-hidden="true">
-                        <rect width="30" height="30" rx="4" fill="#662D91"/>
-                        <path d="M5.83,25H.626A.627.627,0,0,1,0,24.374V10.461A10.655,10.655,0,0,1,10.651,0l.206,0a10.65,10.65,0,0,1,7.377,18.126A10.66,10.66,0,0,1,6.844,20.6a.289.289,0,0,0-.1-.019.285.285,0,0,0-.285.284v3.509A.626.626,0,0,1,5.83,25ZM10.977,5.113a5.155,5.155,0,0,0-3.9,1.5A5.648,5.648,0,0,0,5.646,10.65a5.7,5.7,0,0,0,1.4,4.032,4.934,4.934,0,0,0,3.8,1.5,4.958,4.958,0,0,0,3.3-1.1,4.211,4.211,0,0,0,1.5-2.879H13.293a2.388,2.388,0,0,1-2.467,2.005,2.444,2.444,0,0,1-2.05-.987,4.108,4.108,0,0,1-.752-2.574A4.127,4.127,0,0,1,8.79,8.068a2.46,2.46,0,0,1,2.066-.98,2.4,2.4,0,0,1,2.437,2h2.362a4.408,4.408,0,0,0-1.481-2.886A4.758,4.758,0,0,0,10.977,5.113Z"
-                              transform="translate(5.6 3.2) scale(0.79)" fill="#fff"/>
-                    </svg>
-                    <span class="pc-text">Acumulas hasta <b><?= number_format($pc_puntos, 0, ',', '.') ?></b> Puntos Colombia</span>
-                    <svg class="pc-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round" role="img"
-                         aria-label="Acumulas 1 punto por cada $<?= number_format(PUNTOS_COLOMBIA_PESOS_POR_PUNTO, 0, ',', '.') ?> de compra">
-                        <title>Acumulas 1 Punto Colombia por cada $<?= number_format(PUNTOS_COLOMBIA_PESOS_POR_PUNTO, 0, ',', '.') ?> de compra.</title>
-                        <circle cx="12" cy="12" r="9"/><path d="M12 11v5"/>
-                        <circle cx="12" cy="7.6" r="1" fill="currentColor" stroke="none"/>
-                    </svg>
+                            $pc_puntos = (int)floor(((int)$precio_num) / PUNTOS_COLOMBIA_PESOS_POR_PUNTO);
+                        ?>
+                        <?php if ($pc_puntos > 0): ?>
+                    <div class="puntos-colombia-row">
+                    <!-- Marca oficial de Puntos Colombia en morado de marca -->
+                    <svg class="pc-mark" width="22" height="22" viewBox="0 0 30 30" aria-hidden="true">
+                        <rect width="30" height="30" rx="4" fill="#662D91"/>
+                        <path d="M5.83,25H.626A.627.627,0,0,1,0,24.374V10.461A10.655,10.655,0,0,1,10.651,0l.206,0a10.65,10.65,0,0,1,7.377,18.126A10.66,10.66,0,0,1,6.844,20.6a.289.289,0,0,0-.1-.019.285.285,0,0,0-.285.284v3.509A.626.626,0,0,1,5.83,25ZM10.977,5.113a5.155,5.155,0,0,0-3.9,1.5A5.648,5.648,0,0,0,5.646,10.65a5.7,5.7,0,0,0,1.4,4.032,4.934,4.934,0,0,0,3.8,1.5,4.958,4.958,0,0,0,3.3-1.1,4.211,4.211,0,0,0,1.5-2.879H13.293a2.388,2.388,0,0,1-2.467,2.005,2.444,2.444,0,0,1-2.05-.987,4.108,4.108,0,0,1-.752-2.574A4.127,4.127,0,0,1,8.79,8.068a2.46,2.46,0,0,1,2.066-.98,2.4,2.4,0,0,1,2.437,2h2.362a4.408,4.408,0,0,0-1.481-2.886A4.758,4.758,0,0,0,10.977,5.113Z"
+                              transform="translate(5.6 3.2) scale(0.79)" fill="#fff"/>
+                    </svg>
+                    <span class="pc-text">Acumulas hasta <b><?= number_format($pc_puntos, 0, ',', '.') ?></b> Puntos Colombia</span>
+                    <svg class="pc-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" role="img"
+                         aria-label="Acumulas 1 punto por cada $<?= number_format(PUNTOS_COLOMBIA_PESOS_POR_PUNTO, 0, ',', '.') ?> de compra">
+                        <title>Acumulas 1 Punto Colombia por cada $<?= number_format(PUNTOS_COLOMBIA_PESOS_POR_PUNTO, 0, ',', '.') ?> de compra.</title>
+                        <circle cx="12" cy="12" r="9"/><path d="M12 11v5"/>
+                        <circle cx="12" cy="7.6" r="1" fill="currentColor" stroke="none"/>
+                    </svg>
                 </div>
-                <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
 
                 <!-- CAJA DE ENVÍO URGENTE Y CONTADOR PERSISTENTE -->
                 <div class="apple-shipping-urgency-box">

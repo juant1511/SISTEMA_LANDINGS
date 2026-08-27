@@ -21,7 +21,7 @@ $precio_fmt    = '249.060';
    generar y queda fijo aqui: si cambiara en cada carga no seria creible. */
 $compras_mes   = '9 K+';
 $es_modo_edicion = isset($_GET['modo_edicion']) && $_GET['modo_edicion'] == '1';
-$app_version   = file_exists(__FILE__) ? md5_file(__FILE__) : (string)time();
+$app_version   = file_exists(__FILE__) ? md5_file(__FILE__) : (string)time();
 /* ─── URLs de las pasarelas ───────────────────────────────────────────────
    Se parte de las constantes de config.php y, si la base de datos tiene un
    valor mas reciente (columnas url_bold / url_mercado), se usa ese. Asi, al
@@ -672,19 +672,24 @@ if (empty($otros_productos)) {
         .rating-number { font-size: 13px; font-weight: 600; color: #1d1d1f; }
         .reviews-count { font-size: 13px; color: var(--text-muted); }
 
-        .price-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
-        .current-price {
+.current-price {
             font-family: var(--font-heading);
             font-size: 30px;
             font-weight: 700;
             color: #1d1d1f;
             letter-spacing: -0.025em;
         }
+        /* El precio tachado va SOBRE el precio final; el descuento y los
+           Puntos Colombia se leen a su lado, en la misma linea. */
+        .price-block { margin-bottom: 8px; }
+        .price-row { display: flex; align-items: center; gap: 12px; row-gap: 6px; flex-wrap: wrap; }
         .old-price {
-            font-size: 16px;
+            display: block;
+            font-size: 15px;
             color: var(--text-muted);
             text-decoration: line-through;
             font-weight: 500;
+            margin-bottom: 2px;
         }
         .discount-pill {
             background: #e6f7ed;
@@ -696,71 +701,35 @@ if (empty($otros_productos)) {
             letter-spacing: -0.01em;
         }
 
-        /* ─── BADGE DE ÚLTIMAS UNIDADES (ESTILO NARANJA) ─── */
-        /* ─── PUNTOS COLOMBIA (bajo el precio) ───
-           Acumulacion oficial: 1 punto por cada $700 de compra. */
-        .puntos-colombia-row {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            margin-bottom: 14px;
-            font-family: var(--font-heading);
-            font-size: 13px;
-            line-height: 1.3;
-            color: #662D91;
-            user-select: none;
-        }
-        .puntos-colombia-row .pc-mark { flex-shrink: 0; display: block; border-radius: 4px; }
-        .puntos-colombia-row .pc-text { font-weight: 500; letter-spacing: -0.01em; }
-        .puntos-colombia-row .pc-text b { font-weight: 800; }
-        .puntos-colombia-row .pc-info {
-            flex-shrink: 0; width: 14px; height: 14px; color: #662D91; opacity: .55;
-            cursor: help; transition: opacity .15s ease;
-        }
-        .puntos-colombia-row .pc-info:hover { opacity: 1; }
-
-        @media (max-width: 480px) {
-            .puntos-colombia-row { font-size: 12.5px; gap: 6px; }
-        }
-        .current-price {
-            font-family: var(--font-heading);
-            font-size: 30px;
-            font-weight: 700;
-            color: #1d1d1f;
-            letter-spacing: -0.025em;
-        }
-        .old-price {
-            font-size: 16px;
-            color: var(--text-muted);
-            text-decoration: line-through;
-            font-weight: 500;
-        }
-        .discount-pill {
-            background: #e6f7ed;
-            color: #00a650;
-            font-size: 12px;
-            font-weight: 700;
-            padding: 4px 10px;
-            border-radius: 980px;
-            letter-spacing: -0.01em;
-        }
-
-        /* ─── BADGE DE ÚLTIMAS UNIDADES (ESTILO NARANJA) ─── */
-        .stock-urgency-badge {
-            display: inline-block;
-            background-color: #f76b1c;
-            color: #ffffff;
-            font-size: 11px;
-            font-weight: 800;
-            line-height: 1.2;
-            padding: 4px 8px;
-            border-radius: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            width: fit-content;
+        /* ─── PUNTOS COLOMBIA (al lado del precio final) ───
+           Acumulacion oficial: 1 punto por cada $700 de compra. */
+        .puntos-colombia-row {
+            display: flex;
+            align-items: center;
+            gap: 7px;
             font-family: var(--font-heading);
+            font-size: 13px;
+            line-height: 1.3;
+            color: #662D91;
             user-select: none;
+            /* Si no cabe junto al precio, baja entera a su propia linea en
+               vez de partirse a la mitad. */
+            flex-basis: 100%;
+        }
+        .puntos-colombia-row .pc-mark { flex-shrink: 0; display: block; border-radius: 4px; }
+        .puntos-colombia-row .pc-text { font-weight: 500; letter-spacing: -0.01em; }
+        .puntos-colombia-row .pc-text b { font-weight: 800; }
+        .puntos-colombia-row .pc-info {
+            flex-shrink: 0; width: 14px; height: 14px; color: #662D91; opacity: .55;
+            cursor: help; transition: opacity .15s ease;
+        }
+        .puntos-colombia-row .pc-info:hover { opacity: 1; }
+
+        @media (min-width: 380px) {
+            .puntos-colombia-row { flex-basis: auto; }
+        }
+        @media (max-width: 480px) {
+            .puntos-colombia-row { font-size: 12.5px; gap: 6px; }
         }
 
         /* ─── CAJA DE ENVÍO URGENTE Y CONTADOR (ESTILO MERCADOLIBRE / APPLE) ─── */
@@ -2896,22 +2865,21 @@ if (empty($otros_productos)) {
             <!-- COLUMNA 2: INFORMACIÓN Y COMPRA -->
             <section class="product-info">
 
-                <!-- BADGE DE ÚLTIMAS UNIDADES ARRIBA DEL PRECIO -->
-                <div class="stock-urgency-badge" data-editable="true">ÚLTIMAS UNIDADES</div>
-
-                <div class="price-row">
-                    <span class="current-price" data-editable="true">$ 249.060</span>
+                <div class="price-block">
                     <span class="old-price" data-editable="true">$ 602.350</span>
-                    <span class="discount-pill" data-editable="true">-59% OFF</span>
-                </div>
-                <?php
-                    /* Puntos Colombia: 1 punto por cada $700 de compra (tasa
+
+                    <div class="price-row">
+                        <span class="current-price" data-editable="true">$ 249.060</span>
+                        <span class="discount-pill" data-editable="true">-59%</span>
+
+                        <?php
+                        /* Puntos Colombia: 1 punto por cada $700 de compra (tasa
                        oficial de acumulacion). Se calcula del precio real de la
-                       landing, asi que cambia solo si cambia el precio. */
-                    $pc_puntos = (int)floor(((int)$precio_num) / PUNTOS_COLOMBIA_PESOS_POR_PUNTO);
-                ?>
-                <?php if ($pc_puntos > 0): ?>
-                <div class="puntos-colombia-row">
+                       landing, asi que cambia solo si cambia el precio. */
+                            $pc_puntos = (int)floor(((int)$precio_num) / PUNTOS_COLOMBIA_PESOS_POR_PUNTO);
+                        ?>
+                        <?php if ($pc_puntos > 0): ?>
+                    <div class="puntos-colombia-row">
                     <!-- Marca oficial de Puntos Colombia en morado de marca -->
                     <svg class="pc-mark" width="22" height="22" viewBox="0 0 30 30" aria-hidden="true">
                         <rect width="30" height="30" rx="4" fill="#662D91"/>
@@ -2926,8 +2894,10 @@ if (empty($otros_productos)) {
                         <circle cx="12" cy="12" r="9"/><path d="M12 11v5"/>
                         <circle cx="12" cy="7.6" r="1" fill="currentColor" stroke="none"/>
                     </svg>
-                </div>
-                <?php endif; ?>
+                </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
 
 
                 <!-- CAJA DE ENVÍO URGENTE Y CONTADOR PERSISTENTE -->
