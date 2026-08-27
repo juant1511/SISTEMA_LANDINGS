@@ -4,8 +4,8 @@
  * Drop-in replacement for MySQL PDO in the Mundo Gorras project.
  */
 
-define('SUPABASE_URL', 'https://szmcnkphtyowbngezbkn.supabase.co');
-define('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6bWNua3BodHlvd2JuZ2V6YmtuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY2NTQxNDMsImV4cCI6MjEwMjIzMDE0M30._NoB-VRbYIkhkOIiwUTDmleVbgQrKPMZDWzaMHOwbdA');
+define('SUPABASE_URL', 'https://iwqhaxegjefuhanfmejh.supabase.co');
+define('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3cWhheGVnamVmdWhhbmZtZWpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyMDc0OTQsImV4cCI6MjEwMjc4MzQ5NH0.XhLiH4zndNkPyui73bjeW_Qaa0vDgGaTwARxT00DnfM');
 
 class SupabaseStatement {
     private $sql;
