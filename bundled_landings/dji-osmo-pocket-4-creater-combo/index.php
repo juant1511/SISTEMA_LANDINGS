@@ -68,42 +68,42 @@ if (empty($otros_productos)) {
     $otros_productos = array (
   0 => 
   array (
-    'nombre' => 'DJI Kit de accesorios compatible - DJI Osmo Pocket 4 Creater Combo',
+    'nombre' => 'DJI Kit de accesorios compatible - DJI Osmo Pocket 4 Creater Combo Cámara p',
     'precio' => '$ 248.156',
     'url' => '#',
     'img' => 'img/img_1.webp',
   ),
   1 => 
   array (
-    'nombre' => 'DJI Estuche de transporte premium - DJI Osmo Pocket 4 Creater Combo',
+    'nombre' => 'DJI Estuche de transporte premium - DJI Osmo Pocket 4 Creater Combo Cámara p',
     'precio' => '$ 169.197',
     'url' => '#',
     'img' => 'img/img_2.webp',
   ),
   2 => 
   array (
-    'nombre' => 'DJI Garantia extendida 12 meses - DJI Osmo Pocket 4 Creater Combo',
+    'nombre' => 'DJI Garantia extendida 12 meses - DJI Osmo Pocket 4 Creater Combo Cámara p',
     'precio' => '$ 135.358',
     'url' => '#',
     'img' => 'img/img_3.webp',
   ),
   3 => 
   array (
-    'nombre' => 'DJI Pack x2 con descuento - DJI Osmo Pocket 4 Creater Combo',
+    'nombre' => 'DJI Pack x2 con descuento - DJI Osmo Pocket 4 Creater Combo Cámara p',
     'precio' => '$ 1.973.965',
     'url' => '#',
     'img' => 'img/img_4.webp',
   ),
   4 => 
   array (
-    'nombre' => 'DJI Repuesto original - DJI Osmo Pocket 4 Creater Combo',
+    'nombre' => 'DJI Repuesto original - DJI Osmo Pocket 4 Creater Combo Cámara p',
     'precio' => '$ 203.036',
     'url' => '#',
     'img' => 'img/img_1.webp',
   ),
   5 => 
   array (
-    'nombre' => 'DJI Combo completo edicion limitada - DJI Osmo Pocket 4 Creater Combo',
+    'nombre' => 'DJI Combo completo edicion limitada - DJI Osmo Pocket 4 Creater Combo Cámara p',
     'precio' => '$ 1.579.172',
     'url' => '#',
     'img' => 'img/img_2.webp',
@@ -122,7 +122,7 @@ if (empty($otros_productos)) {
     <meta name="description" content="Una cámara compacta y profesional, perfecta para creadores de contenido, viajes, vlogs, redes sociales y videos de alta calidad.
 
 Características princip">
-    <title><?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo') ?></title>
+    <title><?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1" Estabilización en 3 Ejes Seguimiento de Caras y Objetivos Enfoque Rápido') ?></title>
     
     <!-- FAVICON / NAVICON -->
     <?php if (file_exists(__DIR__ . '/logo.svg')): ?>
@@ -369,14 +369,21 @@ Características princip">
         /* ─── SEPARACIÓN GRIS CLARO ENTRE NAVBAR Y GALERÍA ─── */
         .navbar-gallery-spacer {
             width: 100%;
-            height: 22px;
             background-color: #ededed;
             display: block;
             border-bottom: 1px solid #e0e0e0;
+            padding: 11px 20px;
+            box-sizing: border-box;
+        }
+        /* El titulo del producto vive dentro de esta banda gris, alineado a
+           izquierda con la galeria que viene justo debajo. */
+        .navbar-gallery-spacer .product-title {
+            margin: 0;
+            padding: 0;
         }
         @media (min-width: 992px) {
             .navbar-gallery-spacer {
-                height: 28px;
+                padding: 13px 36px;
                 background-color: #ededed;
                 border-bottom: 1px solid #e0e0e0;
             }
@@ -629,26 +636,38 @@ Características princip">
             letter-spacing: -0.02em;
             margin-bottom: 10px;
         }
-        /* El titulo encabeza ahora el bloque de producto, por encima de la
-           galeria. En movil lleva el mismo margen lateral que .product-info
-           para que quede alineado con el resto del texto. */
-        .product-grid-layout > .product-title {
-            padding: 0 20px;
-            margin-bottom: 14px;
-        }
-        @media (min-width: 992px) {
-            .product-grid-layout > .product-title {
-                grid-column: 1 / -1;   /* ocupa las dos columnas del grid */
-                padding: 0;
-                margin-bottom: 18px;
-            }
-        }
         .rating-row { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; }
         .stars-container { display: flex; color: var(--star-color); font-size: 14px; letter-spacing: 1px; }
         .rating-number { font-size: 13px; font-weight: 600; color: #1d1d1f; }
         .reviews-count { font-size: 13px; color: var(--text-muted); }
 
         .price-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+
+        /* ─── PUNTOS COLOMBIA (bajo el precio) ───
+           Acumulacion oficial: 1 punto por cada $700 de compra. */
+        .puntos-colombia-row {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 14px;
+            font-family: var(--font-heading);
+            font-size: 13px;
+            line-height: 1.3;
+            color: #662D91;
+            user-select: none;
+        }
+        .puntos-colombia-row .pc-mark { flex-shrink: 0; display: block; border-radius: 4px; }
+        .puntos-colombia-row .pc-text { font-weight: 500; letter-spacing: -0.01em; }
+        .puntos-colombia-row .pc-text b { font-weight: 800; }
+        .puntos-colombia-row .pc-info {
+            flex-shrink: 0; width: 14px; height: 14px; color: #662D91; opacity: .55;
+            cursor: help; transition: opacity .15s ease;
+        }
+        .puntos-colombia-row .pc-info:hover { opacity: 1; }
+
+        @media (max-width: 480px) {
+            .puntos-colombia-row { font-size: 12.5px; gap: 6px; }
+        }
         .current-price {
             font-family: var(--font-heading);
             font-size: 30px;
@@ -673,55 +692,6 @@ Características princip">
         }
 
         /* ─── BADGE DE ÚLTIMAS UNIDADES (ESTILO NARANJA) ─── */
-        /* ─── PUNTOS COLOMBIA (bajo el precio) ───
-           Acumulacion oficial: 1 punto por cada $700 de compra. */
-        .puntos-colombia-row {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            margin-bottom: 14px;
-            font-family: var(--font-heading);
-            font-size: 13px;
-            line-height: 1.3;
-            color: #662D91;
-            user-select: none;
-        }
-        .puntos-colombia-row .pc-mark { flex-shrink: 0; display: block; border-radius: 4px; }
-        .puntos-colombia-row .pc-text { font-weight: 500; letter-spacing: -0.01em; }
-        .puntos-colombia-row .pc-text b { font-weight: 800; }
-        .puntos-colombia-row .pc-info {
-            flex-shrink: 0; width: 14px; height: 14px; color: #662D91; opacity: .55;
-            cursor: help; transition: opacity .15s ease;
-        }
-        .puntos-colombia-row .pc-info:hover { opacity: 1; }
-
-        @media (max-width: 480px) {
-            .puntos-colombia-row { font-size: 12.5px; gap: 6px; }
-        }
-        .current-price {
-            font-family: var(--font-heading);
-            font-size: 30px;
-            font-weight: 700;
-            color: #1d1d1f;
-            letter-spacing: -0.025em;
-        }
-        .old-price {
-            font-size: 16px;
-            color: var(--text-muted);
-            text-decoration: line-through;
-            font-weight: 500;
-        }
-        .discount-pill {
-            background: #e6f7ed;
-            color: #00a650;
-            font-size: 12px;
-            font-weight: 700;
-            padding: 4px 10px;
-            border-radius: 980px;
-            letter-spacing: -0.01em;
-        }
-
-        /* ─── BADGE DE ÚLTIMAS UNIDADES (ESTILO NARANJA) ─── */
         .stock-urgency-badge {
             display: inline-block;
             background-color: #f76b1c;
@@ -2112,9 +2082,6 @@ Características princip">
 
         @media (min-width: 992px) {
             .product-grid-layout { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: start; max-width: 100%; }
-            /* El gap de 48px separa las dos columnas. Entre el titulo y la
-               galeria manda solo el margin-bottom del propio titulo. */
-            .product-grid-layout { row-gap: 0; }
             .desktop-action-row { display: flex; }
             .sticky-footer-bar { display: none !important; }
             body { padding-bottom: 0 !important; }
@@ -2839,15 +2806,14 @@ Características princip">
         </div>
     </div>
 
-    <!-- SEPARACIÓN GRIS CLARO ENTRE NAVBAR Y GALERÍA -->
-    <div class="navbar-gallery-spacer"></div>
+    <!-- SEPARACION GRIS ENTRE NAVBAR Y GALERIA: aloja el titulo -->
+    <div class="navbar-gallery-spacer">
+        <h1 class="product-title" data-editable="true"><?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1" Estabilización en 3 Ejes Seguimiento de Caras y Objetivos Enfoque Rápido') ?></h1>
+    </div>
 
     <!-- 4. CONTENIDO PRINCIPAL -->
     <main class="landing-container" id="productSection">
         <div class="product-grid-layout">
-
-            <!-- TITULO DEL PRODUCTO: encabeza el bloque, sobre la galeria -->
-            <h1 class="product-title" data-editable="true"><?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo') ?></h1>
 
             <!-- COLUMNA 1: GALERÍA CON SLIDE Y PUNTICOS INDICADORES -->
             <section class="gallery-wrapper-desktop">
@@ -2856,7 +2822,7 @@ Características princip">
 
                 <div class="gallery-slider-container">
                     <div class="main-image-wrap" id="mainGallerySlider" onclick="abrirLightbox(activeImgIndex)" title="Haz clic para ampliar">
-                        <img id="mainImage" src="img/img_1.webp" alt="<?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo') ?>">
+                        <img id="mainImage" src="img/img_1.webp" alt="<?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1" Estabilización en 3 Ejes Seguimiento de Caras y Objetivos Enfoque Rápido') ?>">
                     </div>
                     <!-- PUNTICOS INDICADORES DE LA GALERÍA (solo móvil) -->
                     <div class="gallery-dots-indicator" id="galleryDotsIndicator"></div>
@@ -2865,7 +2831,6 @@ Características princip">
 
             <!-- COLUMNA 2: INFORMACIÓN Y COMPRA -->
             <section class="product-info">
-
                 <div class="rating-row">
                     <div class="stars-container">★★★★★</div>
                     <span class="reviews-count" data-editable="true">(48)</span>
@@ -2879,31 +2844,31 @@ Características princip">
                     <span class="old-price" data-editable="true">$ 3.150.980</span>
                     <span class="discount-pill" data-editable="true">-64% OFF</span>
                 </div>
-                <?php
-                    /* Puntos Colombia: 1 punto por cada $700 de compra (tasa
-                       oficial de acumulacion). Se calcula del precio real de la
-                       landing, asi que cambia solo si cambia el precio. */
-                    $pc_puntos = (int)floor(((int)$precio_num) / PUNTOS_COLOMBIA_PESOS_POR_PUNTO);
-                ?>
-                <?php if ($pc_puntos > 0): ?>
-                <div class="puntos-colombia-row">
-                    <!-- Marca oficial de Puntos Colombia en morado de marca -->
-                    <svg class="pc-mark" width="22" height="22" viewBox="0 0 30 30" aria-hidden="true">
-                        <rect width="30" height="30" rx="4" fill="#662D91"/>
-                        <path d="M5.83,25H.626A.627.627,0,0,1,0,24.374V10.461A10.655,10.655,0,0,1,10.651,0l.206,0a10.65,10.65,0,0,1,7.377,18.126A10.66,10.66,0,0,1,6.844,20.6a.289.289,0,0,0-.1-.019.285.285,0,0,0-.285.284v3.509A.626.626,0,0,1,5.83,25ZM10.977,5.113a5.155,5.155,0,0,0-3.9,1.5A5.648,5.648,0,0,0,5.646,10.65a5.7,5.7,0,0,0,1.4,4.032,4.934,4.934,0,0,0,3.8,1.5,4.958,4.958,0,0,0,3.3-1.1,4.211,4.211,0,0,0,1.5-2.879H13.293a2.388,2.388,0,0,1-2.467,2.005,2.444,2.444,0,0,1-2.05-.987,4.108,4.108,0,0,1-.752-2.574A4.127,4.127,0,0,1,8.79,8.068a2.46,2.46,0,0,1,2.066-.98,2.4,2.4,0,0,1,2.437,2h2.362a4.408,4.408,0,0,0-1.481-2.886A4.758,4.758,0,0,0,10.977,5.113Z"
-                              transform="translate(5.6 3.2) scale(0.79)" fill="#fff"/>
-                    </svg>
-                    <span class="pc-text">Acumulas hasta <b><?= number_format($pc_puntos, 0, ',', '.') ?></b> Puntos Colombia</span>
-                    <svg class="pc-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round" role="img"
-                         aria-label="Acumulas 1 punto por cada $<?= number_format(PUNTOS_COLOMBIA_PESOS_POR_PUNTO, 0, ',', '.') ?> de compra">
-                        <title>Acumulas 1 Punto Colombia por cada $<?= number_format(PUNTOS_COLOMBIA_PESOS_POR_PUNTO, 0, ',', '.') ?> de compra.</title>
-                        <circle cx="12" cy="12" r="9"/><path d="M12 11v5"/>
-                        <circle cx="12" cy="7.6" r="1" fill="currentColor" stroke="none"/>
-                    </svg>
-                </div>
-                <?php endif; ?>
 
+                <?php
+                    /* Puntos Colombia: 1 punto por cada $700 de compra (tasa
+                       oficial de acumulacion). Se calcula del precio real de la
+                       landing, asi que cambia solo si cambia el precio. */
+                    $pc_puntos = (int)floor(((int)$precio_num) / PUNTOS_COLOMBIA_PESOS_POR_PUNTO);
+                ?>
+                <?php if ($pc_puntos > 0): ?>
+                <div class="puntos-colombia-row">
+                    <!-- Marca oficial de Puntos Colombia en morado de marca -->
+                    <svg class="pc-mark" width="22" height="22" viewBox="0 0 30 30" aria-hidden="true">
+                        <rect width="30" height="30" rx="4" fill="#662D91"/>
+                        <path d="M5.83,25H.626A.627.627,0,0,1,0,24.374V10.461A10.655,10.655,0,0,1,10.651,0l.206,0a10.65,10.65,0,0,1,7.377,18.126A10.66,10.66,0,0,1,6.844,20.6a.289.289,0,0,0-.1-.019.285.285,0,0,0-.285.284v3.509A.626.626,0,0,1,5.83,25ZM10.977,5.113a5.155,5.155,0,0,0-3.9,1.5A5.648,5.648,0,0,0,5.646,10.65a5.7,5.7,0,0,0,1.4,4.032,4.934,4.934,0,0,0,3.8,1.5,4.958,4.958,0,0,0,3.3-1.1,4.211,4.211,0,0,0,1.5-2.879H13.293a2.388,2.388,0,0,1-2.467,2.005,2.444,2.444,0,0,1-2.05-.987,4.108,4.108,0,0,1-.752-2.574A4.127,4.127,0,0,1,8.79,8.068a2.46,2.46,0,0,1,2.066-.98,2.4,2.4,0,0,1,2.437,2h2.362a4.408,4.408,0,0,0-1.481-2.886A4.758,4.758,0,0,0,10.977,5.113Z"
+                              transform="translate(5.6 3.2) scale(0.79)" fill="#fff"/>
+                    </svg>
+                    <span class="pc-text">Acumulas hasta <b><?= number_format($pc_puntos, 0, ',', '.') ?></b> Puntos Colombia</span>
+                    <svg class="pc-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" role="img"
+                         aria-label="Acumulas 1 punto por cada $<?= number_format(PUNTOS_COLOMBIA_PESOS_POR_PUNTO, 0, ',', '.') ?> de compra">
+                        <title>Acumulas 1 Punto Colombia por cada $<?= number_format(PUNTOS_COLOMBIA_PESOS_POR_PUNTO, 0, ',', '.') ?> de compra.</title>
+                        <circle cx="12" cy="12" r="9"/><path d="M12 11v5"/>
+                        <circle cx="12" cy="7.6" r="1" fill="currentColor" stroke="none"/>
+                    </svg>
+                </div>
+                <?php endif; ?>
 
                 <!-- CAJA DE ENVÍO URGENTE Y CONTADOR PERSISTENTE -->
                 <div class="apple-shipping-urgency-box">
@@ -3401,7 +3366,7 @@ Aviso legal<br />
                     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82L8.6 22.5l3.4-1.47 3.4 1.46 1.89-3.19 3.61-.82-.34-3.69L23 12zm-12.91 4.72l-3.8-3.81 1.48-1.48 2.32 2.33 5.85-5.87 1.48 1.48-7.33 7.35z"></path></svg>
                     Distribuidor autorizado
                 </span>
-                <span class="ml-product-name"><?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo') ?></span>
+                <span class="ml-product-name"><?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1" Estabilización en 3 Ejes Seguimiento de Caras y Objetivos Enfoque Rápido') ?></span>
                 <span class="ml-trust-line">Compra Protegida &middot; Pagas con Mercado Pago</span>
             </div>
 
@@ -3600,9 +3565,9 @@ Aviso legal<br />
         ?>
         const IMAGENES = <?= json_encode($supabaseImages) ?>;
         const SWATCHES = [];
-        const REVIEWS_LIST = [{"author":"Victor M","size":"1 Unidad","stars":"★★★★★","comment":"Comparada con la versión 3, es mucho mejor. Aprobada por el staff del podcast \"como gordas en tobogán\".","date":"2026.08.19","fechaTexto":"Hace 5 días","titulo":"Profesional","ubicacion":"Pereira, Colombia","likes":36,"img":"img_reviews/dji_rev_1.webp","img2":"img_reviews/dji_rev_2.webp"},{"author":"Laura T","size":"1 Unidad","stars":"★★★★★","comment":"Llegó todo bien cuidado, mi primera pocket, amo la marca dji y sé que no me decepcionará 🥰♥️.","date":"2026.08.13","fechaTexto":"Hace 1 semana","titulo":"Hermosaa","ubicacion":"Cúcuta, Colombia","likes":9,"img":"img_reviews/dji_rev_3.webp","img2":"img_reviews/dji_rev_4.webp"},{"author":"Jose F","size":"1 Unidad","stars":"★★★★★","comment":"Está muy compacta, ideal para el día a día. Realmente se nota la calidad.","date":"2026.08.07","fechaTexto":"Hace 2 semanas","titulo":"Muy completa, la recomiendo","ubicacion":"Cali, Colombia","likes":22,"img":"img_reviews/dji_rev_5.webp","img2":"img_reviews/dji_rev_6.webp"},{"author":"Andres P","size":"1 Unidad","stars":"★★★★★","comment":"Excelente compra calidad dji, viene completamente sellado.","date":"2026.08.01","fechaTexto":"Hace 2 semanas","titulo":"La original","ubicacion":"Pereira, Colombia","likes":35,"img":"img_reviews/dji_rev_7.webp","img2":"img_reviews/dji_rev_8.webp"},{"author":"Fernanda C","size":"1 Unidad","stars":"★★★★★","comment":"Llegó todo bien en caja bien empacado, ya la empecé a utilizar y graba muy bien. Es la primera osmo pocket que me compro, el micrófono también me gustó mucho.","date":"2026.07.26","fechaTexto":"Hace 3 semanas","titulo":"Fue rapido el envio","ubicacion":"Cúcuta, Colombia","likes":8,"img":"img_reviews/dji_rev_9.webp","img2":"img_reviews/dji_rev_10.webp"}];
+        const REVIEWS_LIST = [{"author":"Victor M","size":"1 Unidad","stars":"★★★★★","comment":"Comparada con la versión 3, es mucho mejor. Aprobada por el staff del podcast \"como gordas en tobogán\".","date":"2026.08.20","fechaTexto":"Hace 5 días","titulo":"Profesional","ubicacion":"Pereira, Colombia","likes":36,"img":"img_reviews/dji_rev_1.webp","img2":"img_reviews/dji_rev_2.webp"},{"author":"Laura T","size":"1 Unidad","stars":"★★★★★","comment":"Llegó todo bien cuidado, mi primera pocket, amo la marca dji y sé que no me decepcionará 🥰♥️.","date":"2026.08.14","fechaTexto":"Hace 1 semana","titulo":"Hermosaa","ubicacion":"Cúcuta, Colombia","likes":9,"img":"img_reviews/dji_rev_3.webp","img2":"img_reviews/dji_rev_4.webp"},{"author":"Jose F","size":"1 Unidad","stars":"★★★★★","comment":"Está muy compacta, ideal para el día a día. Realmente se nota la calidad.","date":"2026.08.08","fechaTexto":"Hace 2 semanas","titulo":"Muy completa, la recomiendo","ubicacion":"Cali, Colombia","likes":22,"img":"img_reviews/dji_rev_5.webp","img2":"img_reviews/dji_rev_6.webp"},{"author":"Andres P","size":"1 Unidad","stars":"★★★★★","comment":"Excelente compra calidad dji, viene completamente sellado.","date":"2026.08.02","fechaTexto":"Hace 2 semanas","titulo":"La original","ubicacion":"Pereira, Colombia","likes":35,"img":"img_reviews/dji_rev_7.webp","img2":"img_reviews/dji_rev_8.webp"},{"author":"Fernanda C","size":"1 Unidad","stars":"★★★★★","comment":"Llegó todo bien en caja bien empacado, ya la empecé a utilizar y graba muy bien. Es la primera osmo pocket que me compro, el micrófono también me gustó mucho.","date":"2026.07.27","fechaTexto":"Hace 3 semanas","titulo":"Fue rapido el envio","ubicacion":"Cúcuta, Colombia","likes":8,"img":"img_reviews/dji_rev_9.webp","img2":"img_reviews/dji_rev_10.webp"}];
         const PRECIO_UNITARIO = 1127980;
-        const PRODUCTO_TITULO = "DJI Osmo Pocket 4 Creater Combo";
+        const PRODUCTO_TITULO = "DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1\" Estabilización en 3 Ejes Seguimiento de Caras y Objetivos Enfoque Rápido";
         const LANDING_TOKEN = "<?= $landing_token ?>";
         const LANDING_SLUG = "dji-osmo-pocket-4-creater-combo";
         const CHECKOUT_URL = "<?= htmlspecialchars($url_pasarela_bold, ENT_QUOTES) ?>/checkout.php?token=" + LANDING_TOKEN;
