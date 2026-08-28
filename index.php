@@ -53,12 +53,49 @@ if (!function_exists('syncBundledLandings')) {
         $folders = @scandir($bundled);
         if (!$folders) return;
 
+        $publicadas = [];
         foreach ($folders as $f) {
             if ($f === '.' || $f === '..') continue;
             if (is_dir($bundled . '/' . $f)) {
                 copyRecursive($bundled . '/' . $f, $dest . '/' . $f);
+                $publicadas[] = $f;
             }
         }
+
+        /* Poda: el volumen debe reflejar lo que se publica, ni mas ni menos.
+           Sin esto una landing retirada del repositorio seguia viva, porque el
+           volumen es persistente y la sincronizacion solo copiaba.
+
+           Dos salvaguardas, y ninguna es teorica:
+           1. No se poda nada si `bundled_landings` viene vacio. El 2026-08-27
+              esa carpeta aparecio vacia por un fallo y un despliegue asi, con
+              poda ciega, habria borrado el volumen entero.
+           2. `uploads` no se toca: son archivos subidos por el usuario, no
+              tienen contrapartida en el repositorio. */
+        if (count($publicadas) === 0) return;
+
+        $intocables = ['uploads', '.', '..'];
+        $enVolumen = @scandir($dest);
+        if (!$enVolumen) return;
+        foreach ($enVolumen as $f) {
+            if (in_array($f, $intocables, true)) continue;
+            if (!is_dir($dest . '/' . $f)) continue;
+            if (in_array($f, $publicadas, true)) continue;
+            borrarRecursivo($dest . '/' . $f);
+        }
+    }
+}
+
+if (!function_exists('borrarRecursivo')) {
+    /** Borra una carpeta del volumen y todo su contenido. */
+    function borrarRecursivo($dir) {
+        if (!is_dir($dir)) return;
+        foreach (@scandir($dir) ?: [] as $f) {
+            if ($f === '.' || $f === '..') continue;
+            $ruta = $dir . '/' . $f;
+            is_dir($ruta) ? borrarRecursivo($ruta) : @unlink($ruta);
+        }
+        @rmdir($dir);
     }
 }
 
