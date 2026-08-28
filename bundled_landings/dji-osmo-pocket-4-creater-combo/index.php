@@ -2989,7 +2989,70 @@ Características princip">
     </style>
     <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
 </head>
-<body class="<?= $es_modo_edicion ? 'modo-edicion-activo' : '' ?>" style="<?= $es_modo_edicion ? 'margin-top: 50px;' : '' ?>">
+<body class="<?= $es_modo_edicion ? 'modo-edicion-activo' : '' ?>
+<?php if (!$es_modo_edicion): ?>
+    <!-- ═══ SKELETON DE CARGA ═══
+         Cubre la pagina desde el primer pintado con siluetas de lo que viene
+         (barra, galeria, titulo, precio, botones) y se desvanece al estar el
+         DOM listo. Al recargar, la pagina ademas empieza SIEMPRE arriba. -->
+    <style>
+        #esqueleto { position: fixed; inset: 0; z-index: 99998; background: #ffffff;
+                     display: flex; flex-direction: column; align-items: center;
+                     opacity: 1; transition: opacity .28s ease; pointer-events: none; }
+        #esqueleto.fuera { opacity: 0; }
+        .esq-bloque { background: #eceef1; border-radius: 10px; position: relative; overflow: hidden; }
+        .esq-bloque::after { content: ''; position: absolute; inset: 0;
+                             background: linear-gradient(90deg, transparent, rgba(255,255,255,.65), transparent);
+                             transform: translateX(-100%); animation: esqBrillo 1.15s ease-in-out infinite; }
+        @keyframes esqBrillo { to { transform: translateX(100%); } }
+        .esq-col { width: min(540px, calc(100vw - 40px)); display: flex; flex-direction: column; gap: 14px; padding-top: 14px; }
+        #esqueleto .esq-barra   { width: 100vw; height: 36px; border-radius: 0; }
+        #esqueleto .esq-nav     { width: 100vw; height: 58px; border-radius: 0; margin-bottom: 4px; }
+        #esqueleto .esq-galeria { aspect-ratio: 1 / 1; width: 100%; }
+        #esqueleto .esq-titulo  { height: 22px; width: 86%; }
+        #esqueleto .esq-linea   { height: 14px; width: 55%; }
+        #esqueleto .esq-precio  { height: 30px; width: 42%; }
+        #esqueleto .esq-boton   { height: 48px; width: 100%; border-radius: 12px; }
+        @media (prefers-reduced-motion: reduce) { .esq-bloque::after { animation: none; } }
+    </style>
+    <div id="esqueleto" aria-hidden="true">
+        <div class="esq-bloque esq-barra"></div>
+        <div class="esq-bloque esq-nav"></div>
+        <div class="esq-col">
+            <div class="esq-bloque esq-galeria"></div>
+            <div class="esq-bloque esq-titulo"></div>
+            <div class="esq-bloque esq-linea"></div>
+            <div class="esq-bloque esq-precio"></div>
+            <div class="esq-bloque esq-boton"></div>
+        </div>
+    </div>
+    <script>
+        /* La recarga (y la vuelta desde el checkout) empieza arriba: el
+           restablecimiento de scroll del navegador dejaria al usuario en
+           mitad de una pagina que aun se esta armando. */
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        window.scrollTo(0, 0);
+        window.addEventListener('pageshow', function () { window.scrollTo(0, 0); });
+
+        (function () {
+            var esq = document.getElementById('esqueleto');
+            if (!esq) return;
+            var fuera = false;
+            function retirar() {
+                if (fuera) return; fuera = true;
+                esq.classList.add('fuera');
+                setTimeout(function () { if (esq.parentNode) esq.parentNode.removeChild(esq); }, 340);
+            }
+            /* Con el DOM listo la pagina ya tiene su maquetacion; un respiro
+               minimo evita el parpadeo en cargas rapidas. */
+            if (document.readyState !== 'loading') { setTimeout(retirar, 120); }
+            else document.addEventListener('DOMContentLoaded', function () { setTimeout(retirar, 120); });
+            /* Tope de seguridad: pase lo que pase, el skeleton nunca se queda. */
+            setTimeout(retirar, 2500);
+        })();
+    </script>
+    <?php endif; ?>
+" style="<?= $es_modo_edicion ? 'margin-top: 50px;' : '' ?>">
 
     <?php if ($es_modo_edicion): ?>
     <div class="editor-top-toolbar" id="editorToolbar">
