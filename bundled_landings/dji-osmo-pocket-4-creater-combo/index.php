@@ -409,7 +409,6 @@ Características princip">
         }
         /* Piezas que solo se leen en escritorio. */
         .rc-word { display: none; }
-        .bm-desktop { display: none; }
         /* Titulo a la izquierda y calificacion a la derecha, como en la ficha
            de MercadoLibre. La calificacion no se encoge ni parte de linea. */
         .spacer-head {
@@ -458,8 +457,6 @@ Características princip">
             /* Titulo arriba y calificacion debajo, no uno al lado del otro. */
             .spacer-head { flex-direction: column; align-items: flex-start; gap: 6px; }
             .rc-word { display: inline; }
-            .bm-desktop { display: inline; }
-            .bm-movil { display: none; }
         }
 
         /* ─── PÁGINA FULL WIDTH (SIN CONTAINER ESTRECHO) ─── */
@@ -495,7 +492,8 @@ Características princip">
             .product-grid-layout {
                 display: grid;
                 grid-template-columns: 1.1fr 1fr;
-                gap: 48px;
+                column-gap: 48px;
+                row-gap: 14px;
                 align-items: start;
                 max-width: 100%;
                 padding: 0;
@@ -1116,12 +1114,9 @@ Características princip">
             gap: 32px;
             align-items: start;
         }
-        @media (min-width: 992px) {
-            .customer-reviews-grid {
-                grid-template-columns: 330px 1fr;
-                gap: 48px;
-            }
-        }
+        /* Escritorio usa la misma columna unica que movil: la cabecera de
+           opiniones arriba a lo ancho y el listado debajo (antes era
+           330px 1fr con resumen sticky). */
 
         /* ─── COLUMNA IZQUIERDA: RESUMEN AMAZON ─── */
         .reviews-summary-card {
@@ -1129,12 +1124,6 @@ Características princip">
             border-radius: 16px;
             padding: 0;
             box-sizing: border-box;
-        }
-        @media (min-width: 992px) {
-            .reviews-summary-card {
-                position: sticky;
-                top: 120px;
-            }
         }
         /* En movil el resumen se reduce al titulo: la nota y el recuento
            ya viajan dentro de cada opinion y duplicaban la lectura. */
@@ -1474,7 +1463,7 @@ Características princip">
 
         .reviews-pagination-row {
             display: flex;
-            justify-content: flex-end;
+            justify-content: center;
             align-items: center;
             gap: 8px;
             margin-top: 22px;
@@ -1486,11 +1475,8 @@ Características princip">
             padding-bottom: 20px;
             border-bottom: 1px solid var(--border-light);
         }
-        /* En movil la columna es todo el ancho: pegadas a la derecha las
-           burbujas quedaban descolgadas del bloque de opiniones. */
-        @media (max-width: 991px) {
-            .reviews-pagination-row { justify-content: center; }
-        }
+        /* La columna unica ocupa todo el ancho en cualquier pantalla:
+           las burbujas van centradas siempre (la regla base ya lo hace). */
         .page-btn {
             width: 30px;
             height: 30px;
@@ -2298,7 +2284,8 @@ Características princip">
                 display: grid;
                 grid-template-columns: 1.1fr 1fr;
                 grid-template-rows: auto 1fr;
-                gap: 48px;
+                column-gap: 48px;
+                row-gap: 14px;
                 align-items: start;
                 max-width: 100%;
             }
@@ -3032,7 +3019,12 @@ Características princip">
            mitad de una pagina que aun se esta armando. */
         if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
         window.scrollTo(0, 0);
-        window.addEventListener('pageshow', function () { window.scrollTo(0, 0); });
+        /* Solo al volver desde la bfcache: en la carga normal `pageshow`
+           se dispara tras `load` (con los iframes, segundos despues de ser
+           interactiva) y devolvia al usuario arriba, ademas de romper los
+           deep-links con ancla. La recarga normal ya la cubren el scrollTo
+           sincrono de arriba y scrollRestoration='manual'. */
+        window.addEventListener('pageshow', function (e) { if (e.persisted) window.scrollTo(0, 0); });
 
         (function () {
             var esq = document.getElementById('esqueleto');
@@ -3161,7 +3153,7 @@ Características princip">
                     </div>
                 </div>
                 <?php if (trim($compras_mes) !== ''): ?>
-                <div class="bought-month"><strong><span class="bm-movil"><?= htmlspecialchars($compras_mes) ?> K+</span><span class="bm-desktop">Más de <?= number_format(((int)$compras_mes) * 1000, 0, ',', '.') ?></span> comprados</strong> el mes pasado</div>
+                <div class="bought-month"><strong><?= htmlspecialchars($compras_mes) ?> K+ comprados</strong> el mes pasado</div>
                 <?php endif; ?>
             </div>
 
@@ -3880,7 +3872,7 @@ Características princip">
             <div class="cart-items-list" id="cartItemsContainer"></div>
             <div class="cart-footer">
                 <div class="cart-summary-row"><span>Subtotal</span><span id="cartSubtotal">$ 1.127.980</span></div>
-                <div class="cart-summary-row"><span>Envío</span><span style="color:#059669; font-weight:700;">GRATIS</span></div>
+                <div class="cart-summary-row" id="cartEnvioRow"><span>Envío</span><span style="color:#059669; font-weight:700;">GRATIS</span></div>
                 <div class="cart-summary-row total"><span>Total</span><span id="cartTotal">$ 1.127.980</span></div>
                 <button class="btn-checkout" onclick="procederAlCheckout()">
                     <span>Finalizar Compra Segura</span>
@@ -4392,6 +4384,9 @@ Características princip">
             // El aviso de envio gratis solo tiene sentido si hay algo que enviar.
             const avisoEnvio = document.querySelector('.shipping-progress-wrap');
             if (avisoEnvio) avisoEnvio.classList.toggle('visible', totalUnits > 0);
+            // Igual que el aviso: la fila "Envío — GRATIS" del pie solo con unidades.
+            const envioRow = document.getElementById('cartEnvioRow');
+            if (envioRow) envioRow.style.display = totalUnits > 0 ? '' : 'none';
             const subtotalEl = document.getElementById('cartSubtotal');
             if (subtotalEl) subtotalEl.textContent = fmtTotal;
             const totalEl = document.getElementById('cartTotal');
