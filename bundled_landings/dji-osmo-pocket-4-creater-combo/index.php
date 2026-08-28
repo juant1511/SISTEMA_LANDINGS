@@ -1456,6 +1456,22 @@ Características princip">
             border-bottom: none;
             padding-bottom: 6px;
         }
+        /* ESCRITORIO: renderReviews pone .rev-dos-columnas y mete las
+           tarjetas en dos wrappers .rev-col (mitad y mitad, orden preservado).
+           Sin la clase (movil) la lista sigue en una columna paginada. */
+        .reviews-list-wrap.rev-dos-columnas {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            column-gap: 48px;
+            align-items: start;
+        }
+        .rev-col { min-width: 0; }
+        /* La ultima tarjeta de CADA columna pierde su linea inferior para no
+           dejar rayas sueltas colgando al fondo de las columnas. */
+        .rev-col .review-card-item:last-child {
+            border-bottom: none;
+            padding-bottom: 6px;
+        }
         /* Mientras el JS pinta las opiniones el contenedor no debe colapsar:
            la pagina se acortaba y en movil, al terminar los videos, parecia
            que ya no habia nada mas abajo. El :empty se deja de cumplir en
@@ -4822,13 +4838,34 @@ Características princip">
             // Sin filtros: se muestran todas, en el orden en que vienen.
             const filtered = [...REVIEWS_LIST];
 
-            const totalPages = Math.max(1, Math.ceil(filtered.length / REVIEWS_PER_PAGE));
+            /* Escritorio (>=992px): sin paginacion, TODAS las opiniones a la
+               vez repartidas en dos columnas. Movil: 3 por pagina, como antes. */
+            const esEscritorio = window.matchMedia('(min-width: 992px)').matches;
+
+            const totalPages = esEscritorio ? 1 : Math.max(1, Math.ceil(filtered.length / REVIEWS_PER_PAGE));
             if (currentReviewPage > totalPages) currentReviewPage = 1;
 
-            const startIdx = (currentReviewPage - 1) * REVIEWS_PER_PAGE;
-            const pageItems = filtered.slice(startIdx, startIdx + REVIEWS_PER_PAGE);
+            const startIdx = esEscritorio ? 0 : (currentReviewPage - 1) * REVIEWS_PER_PAGE;
+            const pageItems = esEscritorio ? filtered : filtered.slice(startIdx, startIdx + REVIEWS_PER_PAGE);
 
             container.innerHTML = '';
+            /* En escritorio las tarjetas van dentro de dos wrappers .rev-col:
+               la primera mitad (redondeo hacia arriba) a la izquierda y el
+               resto a la derecha, en el mismo orden. Los post-procesos
+               (ajustarLeerMas, restaurarUtiles) usan querySelectorAll
+               descendente, asi que el nivel extra no les afecta. */
+            const dosColumnas = esEscritorio && pageItems.length > 0;
+            container.classList.toggle('rev-dos-columnas', dosColumnas);
+            let colIzq = null, colDer = null, corteCol = 0;
+            if (dosColumnas) {
+                corteCol = Math.ceil(pageItems.length / 2);
+                colIzq = document.createElement('div');
+                colIzq.className = 'rev-col';
+                colDer = document.createElement('div');
+                colDer.className = 'rev-col';
+                container.appendChild(colIzq);
+                container.appendChild(colDer);
+            }
             if (pageItems.length === 0) {
                 container.innerHTML = `
                     <div style="text-align:center; padding:36px 16px; color:#565959;">
@@ -4842,7 +4879,7 @@ Características princip">
                     item.className = 'review-card-item';
                     const nEstrellas = contarEstrellas(r.estrellas || r.stars);
                     const inicial = String(r.author || '?').trim().charAt(0).toUpperCase();
-                    const foto = avatarDe(idx + (currentReviewPage - 1) * REVIEWS_PER_PAGE);
+                    const foto = avatarDe(startIdx + idx);
                     const fotos = [r.img, r.img2].filter(Boolean);
                     item.innerHTML = `
                         <div class="rev-cabecera">
@@ -4854,7 +4891,7 @@ Características princip">
                             ${estrellasSvg(nEstrellas)}
                             ${r.titulo ? `<span class="rev-titulo" data-editable="true">${r.titulo}</span>` : ''}
                         </div>
-                        <div class="rev-meta">Certificado en Colombia el ${fechaCertificacion(r, idx)}</div>
+                        <div class="rev-meta">Certificado en Colombia el ${fechaCertificacion(r, idx % REVIEWS_PER_PAGE)}</div>
                         <div class="rev-meta">Producto: <b>${PRODUCTO_CORTO}</b></div>
                         <div class="rev-verificada">Compra verificada</div>
                         ${fotos.length ? `<div class="review-photos">${fotos.map(u => `<img src="${u}" class="review-photo" loading="lazy" alt="Foto de la opinión" onclick="abrirFotoOpinion(this)">`).join('')}</div>` : ''}
@@ -4886,7 +4923,7 @@ Características princip">
                             </button>
                         </div>` : ''}
                     `;
-                    container.appendChild(item);
+                    (dosColumnas ? (idx < corteCol ? colIzq : colDer) : container).appendChild(item);
                 });
             }
 
@@ -4921,6 +4958,16 @@ Características princip">
         if (document.getElementById('reviewsListContainer')) {
             try { renderReviews(); } catch (e) {}
         }
+
+        /* Al cruzar el umbral de escritorio (992px) la lista cambia de forma:
+           dos columnas sin paginar a un lado, 3 por pagina al otro. Se
+           repinta al vuelo, sin recargar. */
+        (function () {
+            var mqEscritorio = window.matchMedia('(min-width: 992px)');
+            var repintarReviews = function () { try { renderReviews(); } catch (e) {} };
+            if (mqEscritorio.addEventListener) mqEscritorio.addEventListener('change', repintarReviews);
+            else if (mqEscritorio.addListener) mqEscritorio.addListener(repintarReviews);
+        })();
 
 
         function cambiarPaginaReviews(nuevaPagina, totalPages) {
