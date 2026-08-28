@@ -17,9 +17,11 @@ try {
 $landing_token = 'c384598dcd43f72d5e5d943491288cfd';
 $precio_num    = 1127980;
 $precio_fmt    = '1.127.980';
-/* Cuantas unidades se compraron el mes pasado. Lo sortea el exportador al
-   generar y queda fijo aqui: si cambiara en cada carga no seria creible. */
-$compras_mes   = '6 K+';
+/* Digito de unidades compradas el mes pasado. Lo sortea el exportador al
+   generar y queda fijo aqui: si cambiara en cada carga no seria creible.
+   De este mismo numero salen los dos formatos: "6 K+" en movil y
+   "Mas de 6.000" en escritorio. */
+$compras_mes   = '6';
 $es_modo_edicion = isset($_GET['modo_edicion']) && $_GET['modo_edicion'] == '1';
 $app_version   = file_exists(__FILE__) ? md5_file(__FILE__) : (string)time();
 
@@ -40,6 +42,19 @@ try {
         if (!empty($row_u['url_mercado'])) { $url_pasarela_meli = rtrim((string)$row_u['url_mercado'], '/'); }
     }
 } catch (Exception $e) { /* sin base de datos se usan las constantes locales */ }
+
+/* ─── Videos propios de la seccion de opiniones ───
+   Si la carpeta `videos/` tiene archivos, el carrusel los usa y NO se carga
+   nada de YouTube: sin iframes, sin su interfaz y con una fraccion del peso
+   (medido: los diez embeds eran el 98% del trafico de la pagina).
+   Si la carpeta esta vacia se mantiene el motor de YouTube, para que la
+   seccion nunca quede en blanco. */
+$videos_locales = [];
+foreach (glob(__DIR__ . '/videos/*.{mp4,webm,mov,m4v}', GLOB_BRACE) ?: [] as $ruta_video) {
+    if (is_file($ruta_video)) { $videos_locales[] = 'videos/' . rawurlencode(basename($ruta_video)); }
+}
+natsort($videos_locales);
+$videos_locales = array_values($videos_locales);
 
 // ─── Cargar Productos de Otras Landings o Productos Demo ───
 $otros_productos = [];
@@ -128,14 +143,14 @@ Características princip">
     <title><?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1"') ?></title>
     
     <!-- FAVICON / NAVICON -->
-    <?php if (file_exists(__DIR__ . '/logo.svg')): ?>
-        <link rel="icon" type="image/svg+xml" href="logo.svg">
-        <link rel="apple-touch-icon" href="logo.svg">
-    <?php elseif (file_exists(__DIR__ . '/logo.webp')): ?>
+    <?php if (file_exists(__DIR__ . '/assets/marca/logo.svg')): ?>
+        <link rel="icon" type="image/svg+xml" href="assets/marca/logo.svg">
+        <link rel="apple-touch-icon" href="assets/marca/logo.svg">
+    <?php elseif (file_exists(__DIR__ . '/assets/marca/logo.webp')): ?>
         <link rel="icon" type="image/webp" href="logo.webp">
         <link rel="shortcut icon" type="image/webp" href="logo.webp">
         <link rel="apple-touch-icon" href="logo.webp">
-    <?php elseif (file_exists(__DIR__ . '/logo.png')): ?>
+    <?php elseif (file_exists(__DIR__ . '/assets/marca/logo.png')): ?>
         <link rel="icon" type="image/png" href="logo.png">
         <link rel="shortcut icon" type="image/png" href="logo.png">
         <link rel="apple-touch-icon" href="logo.png">
@@ -370,20 +385,31 @@ Características princip">
         }
 
         /* ─── SEPARACIÓN GRIS CLARO ENTRE NAVBAR Y GALERÍA ─── */
-        .navbar-gallery-spacer {
-            width: 100%;
+        /* En movil no se pinta: quien hace de banda gris es .product-header-block,
+           que ademas lleva el titulo. En escritorio vuelve a ser el separador
+           fino de siempre, porque alli la cabecera se va a la columna derecha. */
+        .navbar-gallery-spacer { display: none; }
+
+        /* Cabecera del producto (titulo + calificacion + compras).
+           Es el primer hijo del grid, asi que en movil sale sobre la galeria
+           con el aspecto de la banda gris de antes. */
+        .product-header-block {
             background-color: #ededed;
-            display: block;
             border-bottom: 1px solid #e0e0e0;
             padding: 11px 20px;
             box-sizing: border-box;
+            /* .product-grid-layout es flex con gap:20px en movil; este margen
+               lo cancela para que la galeria quede pegada a la banda, igual
+               que cuando la banda vivia fuera del grid. */
+            margin-bottom: -20px;
         }
-        /* El titulo del producto vive dentro de esta banda gris, alineado a
-           izquierda con la galeria que viene justo debajo. */
-        .navbar-gallery-spacer .product-title {
+        .product-header-block .product-title {
             margin: 0;
             padding: 0;
         }
+        /* Piezas que solo se leen en escritorio. */
+        .rc-word { display: none; }
+        .bm-desktop { display: none; }
         /* Titulo a la izquierda y calificacion a la derecha, como en la ficha
            de MercadoLibre. La calificacion no se encoge ni parte de linea. */
         .spacer-head {
@@ -414,11 +440,26 @@ Características princip">
             .spacer-head { flex-direction: column; align-items: flex-start; gap: 7px; }
         }
         @media (min-width: 992px) {
+            /* Escritorio: separador fino arriba y la cabecera se muda a la
+               columna derecha, sobre el precio (la coloca el grid mas abajo). */
             .navbar-gallery-spacer {
-                padding: 13px 36px;
+                display: block;
+                width: 100%;
+                height: 28px;
                 background-color: #ededed;
                 border-bottom: 1px solid #e0e0e0;
             }
+            .product-header-block {
+                background-color: transparent;
+                border-bottom: none;
+                padding: 0;
+                margin-bottom: 0;
+            }
+            /* Titulo arriba y calificacion debajo, no uno al lado del otro. */
+            .spacer-head { flex-direction: column; align-items: flex-start; gap: 6px; }
+            .rc-word { display: inline; }
+            .bm-desktop { display: inline; }
+            .bm-movil { display: none; }
         }
 
         /* ─── PÁGINA FULL WIDTH (SIN CONTAINER ESTRECHO) ─── */
@@ -695,7 +736,7 @@ Características princip">
                vez de partirse a la mitad. */
             flex-basis: 100%;
         }
-        .puntos-colombia-row .pc-mark { flex-shrink: 0; display: block; border-radius: 4px; }
+        .puntos-colombia-row .pc-mark { flex-shrink: 0; display: block; height: 22px; width: auto; }
         .puntos-colombia-row .pc-text { font-weight: 500; letter-spacing: -0.01em; }
         .puntos-colombia-row .pc-text b { font-weight: 800; }
         .puntos-colombia-row .pc-info {
@@ -715,20 +756,20 @@ Características princip">
             font-family: var(--font-heading);
             font-size: 30px;
             font-weight: 700;
-            color: #1d1d1f;
+            color: #101010;
             letter-spacing: -0.025em;
         }
         .old-price {
             display: block;
             font-size: 15px;
-            color: var(--text-muted);
+            color: #7A7A7A;
             text-decoration: line-through;
             font-weight: 500;
             margin-bottom: 2px;
         }
         .discount-pill {
-            background: #e6f7ed;
-            color: #00a650;
+            background: #F2F3F5;
+            color: #202124;
             font-size: 12px;
             font-weight: 700;
             padding: 4px 10px;
@@ -738,8 +779,8 @@ Características princip">
 
         /* ─── CAJA DE ENVÍO URGENTE Y CONTADOR (ESTILO MERCADOLIBRE / APPLE) ─── */
         .apple-shipping-urgency-box {
-            background: #fbfbfd;
-            border: 1px solid rgba(0, 166, 80, 0.25);
+            background: #FAFAFA;
+            border: 1px solid #D1D5DB;
             border-radius: 12px;
             padding: 12px 14px;
             margin-bottom: 18px;
@@ -754,8 +795,8 @@ Características princip">
         }
         .shipping-flash-icon {
             flex-shrink: 0;
-            fill: #f59e0b;
-            stroke: #f59e0b;
+            fill: #27272A;
+            stroke: #27272A;
         }
         .shipping-lead-text {
             display: flex;
@@ -763,7 +804,7 @@ Características princip">
             gap: 2px;
         }
         .shipping-badge-highlight {
-            color: #00a650;
+            color: #18181B;
             font-size: 14.5px;
             font-weight: 600;
             letter-spacing: -0.01em;
@@ -773,13 +814,54 @@ Características princip">
         }
         .shipping-timer-subtext {
             font-size: 12.5px;
-            color: #6e6e73;
+            color: #686868;
             font-weight: 400;
         }
         .shipping-countdown-val {
-            color: #d9383a;
+            color: #686868;
             font-weight: 700;
             letter-spacing: 0.2px;
+        }
+
+        /* ─── COMPRA DIRECTA: "Comprar ahora" + "Agregar al carrito" ───
+           Van justo bajo precio/envio, antes de elegir presentacion. */
+        .direct-purchase-row {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .btn-buy-now,
+        .btn-add-cart-outline {
+            width: 100%;
+            height: 52px;
+            border-radius: 12px;
+            font-family: var(--font-heading);
+            font-size: 15.5px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+        }
+        .btn-buy-now {
+            background-color: #101010;
+            color: #ffffff;
+            border: none;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+        }
+        .btn-buy-now:hover {
+            background-color: #000000;
+            transform: scale(1.01);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.24);
+        }
+        .btn-add-cart-outline {
+            background-color: #ffffff;
+            color: #101010;
+            border: 1px solid #D1D5DB;
+        }
+        .btn-add-cart-outline:hover {
+            background-color: #FAFAFA;
+            border-color: #b8bcc4;
         }
 
         .variant-block { margin-bottom: 16px; border-top: 1px solid var(--border-light); padding-top: 14px; }
@@ -808,7 +890,8 @@ Características princip">
             background: rgba(0, 113, 227, 0.1);
         }
 
-        .desktop-action-row { display: none; gap: 12px; align-items: center; margin-bottom: 22px; }
+        .desktop-action-row { display: none; gap: 16px; align-items: center; margin-bottom: 22px; }
+        .qty-label { font-size: 13px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.01em; }
         .qty-controls-desktop {
             display: flex;
             align-items: center;
@@ -873,21 +956,100 @@ Características princip">
             text-align: left;
             letter-spacing: -0.01em;
         }
+        /* Cabecera sin plegado: la descripcion la despliega "Ver mas". */
+        .accordion-header-fijo { cursor: default; }
         .accordion-body { display: none; padding-bottom: 15px; font-size: 13.5px; color: #424245; line-height: 1.55; }
         .accordion-body.open { display: block; }
 
-        .secure-trust-box {
-            background: #fbfbfd;
-            border: 1px solid var(--border-light);
-            border-radius: 12px;
-            padding: 14px 18px;
-            margin-top: 20px;
+        /* ─── TABLA DE DETALLES DEL PRODUCTO (ESTILO AMAZON) ───
+           Hay dos copias en el HTML, generadas del mismo array de PHP: la de
+           movil va en el flujo sobre la descripcion y la de escritorio bajo la
+           galeria. Solo se ve una a la vez. */
+        .product-details-block { margin-bottom: 20px; }
+        .pd-desktop { display: none; }
+        .product-details-title {
+            font-family: var(--font-heading);
+            font-size: 15px;
+            font-weight: 700;
+            color: #1d1d1f;
+            letter-spacing: -0.01em;
+            margin: 0 0 10px 0;
         }
-        .secure-trust-header { display: flex; align-items: center; gap: 8px; font-family: var(--font-heading); font-size: 13.5px; font-weight: 700; color: #1d1d1f; margin-bottom: 8px; }
-        .secure-trust-header svg { flex-shrink: 0; }
-        .secure-trust-list { list-style: none; display: flex; flex-direction: column; gap: 6px; padding: 0; margin: 0; }
-        .secure-trust-list li { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: #6e6e73; line-height: 1.4; }
-        .secure-trust-list .check-icon { color: #00a650; font-weight: 800; font-size: 13px; line-height: 1.3; }
+        .product-details-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-family: var(--font-body);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+        .product-details-table th,
+        .product-details-table td {
+            padding: 9px 12px;
+            text-align: left;
+            vertical-align: top;
+            word-break: break-word;
+        }
+        .product-details-table th { width: 42%; font-weight: 600; color: #565959; }
+        .product-details-table td { color: #0f1111; }
+        /* Filas intercaladas gris/blanco, como la ficha de detalles de Amazon */
+        .product-details-table tr:nth-child(odd)  { background: #f5f5f5; }
+        .product-details-table tr:nth-child(even) { background: #ffffff; }
+
+        /* ─── DESCRIPCION POR BLOQUES ─── */
+        .desc-cuerpo > p { margin: 0 0 4px 0; }
+        .desc-subtitulo {
+            font-family: var(--font-heading);
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #1d1d1f;
+            letter-spacing: -0.01em;
+            margin: 15px 0 7px 0;
+        }
+        .desc-lista {
+            margin: 0;
+            padding-left: 18px;
+            list-style: disc;
+        }
+        .desc-lista li { margin-bottom: 6px; }
+        .desc-lista:last-of-type li:last-child { margin-bottom: 0; }
+        .desc-lista li::marker { color: #86868b; }
+
+        /* ─── DESCRIPCION PLEGADA CON "VER MAS" ───
+           El recorte se hace por alto, no cortando caracteres: asi no se parte
+           ninguna etiqueta del texto y el HTML sigue siendo valido.
+           El max-height de apertura es un tope holgado, no la altura real: hace
+           falta un valor concreto para que la transicion pueda animarse. */
+        .desc-item .desc-cuerpo {
+            max-height: 104px;
+            overflow: hidden;
+            transition: max-height 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .desc-item.desc-abierta .desc-cuerpo { max-height: 1400px; }
+
+        .desc-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 3px;
+            padding: 0;
+            background: none;
+            border: none;
+            font-family: var(--font-heading);
+            font-size: 13px;
+            font-weight: 600;
+            color: #007185;
+            cursor: pointer;
+        }
+        .desc-toggle:hover .desc-toggle-txt { text-decoration: underline; }
+        /* Flecha fina que gira al desplegar */
+        .desc-chevron {
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
+            transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .desc-item.desc-abierta .desc-chevron { transform: rotate(180deg); }
 
         /* ─── BANNER MERCADOLIBRE ───
            Specs tomadas del design system real de Mercado Libre (Andes):
@@ -900,25 +1062,14 @@ Características princip">
         .ml-banner-inner { max-width: 1280px; margin: 0 auto; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; width: 100%; box-sizing: border-box; }
 
         .ml-banner-left { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
-        .ml-logo-img { height: 72px; max-width: 240px; width: auto; object-fit: contain; display: block; }
+        .ml-logo-img { height: 92px; max-width: 300px; width: auto; object-fit: contain; display: block; }
         .ml-banner-divider { width: 1px; height: 62px; background: rgba(0, 0, 0, 0.12); flex-shrink: 0; }
 
         .ml-banner-center { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 6px; overflow: hidden; padding-right: 8px; }
-        .ml-kicker { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; background: #ffffff; border-radius: 4px; padding: 5px 10px 5px 8px; font-family: var(--font-ml); font-weight: 700; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; color: #2d3277; white-space: nowrap; overflow: hidden; }
-        .ml-kicker svg { width: 14px; height: 14px; flex-shrink: 0; color: #3483fa; }
-        .ml-product-name { max-width: 100%; font-family: var(--font-ml); font-weight: 600; font-size: 16px; line-height: 1.25; color: rgba(0, 0, 0, 0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .ml-trust-line { max-width: 100%; font-family: var(--font-ml); font-weight: 400; font-size: 13px; line-height: 1.3; color: rgba(0, 0, 0, 0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ml-headline { max-width: 100%; font-family: var(--font-ml); font-weight: 700; font-size: 18px; line-height: 1.25; color: rgba(0, 0, 0, 0.9); }
+        .ml-subline { max-width: 100%; font-family: var(--font-ml); font-weight: 400; font-size: 13.5px; line-height: 1.3; color: rgba(0, 0, 0, 0.55); }
 
         .ml-banner-right { flex-shrink: 0; display: flex; align-items: center; gap: 18px; }
-
-        /* Imagen "ENVÍO GRATIS EN TU PRIMERA COMPRA" */
-        .ml-shipping-img { height: 40px; width: auto; max-width: 384px; object-fit: contain; display: block; }
-
-        /* Replica en CSS del mismo diseno, mientras no exista el archivo de imagen */
-        .ml-ship-pill { display: inline-flex; align-items: center; background: #ffffff; border-radius: 999px; padding: 4px; font-family: var(--font-ml); }
-        .ml-ship-pill .pill-dark { background: #2d3277; color: #ffffff; border-radius: 999px; padding: 8px 17px; font-size: 12.5px; font-weight: 800; letter-spacing: 0.3px; white-space: nowrap; }
-        .ml-ship-pill .pill-white { color: #2d3277; padding: 0 17px 0 13px; font-size: 12.5px; font-weight: 600; letter-spacing: 0.3px; white-space: nowrap; }
-        .ml-ship-pill .pill-white b { font-weight: 800; }
 
         /* CTA con las specs exactas del boton "loud" de Andes */
         .ml-cta { display: inline-flex; align-items: center; justify-content: center; height: 48px; padding: 0 24px; background: #3483fa; color: #ffffff; border-radius: 6px; font-family: var(--font-ml); font-size: 16px; font-weight: 600; line-height: 48px; white-space: nowrap; transition: background-color 0.15s ease; -webkit-font-smoothing: antialiased; }
@@ -927,21 +1078,17 @@ Características princip">
         @media (max-width: 1280px) {
             .ml-banner-inner { padding: 18px 20px; gap: 16px; flex-wrap: wrap; justify-content: center; }
             .ml-banner-left { gap: 14px; }
-            .ml-logo-img { height: 60px; max-width: 200px; }
+            .ml-logo-img { height: 76px; max-width: 250px; }
             .ml-banner-divider { display: none; }
             .ml-banner-center { flex: 1 1 100%; align-items: center; text-align: center; gap: 5px; order: 2; padding-right: 0; }
             .ml-banner-right { flex: 1 1 100%; order: 3; flex-direction: column; gap: 14px; }
-            .ml-shipping-img { height: 38px; max-width: 100%; }
         }
 
         @media (max-width: 480px) {
             .ml-banner-inner { padding: 16px 16px; }
-            .ml-logo-img { height: 52px; max-width: 170px; }
-            .ml-product-name { font-size: 15px; white-space: normal; }
-            .ml-trust-line { font-size: 12px; white-space: normal; }
-            .ml-shipping-img { height: 32px; }
-            .ml-ship-pill .pill-dark { padding: 7px 12px; font-size: 11px; }
-            .ml-ship-pill .pill-white { padding: 0 12px 0 10px; font-size: 11px; }
+            .ml-logo-img { height: 64px; max-width: 205px; }
+            .ml-headline { font-size: 16px; }
+            .ml-subline { font-size: 12.5px; }
             .ml-cta { width: 100%; height: 46px; line-height: 46px; font-size: 15px; padding: 0 18px; }
         }
 
@@ -989,13 +1136,31 @@ Características princip">
                 top: 120px;
             }
         }
+        /* En movil el resumen se reduce al titulo: la nota y el recuento
+           ya viajan dentro de cada opinion y duplicaban la lectura. */
+        @media (max-width: 991px) {
+            .customer-reviews-grid { gap: 18px; }
+            .reviews-summary-card .reviews-score-hero,
+            .reviews-summary-card .reviews-total-ratings-sub { display: none; }
+            .reviews-summary-card .reviews-sidebar-subtitle { margin-bottom: 0; }
+        }
+        /* Titulo de seccion, nivel 1: mismo tamano y peso que
+           "Opiniones en video" y "Tambien compraron". */
         .reviews-sidebar-title {
             font-family: var(--font-heading);
-            font-size: 22px;
-            font-weight: 700;
+            font-size: 20px;
+            font-weight: 800;
             color: #0f1111;
-            margin: 0 0 10px 0;
+            margin: 0 0 3px 0;
             letter-spacing: -0.015em;
+        }
+        /* Mismo registro que el subtitulo de Opiniones en video. */
+        .reviews-sidebar-subtitle {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted, #6b7280);
+            margin: 0 0 10px 0;
         }
         .reviews-score-hero {
             display: flex;
@@ -1119,8 +1284,9 @@ Características princip">
         .write-review-block {
             margin-top: 8px;
         }
+        /* Titulo de bloque, nivel 2: igual que "Detalles del producto". */
         .write-review-title {
-            font-size: 17px;
+            font-size: 15px;
             font-weight: 700;
             color: #0f1111;
             margin: 0 0 4px 0;
@@ -1160,64 +1326,85 @@ Características princip">
             width: 100%;
             min-width: 0;
         }
-        .reviews-filters-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            padding-bottom: 14px;
-            border-bottom: 1px solid var(--border-light);
-            margin-bottom: 12px;
-        }
-        .filters-left-group {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .filters-right-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .review-filter-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12.5px;
-            color: #374151;
-            font-weight: 600;
-        }
-        .filter-select-box {
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 6px 24px 6px 10px;
-            font-size: 12.5px;
-            color: #1d1d1f;
-            background: #ffffff;
-            appearance: none;
-            cursor: pointer;
-            font-weight: 500;
-        }
+        /* ─── OPINION: una sola columna, como la ficha de Amazon ───
+           Orden: quien opina, valoracion, titulo, procedencia, producto,
+           fotos y por ultimo el texto. */
         .review-card-item {
-            display: grid;
-            grid-template-columns: 200px 1fr auto;
-            gap: 20px;
+            position: relative;
             padding: 20px 0;
             border-bottom: 1px solid var(--border-light);
-            align-items: start;
         }
+        .rev-cabecera { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; flex-wrap: wrap; }
+        /* Si la API no responde, el onerror lo sustituye por la inicial: el
+           mismo estilo sirve para la imagen y para el recambio de texto. */
+        .rev-avatar {
+            width: 30px; height: 30px; flex-shrink: 0;
+            border-radius: 50%;
+            background: #e9eaec;
+            color: #6b7280;
+            font-family: var(--font-heading);
+            font-size: 13px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            object-fit: cover;
+            user-select: none;
+        }
+        .rev-nombre { font-family: var(--font-heading); font-size: 14px; font-weight: 500; color: #0f1111; }
+
+        /* Estrellas y sello juntos, con poco aire entre medias */
+        /* Estrellas y titular en la MISMA linea: el titulo es lo que las
+           estrellas califican, tenerlo suelto lo dejaba huerfano. En pantallas
+           estrechas el titulo largo baja entero a la linea siguiente. */
+        .rev-valoracion { display: flex; align-items: center; gap: 9px; margin-bottom: 3px; flex-wrap: wrap; row-gap: 2px; }
+        /* Estrellas dibujadas, no el caracter tipografico: se ven limpias y
+           del mismo tamano en cualquier sistema. */
+        /* Sin separacion: en la referencia las cinco se tocan */
+        .rev-estrellas { display: inline-flex; gap: 0; }
+        .rev-estrellas svg { width: 16px; height: 16px; display: block; }
+        .rev-estrellas .llena { color: #de7921; }
+        .rev-estrellas .vacia { color: #d5d9d9; }
+        /* Chip de verificacion junto al nombre: habla del comprador, no de la
+           nota, asi que vive en la linea de identidad. */
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 2.5px 9px;
+            border-radius: 999px;
+            background: #e7f4ec;
+            font-family: var(--font-heading);
+            font-size: 11px; font-weight: 700; color: #157347;
+            white-space: nowrap;
+        }
+
+        /* Cuerpo mas alto: a 13.5px el texto quedaba corto en una columna
+           ancha y toda la derecha se veia vacia. */
+        .rev-titulo { font-family: var(--font-heading); font-size: 15.5px; font-weight: 700; color: #0f1111; line-height: 1.3; }
+        .rev-meta { font-size: 13.5px; color: #565959; line-height: 1.55; }
+        .rev-meta b { font-weight: 600; color: #0f1111; }
+
+        .rev-texto {
+            font-size: 14.5px;
+            color: #0f1111;
+            line-height: 1.55;
+            margin: 10px 0 0 0;
+            max-height: 96px;
+            overflow: hidden;
+            transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .review-card-item.rev-abierta .rev-texto { max-height: 1200px; }
+        .rev-leer-mas {
+            display: inline-flex; align-items: center; gap: 5px;
+            margin-top: 6px; padding: 0;
+            background: none; border: none;
+            font-family: var(--font-heading);
+            font-size: 12.5px; font-weight: 600; color: #007185;
+            cursor: pointer;
+        }
+        .rev-leer-mas:hover span { text-decoration: underline; }
+        .rev-leer-mas svg { width: 14px; height: 14px; transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
+        .review-card-item.rev-abierta .rev-leer-mas svg { transform: rotate(180deg); }
         @media (max-width: 768px) {
             .review-card-item {
                 grid-template-columns: 1fr;
                 gap: 8px;
             }
-        }
-        .reviewer-col {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
         }
         .reviewer-name {
             font-weight: 700;
@@ -1227,45 +1414,13 @@ Características princip">
             align-items: center;
             gap: 6px;
         }
-        .reviewer-badge-verified {
-            font-size: 10.5px;
-            background: #e6f7ed;
-            color: #059669;
-            font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-        .reviewer-meta {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-        .review-content-col {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .review-stars-row {
-            color: #de7921;
-            font-size: 14px;
-            letter-spacing: 1px;
-        }
-        .review-comment-text {
-            font-size: 13.5px;
-            color: #1d1d1f;
-            line-height: 1.5;
-            font-weight: 400;
-            margin: 0;
-        }
-        .review-date-badge {
-            font-size: 11.5px;
-            color: var(--text-muted);
-            white-space: nowrap;
-            text-align: right;
-        }
+        /* El boton de borrar la propia opinion pasa a la esquina */
         .review-actions-wrap {
+            position: absolute;
+            top: 18px;
+            right: 0;
             display: flex;
             align-items: center;
-            justify-content: flex-end;
             gap: 8px;
         }
         .btn-delete-user-review {
@@ -1289,13 +1444,34 @@ Características princip">
             background: rgba(211, 47, 47, 0.08);
         }
         @media (max-width: 768px) {
-            .review-date-badge {
-                text-align: left;
-            }
             .review-actions-wrap {
                 justify-content: flex-start;
             }
         }
+        /* Naranja de Amazon para el sello de compra verificada. */
+        .rev-verificada {
+            font-family: var(--font-heading);
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #C7511F;
+            margin-top: 2px;
+            line-height: 1.3;
+        }
+        /* Las burbujas van DENTRO del bloque de opiniones, encima de la linea
+           que lo cierra: colgadas por debajo del separador de la ultima
+           opinion se leian como algo ajeno a la lista.
+           La clase la pone renderReviews solo cuando hay mas de una pagina,
+           asi la ultima opinion conserva su linea si no hay paginador. */
+        .reviews-list-wrap.con-paginador .review-card-item:last-child {
+            border-bottom: none;
+            padding-bottom: 6px;
+        }
+        /* Mientras el JS pinta las opiniones el contenedor no debe colapsar:
+           la pagina se acortaba y en movil, al terminar los videos, parecia
+           que ya no habia nada mas abajo. El :empty se deja de cumplir en
+           cuanto entra la primera tarjeta, asi que no deja hueco despues. */
+        #reviewsListContainer:empty { min-height: 70vh; }
+
         .reviews-pagination-row {
             display: flex;
             justify-content: flex-end;
@@ -1304,6 +1480,16 @@ Características princip">
             margin-top: 22px;
             font-size: 12.5px;
             color: var(--text-muted);
+        }
+        .reviews-pagination-row:not(:empty) {
+            margin-top: 12px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        /* En movil la columna es todo el ancho: pegadas a la derecha las
+           burbujas quedaban descolgadas del bloque de opiniones. */
+        @media (max-width: 991px) {
+            .reviews-pagination-row { justify-content: center; }
         }
         .page-btn {
             width: 30px;
@@ -1321,7 +1507,7 @@ Características princip">
             transition: all 0.2s;
         }
         .page-btn.active {
-            background: #1d1d1f;
+            background: #5f6368;
             color: #ffffff;
         }
         .page-btn:hover:not(.active) {
@@ -1721,7 +1907,7 @@ Características princip">
         .section-heading-center {
             font-family: var(--font-heading);
             font-size: 20px;
-            font-weight: 700;
+            font-weight: 800;
             letter-spacing: -0.015em;
             color: #1d1d1f;
             margin-bottom: 20px;
@@ -2108,7 +2294,32 @@ Características princip">
         .btn-add-to-cart { flex: 1; height: 48px; background-color: var(--btn-bg); color: #ffffff; border: none; border-radius: 12px; font-family: var(--font-heading); font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 
         @media (min-width: 992px) {
-            .product-grid-layout { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: start; max-width: 100%; }
+            .product-grid-layout {
+                display: grid;
+                grid-template-columns: 1.1fr 1fr;
+                grid-template-rows: auto 1fr;
+                gap: 48px;
+                align-items: start;
+                max-width: 100%;
+            }
+            /* La galeria ocupa la columna izquierda entera; a la derecha,
+               primero la cabecera y debajo el bloque de compra. */
+            .product-header-block      { grid-column: 2; grid-row: 1; }
+            .gallery-wrapper-desktop   { grid-column: 1; grid-row: 1 / span 2; }
+            /* La columna de la galeria admite una segunda linea: ahi cae la
+               tabla de detalles, que antes dejaba ese hueco en blanco. */
+            .gallery-wrapper-desktop { flex-wrap: wrap; }
+            .pd-desktop { display: block; flex-basis: 100%; margin-top: 26px; margin-bottom: 0; }
+            .pd-movil { display: none; }
+            .product-info              { grid-column: 2; grid-row: 2; }
+            /* El orden del DOM es el de movil. En escritorio los botones de
+               compra bajan por debajo de Presentacion y Cantidad. */
+            .product-info { display: flex; flex-direction: column; }
+            .product-info > *                          { order: 6; }
+            .product-info > .price-block               { order: 1; }
+            .product-info > .apple-shipping-urgency-box{ order: 2; }
+            .product-info > .desktop-action-row        { order: 4; }
+            .product-info > .direct-purchase-row       { order: 5; }
             .desktop-action-row { display: flex; }
             .sticky-footer-bar { display: none !important; }
             body { padding-bottom: 0 !important; }
@@ -2123,7 +2334,14 @@ Características princip">
         
         .lightbox-nav-btn.prev { left: -70px; }
         .lightbox-nav-btn.next { right: -70px; }
-        @media (max-width: 768px) { .lightbox-nav-btn.prev { left: 10px; } .lightbox-nav-btn.next { right: 10px; } }
+        /* En movil no hay flechas: se pasa de foto deslizando, que es el gesto
+           que el usuario ya intenta. Las flechas tapaban parte de la imagen y
+           en pantalla tactil sobran. El deslizamiento ya estaba habilitado
+           sobre #imageLightbox, asi que no se pierde forma de navegar. */
+        @media (max-width: 768px) {
+            /* La regla base usa !important, asi que aqui hace falta tambien. */
+            .lightbox-nav-btn { display: none !important; }
+        }
         .lightbox-thumbs-row { display: flex; gap: 10px; margin-top: 20px; max-width: 90vw; overflow-x: auto; padding: 8px; }
         .lightbox-thumb { width: 54px; height: 54px; border-radius: 6px; overflow: hidden; border: 2px solid transparent; cursor: pointer; opacity: 0.6; transition: all 0.2s; }
         .lightbox-thumb.active { border-color: #ffffff; opacity: 1; transform: scale(1.1); }
@@ -2197,10 +2415,26 @@ Características princip">
             background: #e5e5ea;
             color: #1d1d1f;
         }
+        /* Anunciar envio gratis con el carrito vacio no significa nada: el
+           bloque solo existe cuando hay algo que enviar. Se pliega en vez de
+           desaparecer de golpe, y la barra se llena al aparecer. */
         .shipping-progress-wrap {
             background: rgba(0, 166, 80, 0.05);
+            padding: 0 24px;
+            border-bottom: 1px solid rgba(0, 166, 80, 0);
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height .38s cubic-bezier(.16, 1, .3, 1),
+                        padding .38s cubic-bezier(.16, 1, .3, 1),
+                        opacity .26s ease,
+                        border-bottom-color .3s ease;
+        }
+        .shipping-progress-wrap.visible {
+            max-height: 92px;
             padding: 12px 24px;
-            border-bottom: 1px solid rgba(0, 166, 80, 0.15);
+            opacity: 1;
+            border-bottom-color: rgba(0, 166, 80, 0.15);
         }
         .shipping-progress-text {
             font-size: 12.5px;
@@ -2210,6 +2444,13 @@ Características princip">
             display: flex;
             align-items: center;
             gap: 6px;
+            transform: translateY(-5px);
+            opacity: 0;
+            transition: transform .4s cubic-bezier(.16, 1, .3, 1) .08s, opacity .4s ease .08s;
+        }
+        .shipping-progress-wrap.visible .shipping-progress-text {
+            transform: none;
+            opacity: 1;
         }
         .shipping-bar {
             height: 5px;
@@ -2220,9 +2461,11 @@ Características princip">
         .shipping-bar-fill {
             height: 100%;
             background: #00a650;
-            width: 100%;
+            width: 0;
             border-radius: 980px;
+            transition: width .75s cubic-bezier(.16, 1, .3, 1) .14s;
         }
+        .shipping-progress-wrap.visible .shipping-bar-fill { width: 100%; }
         .cart-items-list {
             flex: 1;
             overflow-y: auto;
@@ -2446,7 +2689,7 @@ Características princip">
             font-weight: 800;
             color: #111827;
             margin: 0;
-            letter-spacing: -0.3px;
+            letter-spacing: -0.015em;
         }
         .video-reviews-subtitle {
             font-size: 13px;
@@ -2477,158 +2720,157 @@ Características princip">
             background: #16a34a;
             transform: scale(1.03);
         }
-        .video-carousel-arrows {
-            display: flex;
-            gap: 6px;
-        }
-        .video-arrow-btn {
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
-            color: #1f2937;
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-            transition: all 0.2s ease;
-        }
-        .video-arrow-btn:hover {
-            background: #111827;
-            color: #ffffff;
-            border-color: #111827;
-        }
+        .video-carousel-wrap { position: relative; }
 
         .video-reviews-carousel-track {
             display: flex;
             gap: 14px;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            padding: 8px 4px 18px 4px;
+            /* Sin desplazamiento nativo: el impulso del navegador recorria
+               varias tarjetas de un gesto y ademas peleaba con el reciclado
+               del bucle. La posicion la fija el JS, una tarjeta por gesto.
+               touch-action: pan-y deja libre el desplazamiento vertical de la
+               pagina; solo se captura el horizontal. */
+            overflow-x: hidden;
+            touch-action: pan-y;
+            outline: none;
+            /* Sin relleno de centrado: ese hueco era el blanco de los extremos.
+               El bucle recicla tarjetas, asi que siempre hay vecinas a los dos
+               lados y cualquiera puede quedar centrada. */
+            padding: 8px 0 18px 0;
             -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 transparent;
+            /* Barra oculta: el desplazamiento se maneja con las flechas */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
-        .video-reviews-carousel-track::-webkit-scrollbar {
-            height: 6px;
+        .video-reviews-carousel-track::-webkit-scrollbar { display: none; }
+
+        /* Indicador discreto: barra corta.
+           Se descarto el contador "n / total" porque con varias tarjetas a la
+           vista jamas alcanza el total (se queda en 5/10) y se lee como roto. */
+        .video-carousel-progreso {
+            position: relative;
+            width: 92px;
+            height: 3px;
+            margin: 4px auto 0 auto;
+            border-radius: 999px;
+            background: #e5e7eb;
+            overflow: hidden;
         }
-        .video-reviews-carousel-track::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 6px;
+        .video-carousel-progreso .vc-barra {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            border-radius: 999px;
+            background: #1f2937;
+            transition: left 0.18s ease, width 0.18s ease;
         }
 
+        /* ─── TARJETA DE SHORT ───
+           Video vertical 9:16 arriba y franja de producto abajo. Solo la
+           tarjeta activa reproduce; las demas quedan atenuadas. */
         .video-review-card {
-            flex: 0 0 160px;
-            height: 250px;
-            border-radius: 14px;
-            position: relative;
+            flex: 0 0 208px;
+            border-radius: 16px;
             overflow: hidden;
-            background: #000000;
+            background: #ffffff;
             cursor: pointer;
-            scroll-snap-align: start;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease;
+            scroll-snap-align: center;
+            box-shadow: 0 3px 14px rgba(0,0,0,0.10);
+            /* Sin atenuar los lados: las vecinas se ven enteras y a color;
+               la activa se distingue por tamano y sombra, no por opacidad. */
+            transform: scale(0.95);
+            transition: transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.32s ease;
             user-select: none;
         }
+        .video-review-card.activa {
+            transform: scale(1);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.20);
+        }
+
+        /* ─── MOVIL: una tarjeta centrada y media a cada lado ───
+           Las medidas van en vw, no en %: el % se resolveria contra el
+           contenido de la pista, que su propio relleno ya encogio, y la
+           tarjeta saldria diminuta.
+           Con tarjeta = 50vw - gap entran justo la central entera y la mitad
+           de cada vecina; el relleno de 25vw + gap/2 es lo que permite que la
+           primera y la ultima tambien lleguen al centro. */
         @media (max-width: 640px) {
-            .video-review-card {
-                flex: 0 0 140px;
-                height: 220px;
-                border-radius: 12px;
-            }
+            /* El carrusel va de borde a borde; el encabezado conserva su margen. */
+            .video-reviews-section { padding-left: 0; padding-right: 0; }
+            .video-reviews-header { padding-left: 16px; padding-right: 16px; }
+
+            .video-review-card { flex: 0 0 calc(50vw - 14px); border-radius: 14px; }
+            /* Sin relleno lateral: lo aporta el bucle recirculando tarjetas. */
+            .video-reviews-carousel-track { padding-left: 0; padding-right: 0; }
         }
-        .video-review-card:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 10px 22px rgba(0,0,0,0.25);
+
+        .vs-media {
+            position: relative;
+            aspect-ratio: 9 / 16;
+            background: #0b0b0d;
+            overflow: hidden;
         }
-        .video-card-thumb {
+        .vs-thumb {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
-            transition: transform 0.4s ease;
-            background: #1e293b;
         }
-        .video-review-card:hover .video-card-thumb {
-            transform: scale(1.06);
-        }
-        .video-card-gradient {
+        /* El reproductor se monta encima de la miniatura solo en la activa.
+           pointer-events:none deja el iframe fuera del alcance del raton: sin
+           eso se puede pulsar el titulo o el logo y YouTube abre su pagina. */
+        .vs-player {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.5) 45%, rgba(0,0,0,0.05) 80%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
             pointer-events: none;
         }
-        .video-card-badge-play {
+        .vs-player iframe { width: 100%; height: 100%; border: 0; display: block; }
+        /* Motor de video propio. El <video> ocupa la tarjeta entera y su primer
+           fotograma hace de portada gracias a preload="metadata", asi que aqui
+           no hacen falta ni miniatura ni el juego de opacidades que existia
+           solo para tapar la interfaz de YouTube. */
+        .vs-video {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            object-fit: cover; display: block;
+            background: #0b0b0d;
+            pointer-events: none;   /* lo unico pulsable es el boton de sonido */
+        }
+        .video-review-card.reproduciendo .vs-player { opacity: 1; }
+        /* La miniatura se apaga con un retraso pequeno: si se fuera a la vez
+           que aparece el video se veria un parpadeo negro entre medias. */
+        .vs-thumb { transition: opacity 0.4s ease 0.12s; }
+        .video-review-card.reproduciendo .vs-thumb { opacity: 0; }
+        /* Nada del video es seleccionable ni arrastrable. */
+        .vs-media { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+
+        /* Boton de sonido */
+        .vs-sonido {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.65);
-            backdrop-filter: blur(4px);
-            color: #ffffff;
-            width: 28px;
-            height: 28px;
+            right: 8px;
+            bottom: 8px;
+            z-index: 4;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
-            display: flex;
+            border: 1px solid rgba(255,255,255,0.35);
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(3px);
+            color: #ffffff;
+            display: none;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
-            padding-left: 2px;
-            border: 1px solid rgba(255,255,255,0.3);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            transition: all 0.2s ease;
-            z-index: 2;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
         }
-        .video-review-card:hover .video-card-badge-play {
-            background: #e11d48;
-            border-color: #e11d48;
-            transform: scale(1.15);
-        }
-        .video-card-info {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 12px 10px;
-            color: #ffffff;
-            z-index: 2;
-            pointer-events: none;
-        }
-        .video-card-stars {
-            color: #f97316;
-            font-size: 13px;
-            letter-spacing: 1.5px;
-            margin-bottom: 3px;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-        }
-        .video-card-duration {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 12px;
-            font-weight: 800;
-            font-family: var(--font-heading, sans-serif);
-            color: #ffffff;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.9);
-        }
-        .play-icon-mini {
-            font-size: 10px;
-            opacity: 0.9;
-        }
-        .video-card-title-text {
-            font-size: 11px;
-            font-weight: 600;
-            color: #e2e8f0;
-            margin-top: 3px;
-            line-height: 1.25;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.9);
-        }
+        .video-review-card.activa .vs-sonido { display: flex; }
+        .vs-sonido:hover { background: rgba(0,0,0,0.72); transform: scale(1.08); }
+        .vs-ico { width: 17px; height: 17px; }
+        .vs-ico-audio { display: none; }
+        .video-review-card.con-sonido .vs-ico-mute { display: none; }
+        .video-review-card.con-sonido .vs-ico-audio { display: block; }
 
         .video-card-admin-bar {
             position: absolute;
@@ -2661,87 +2903,89 @@ Características princip">
             box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         }
 
-        /* ─── VIDEO LIGHTBOX MODAL ─── */
-        .video-modal-backdrop {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.88);
-            backdrop-filter: blur(8px);
-            z-index: 9999999;
-            justify-content: center;
-            align-items: center;
-            padding: 16px;
-            box-sizing: border-box;
-            opacity: 0;
-            transition: opacity 0.25s ease;
-        }
-        .video-modal-backdrop.active {
-            display: flex;
-            opacity: 1;
-        }
-        .video-modal-container {
-            position: relative;
-            width: 100%;
-            max-width: 820px;
-            background: #000000;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            transform: scale(0.94);
-            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        .video-modal-backdrop.active .video-modal-container {
-            transform: scale(1);
-        }
-        .video-modal-close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 20;
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            color: #ffffff;
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-        .video-modal-close-btn:hover {
-            background: #ef4444;
-            border-color: #ef4444;
-            transform: scale(1.1);
-        }
-        .video-modal-iframe-wrapper {
-            position: relative;
-            width: 100%;
-            padding-top: 56.25%; /* 16:9 Aspect Ratio */
-            background: #000000;
-        }
-        .video-modal-iframe-wrapper iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 0;
-        }
-            .review-title-text { font-family: var(--font-heading); font-weight: 700; font-size: 13.5px; color: #1d1d1f; margin: 2px 0 4px; line-height: 1.35; }
         .reviewer-place { font-size: 11.5px; color: #86868b; }
-        .review-photos { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-        .review-photo { width: 74px; height: 74px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-light); cursor: zoom-in; transition: transform .2s ease; background: #fbfbfd; }
-        .review-photo:hover { transform: scale(1.06); }
-        .review-helpful { margin-top: 9px; font-size: 11.5px; color: #86868b; }
-        .review-photo-backdrop { position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,.88); display: none; align-items: center; justify-content: center; padding: 24px; cursor: zoom-out; }
+        /* ─── FOTOS DE LA OPINION ───
+           En fila y desplazables: con dos caben en pantalla y no hay nada que
+           desplazar, y a partir de la tercera se recorren de lado sin que la
+           tarjeta crezca a lo alto. Sin barra a la vista. */
+        .review-photos {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 10px;
+            margin-top: 12px;
+            overflow-x: auto;
+            scroll-snap-type: x proximity;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            touch-action: pan-x pan-y;
+            padding-bottom: 2px;
+        }
+        .review-photos::-webkit-scrollbar { display: none; }
+        .review-photo {
+            flex: 0 0 auto;
+            width: 148px;
+            height: 148px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid var(--border-light);
+            cursor: zoom-in;
+            transition: transform .2s ease;
+            background: #fbfbfd;
+            scroll-snap-align: start;
+        }
+        .review-photo:hover { transform: scale(1.03); }
+        @media (max-width: 480px) {
+            .review-photo { width: 132px; height: 132px; }
+        }
+        /* Fila del voto: boton pulsable + contador. Antes solo estaba el
+           contador, que anunciaba votos sin ofrecer forma de votar. */
+        .rev-util-fila { display: flex; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+        .rev-util {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 5px 11px;
+            border: 1px solid #e3e5e5;
+            border-radius: 999px;
+            background: #f7f8f8;
+            font-family: var(--font-heading);
+            /* Icono y texto en un gris apenas mas oscuro que el fondo del
+               boton: presente pero discreto, sin competir con la opinion. */
+            font-size: 11.5px; font-weight: 600; color: #8a8f8f;
+            cursor: pointer;
+            transition: background .18s ease, border-color .18s ease, color .18s ease;
+        }
+        .rev-util svg { width: 13px; height: 13px; }
+        .rev-util:hover { background: #eef0f0; border-color: #d5d9d9; color: #0f1111; }
+        /* Votado: gris un punto mas oscuro que el de reposo. Suficiente para
+           distinguirlo, sin que el boton compita con el texto de la opinion. */
+        .rev-util.votado { background: #e8eaea; border-color: #c9cdcd; color: #828787; }
+        .rev-util.votado:hover { background: #dfe2e2; border-color: #b9bfbf; }
+        .rev-util-cuenta { font-size: 12.5px; color: #565959; }
+        /* Visor de las fotos de una opinion. Antes mostraba solo la imagen
+           tocada y no habia manera de llegar a las demas. Ahora es una pista
+           deslizable con todas, una por pantalla y sin flechas, igual que el
+           visor de la galeria. */
+        .review-photo-backdrop { position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,.88); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 24px 0 26px; }
         .review-photo-backdrop.open { display: flex; }
-        .review-photo-backdrop img { max-width: 100%; max-height: 100%; border-radius: 10px; object-fit: contain; }
+        .rvf-pista {
+            display: flex; width: 100%; flex: 1; min-height: 0;
+            overflow-x: auto; overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .rvf-pista::-webkit-scrollbar { display: none; }
+        .rvf-slide { flex: 0 0 100%; scroll-snap-align: center; display: flex; align-items: center; justify-content: center; padding: 0 18px; box-sizing: border-box; }
+        .rvf-slide img { max-width: 100%; max-height: 100%; border-radius: 10px; object-fit: contain; }
+        .rvf-puntos { display: flex; gap: 6px; margin-top: 16px; height: 6px; }
+        .rvf-punto { width: 6px; height: 6px; border-radius: 999px; background: rgba(255,255,255,.35); transition: background .2s ease, width .2s ease; }
+        .rvf-punto.activo { background: #ffffff; width: 16px; }
+        .rvf-cerrar {
+            position: absolute; top: 14px; right: 14px; width: 40px; height: 40px;
+            border: none; border-radius: 50%; background: rgba(255,255,255,.14);
+            color: #ffffff; font-size: 16px; line-height: 1; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .rvf-cerrar:hover { background: rgba(255,255,255,.24); }
     </style>
     <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
 </head>
@@ -2780,10 +3024,10 @@ Características princip">
         </div>
 
         <div class="nav-center-logo">
-            <?php if (file_exists(__DIR__ . '/logo.svg')): ?>
-                <img src="logo.svg" class="brand-logo-img" alt="<?= htmlspecialchars('DJI') ?>">
-            <?php elseif (file_exists(__DIR__ . '/logo.webp')): ?>
-                <img src="logo.webp" class="brand-logo-img" alt="<?= htmlspecialchars('DJI') ?>">
+            <?php if (file_exists(__DIR__ . '/assets/marca/logo.svg')): ?>
+                <img src="assets/marca/logo.svg" class="brand-logo-img" alt="<?= htmlspecialchars('DJI') ?>">
+            <?php elseif (file_exists(__DIR__ . '/assets/marca/logo.webp')): ?>
+                <img src="assets/marca/logo.webp" class="brand-logo-img" alt="<?= htmlspecialchars('DJI') ?>">
             <?php else: ?>
                 <span class="brand-logo-text" data-editable="true"><?= htmlspecialchars('DJI') ?></span>
             <?php endif; ?>
@@ -2806,10 +3050,10 @@ Características princip">
         <div class="nav-menu-drawer">
             <div class="nav-menu-header">
                 <div class="nav-menu-brand">
-                    <?php if (file_exists(__DIR__ . '/logo.svg')): ?>
-                        <img src="logo.svg" style="height:40px; max-width:130px; object-fit:contain; display:block;" alt="<?= htmlspecialchars('DJI') ?>">
-                    <?php elseif (file_exists(__DIR__ . '/logo.webp')): ?>
-                        <img src="logo.webp" style="height:40px; max-width:130px; object-fit:contain; display:block;" alt="<?= htmlspecialchars('DJI') ?>">
+                    <?php if (file_exists(__DIR__ . '/assets/marca/logo.svg')): ?>
+                        <img src="assets/marca/logo.svg" style="height:40px; max-width:130px; object-fit:contain; display:block;" alt="<?= htmlspecialchars('DJI') ?>">
+                    <?php elseif (file_exists(__DIR__ . '/assets/marca/logo.webp')): ?>
+                        <img src="assets/marca/logo.webp" style="height:40px; max-width:130px; object-fit:contain; display:block;" alt="<?= htmlspecialchars('DJI') ?>">
                     <?php else: ?>
                         <span class="nav-menu-brand-text"><?= htmlspecialchars('DJI') ?></span>
                     <?php endif; ?>
@@ -2821,38 +3065,66 @@ Características princip">
                     Producto
                 </a>
                 <a href="#videoReviewsSection" class="nav-menu-link" onclick="navegarSeccion(event, 'videoReviewsSection')">
-                    Video Reviews
+                    Opiniones en video
                 </a>
                 <a href="#customerReviewsSection" class="nav-menu-link" onclick="navegarSeccion(event, 'customerReviewsSection')">
-                    Customer Reviews
+                    Opiniones de clientes
                 </a>
                 <a href="#recommendedProductsSection" class="nav-menu-link" onclick="navegarSeccion(event, 'recommendedProductsSection')">
-                    Quienes vieron este producto
+                    Tambien compraron
                 </a>
             </nav>
         </div>
     </div>
 
-    <!-- SEPARACION GRIS ENTRE NAVBAR Y GALERIA: aloja el titulo -->
-    <div class="navbar-gallery-spacer">
-        <div class="spacer-head">
-            <h1 class="product-title" data-editable="true"><?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1"') ?></h1>
-            <div class="rating-row">
-                <span class="rating-number">4.9</span>
-                <div class="stars-container">★★★★★</div>
-                <span class="reviews-count" data-editable="true">(48)</span>
-            </div>
-        </div>
-        <?php if (trim($compras_mes) !== ''): ?>
-        <div class="bought-month"><strong><?= htmlspecialchars($compras_mes) ?> comprados</strong> el mes pasado</div>
-        <?php endif; ?>
-    </div>
+    <!-- SEPARACION GRIS CLARO ENTRE NAVBAR Y GALERIA (solo escritorio) -->
+    <div class="navbar-gallery-spacer"></div>
 
     <!-- 4. CONTENIDO PRINCIPAL -->
     <main class="landing-container" id="productSection">
         <div class="product-grid-layout">
 
+            <!-- CABECERA DEL PRODUCTO: titulo, calificacion y compras.
+                 Una sola copia en el DOM. En movil encabeza la pagina sobre
+                 la galeria (con la banda gris); en escritorio la CSS la
+                 coloca arriba de la columna derecha, sobre el precio. -->
+            <div class="product-header-block">
+                <div class="spacer-head">
+                    <h1 class="product-title" data-editable="true"><?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1"') ?></h1>
+                    <div class="rating-row">
+                        <span class="rating-number">4.9</span>
+                        <div class="stars-container">★★★★★</div>
+                        <span class="reviews-count" data-editable="true">(48<span class="rc-word"> opiniones</span>)</span>
+                    </div>
+                </div>
+                <?php if (trim($compras_mes) !== ''): ?>
+                <div class="bought-month"><strong><span class="bm-movil"><?= htmlspecialchars($compras_mes) ?> K+</span><span class="bm-desktop">Más de <?= number_format(((int)$compras_mes) * 1000, 0, ',', '.') ?></span> comprados</strong> el mes pasado</div>
+                <?php endif; ?>
+            </div>
+
             <!-- COLUMNA 1: GALERÍA CON SLIDE Y PUNTICOS INDICADORES -->
+            <?php
+                /* Detalles del producto. Los valores salen de la propia ficha:
+                   la marca la trae la base de datos y el resto ya figura en la
+                   descripcion, asi que no hay dato inventado.
+                   La tabla se pinta DOS veces, desde este mismo array: en
+                   escritorio bajo la galeria (donde sobraba espacio) y en movil
+                   dentro del flujo, sobre la descripcion. La CSS enseña solo la
+                   que corresponde, asi que el lector nunca ve las dos. */
+                $detalles_producto = [
+                    'Marca'                  => $nombre_marca,
+                    'Modelo'                 => 'Osmo Pocket 4 Creator Combo',
+                    'Sensor'                 => 'CMOS de 1"',
+                    'Resolución de video'    => '4K a 120 fps',
+                    'Estabilización'         => 'Mecánica de 3 ejes',
+                    'Zoom'                   => '2X sin pérdida',
+                    'Almacenamiento interno' => '107 GB',
+                    'Audio'                  => 'Compatible con DJI Mic 3',
+                    'Contenido'              => '1 Unidad',
+                    'Garantía'               => '3 años',
+                ];
+            ?>
+
             <section class="gallery-wrapper-desktop">
                 <!-- MINIATURAS DESKTOP (IZQUIERDA) -->
                 <div class="gallery-thumbnails-strip" id="galleryThumbsStrip"></div>
@@ -2863,6 +3135,22 @@ Características princip">
                     </div>
                     <!-- PUNTICOS INDICADORES DE LA GALERÍA (solo móvil) -->
                     <div class="gallery-dots-indicator" id="galleryDotsIndicator"></div>
+                </div>
+
+                <!-- DETALLES DEL PRODUCTO (solo escritorio): baja a una segunda
+                     linea de la columna y ocupa el hueco que dejaba la galeria. -->
+                <div class="product-details-block pd-desktop">
+                    <h3 class="product-details-title" data-editable="true">Detalles del producto</h3>
+                    <table class="product-details-table">
+                        <tbody>
+                        <?php foreach ($detalles_producto as $etiqueta => $valor): ?>
+                            <tr>
+                                <th scope="row"><?= htmlspecialchars($etiqueta) ?></th>
+                                <td><?= htmlspecialchars($valor) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
@@ -2876,27 +3164,25 @@ Características princip">
                         <span class="discount-pill" data-editable="true">-64%</span>
 
                         <?php
-                        /* Puntos Colombia: 1 punto por cada $700 de compra (tasa
-                       oficial de acumulacion). Se calcula del precio real de la
+                        /* Puntos Colombia: 1 punto por cada $700 de compra (tasa
+                       oficial de acumulacion). Se calcula del precio real de la
                        landing, asi que cambia solo si cambia el precio. */
                             $pc_puntos = (int)floor(((int)$precio_num) / PUNTOS_COLOMBIA_PESOS_POR_PUNTO);
                         ?>
                         <?php if ($pc_puntos > 0): ?>
-                    <div class="puntos-colombia-row">
-                    <!-- Marca oficial de Puntos Colombia en morado de marca -->
-                    <svg class="pc-mark" width="22" height="22" viewBox="0 0 30 30" aria-hidden="true">
-                        <rect width="30" height="30" rx="4" fill="#662D91"/>
-                        <path d="M5.83,25H.626A.627.627,0,0,1,0,24.374V10.461A10.655,10.655,0,0,1,10.651,0l.206,0a10.65,10.65,0,0,1,7.377,18.126A10.66,10.66,0,0,1,6.844,20.6a.289.289,0,0,0-.1-.019.285.285,0,0,0-.285.284v3.509A.626.626,0,0,1,5.83,25ZM10.977,5.113a5.155,5.155,0,0,0-3.9,1.5A5.648,5.648,0,0,0,5.646,10.65a5.7,5.7,0,0,0,1.4,4.032,4.934,4.934,0,0,0,3.8,1.5,4.958,4.958,0,0,0,3.3-1.1,4.211,4.211,0,0,0,1.5-2.879H13.293a2.388,2.388,0,0,1-2.467,2.005,2.444,2.444,0,0,1-2.05-.987,4.108,4.108,0,0,1-.752-2.574A4.127,4.127,0,0,1,8.79,8.068a2.46,2.46,0,0,1,2.066-.98,2.4,2.4,0,0,1,2.437,2h2.362a4.408,4.408,0,0,0-1.481-2.886A4.758,4.758,0,0,0,10.977,5.113Z"
-                              transform="translate(5.6 3.2) scale(0.79)" fill="#fff"/>
-                    </svg>
-                    <span class="pc-text">Acumulas hasta <b><?= number_format($pc_puntos, 0, ',', '.') ?></b> Puntos Colombia</span>
-                    <svg class="pc-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round" role="img"
-                         aria-label="Acumulas 1 punto por cada $<?= number_format(PUNTOS_COLOMBIA_PESOS_POR_PUNTO, 0, ',', '.') ?> de compra">
-                        <title>Acumulas 1 Punto Colombia por cada $<?= number_format(PUNTOS_COLOMBIA_PESOS_POR_PUNTO, 0, ',', '.') ?> de compra.</title>
-                        <circle cx="12" cy="12" r="9"/><path d="M12 11v5"/>
-                        <circle cx="12" cy="7.6" r="1" fill="currentColor" stroke="none"/>
-                    </svg>
+                    <div class="puntos-colombia-row">
+                    <!-- Marca de Puntos Colombia: archivo del proyecto.
+                         Lleva aria-hidden porque el texto contiguo ya dice
+                         "Puntos Colombia" y repetirlo sobraria al leerlo. -->
+                    <img class="pc-mark" src="assets/sellos/puntoscol.svg" alt="" aria-hidden="true">
+                    <span class="pc-text">Acumulas hasta <b><?= number_format($pc_puntos, 0, ',', '.') ?></b> Puntos Colombia</span>
+                    <svg class="pc-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" role="img"
+                         aria-label="Acumulas 1 punto por cada $<?= number_format(PUNTOS_COLOMBIA_PESOS_POR_PUNTO, 0, ',', '.') ?> de compra">
+                        <title>Acumulas 1 Punto Colombia por cada $<?= number_format(PUNTOS_COLOMBIA_PESOS_POR_PUNTO, 0, ',', '.') ?> de compra.</title>
+                        <circle cx="12" cy="12" r="9"/><path d="M12 11v5"/>
+                        <circle cx="12" cy="7.6" r="1" fill="currentColor" stroke="none"/>
+                    </svg>
                 </div>
                         <?php endif; ?>
                     </div>
@@ -2905,94 +3191,134 @@ Características princip">
                 <!-- CAJA DE ENVÍO URGENTE Y CONTADOR PERSISTENTE -->
                 <div class="apple-shipping-urgency-box">
                     <div class="shipping-lead-row">
-                        <svg class="shipping-flash-icon" viewBox="0 0 24 24" width="20" height="20" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="shipping-flash-icon" viewBox="0 0 24 24" width="20" height="20" fill="#27272A" stroke="#27272A" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
                             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                         </svg>
                         <div class="shipping-lead-text">
                             <span class="shipping-badge-highlight" data-editable="true">Llega gratis <b>mañana</b></span>
                             <div class="shipping-timer-subtext">
-                                <span data-editable="true">Comprando dentro de las próximas</span> <span class="shipping-countdown-val" id="shippingCountdown">20 h 40 min 00 s</span>
+                                <span data-editable="true">Comprando dentro de las próximas</span> <span class="shipping-countdown-val" id="shippingCountdown">20 h 40 min</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                
-
-                <div class="size-block">
-                    <div class="variant-header"><div class="variant-label">Presentación:</div></div>
-                    <div class="size-pills-row">
-                        <button class="size-pill" data-editable="true"><?= htmlspecialchars('1 Unidad') ?></button>
-                    </div>
+                <!-- COMPRA DIRECTA: dos botones, justo bajo precio/envio -->
+                <div class="direct-purchase-row">
+                    <button type="button" class="btn-buy-now" onclick="comprarAhora()" data-editable="true">Comprar ahora</button>
+                    <button type="button" class="btn-add-cart-outline" onclick="agregarAlCarrito(event)" data-editable="true">Agregar al carrito</button>
                 </div>
 
                 <div class="desktop-action-row">
+                    <div class="qty-label">Cantidad</div>
                     <div class="qty-controls-desktop">
                         <button class="qty-btn-desktop" onclick="cambiarCantidad(-1)">-</button>
                         <span class="qty-val-desktop" id="qtyDesktopDisplay">1</span>
                         <button class="qty-btn-desktop" onclick="cambiarCantidad(1)">+</button>
                     </div>
-                    <button class="btn-add-desktop" onclick="agregarAlCarrito(event)" data-editable="true">
-                        Añadir al carro
-                    </button>
                 </div>
 
-                <div class="accordion-item">
-                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                <div class="product-details-block pd-movil">
+                    <h3 class="product-details-title" data-editable="true">Detalles del producto</h3>
+                    <table class="product-details-table">
+                        <tbody>
+                        <?php foreach ($detalles_producto as $etiqueta => $valor): ?>
+                            <tr>
+                                <th scope="row"><?= htmlspecialchars($etiqueta) ?></th>
+                                <td><?= htmlspecialchars($valor) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="accordion-item desc-item<?= $es_modo_edicion ? ' desc-abierta' : '' ?>">
+                    <div class="accordion-header accordion-header-fijo">
                         <span data-editable="true">Descripción y Beneficios</span>
-                        <span>▾</span>
-                    </button>
-                    <div class="accordion-body open"><p data-editable="true">Una cámara compacta y profesional, perfecta para creadores de contenido, viajes, vlogs, redes sociales y videos de alta calidad.<br />
-<br />
-Características principales<br />
-Sensor CMOS de 1&quot; para imágenes claras y detalladas.<br />
-Video en 4K para una excelente calidad de grabación.<br />
-Estabilización mecánica de 3 ejes para videos suaves y estables.<br />
-Pantalla táctil giratoria para grabar fácilmente en vertical u horizontal.<br />
-ActiveTrack para realizar seguimiento inteligente del sujeto.<br />
-Zoom 2X sin pérdida.<br />
-Almacenamiento interno de 107 GB.<br />
-Grabación en 10-bit D-Log para mayor detalle y mejores colores.<br />
-Compatible con DJI Mic 3 para obtener audio de alta calidad.<br />
-<br />
-<br />
-Creator Combo incluye<br />
-DJI Osmo Pocket 4<br />
-Transmisor DJI Mic 3<br />
-Luz de relleno<br />
-Lente gran angular<br />
-Mini trípode<br />
-Accesorios para transporte y protección<br />
-<br />
-Aviso legal<br />
-• La duración de la batería depende del uso que se le dé al producto.</p>
+                    </div>
+                    <div class="accordion-body open">
+                        <div class="desc-cuerpo">
+                            <p data-editable="true">Una cámara compacta y profesional, perfecta para creadores de contenido, viajes, vlogs, redes sociales y videos de alta calidad.</p>
+
+                            <h4 class="desc-subtitulo" data-editable="true">Características principales</h4>
+                            <ul class="desc-lista">
+                                <li data-editable="true">Sensor CMOS de 1&quot; para imágenes claras y detalladas.</li>
+                                <li data-editable="true">Video en 4K para una excelente calidad de grabación.</li>
+                                <li data-editable="true">Estabilización mecánica de 3 ejes para videos suaves y estables.</li>
+                                <li data-editable="true">Pantalla táctil giratoria para grabar fácilmente en vertical u horizontal.</li>
+                                <li data-editable="true">ActiveTrack para realizar seguimiento inteligente del sujeto.</li>
+                                <li data-editable="true">Zoom 2X sin pérdida.</li>
+                                <li data-editable="true">Almacenamiento interno de 107 GB.</li>
+                                <li data-editable="true">Grabación en 10-bit D-Log para mayor detalle y mejores colores.</li>
+                                <li data-editable="true">Compatible con DJI Mic 3 para obtener audio de alta calidad.</li>
+                            </ul>
+
+                            <h4 class="desc-subtitulo" data-editable="true">Creator Combo incluye</h4>
+                            <ul class="desc-lista">
+                                <li data-editable="true">DJI Osmo Pocket 4</li>
+                                <li data-editable="true">Transmisor DJI Mic 3</li>
+                                <li data-editable="true">Luz de relleno</li>
+                                <li data-editable="true">Lente gran angular</li>
+                                <li data-editable="true">Mini trípode</li>
+                                <li data-editable="true">Accesorios para transporte y protección</li>
+                            </ul>
+
+                            <h4 class="desc-subtitulo" data-editable="true">Aviso legal</h4>
+                            <ul class="desc-lista">
+                                <li data-editable="true">La duración de la batería depende del uso que se le dé al producto.</li>
+                            </ul>
+                        </div>
+                        <?php if (!$es_modo_edicion): ?>
+                        <button type="button" class="desc-toggle" onclick="toggleDescripcion(this)" aria-expanded="false">
+                            <svg class="desc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="m6 9 6 6 6-6"></path>
+                            </svg>
+                            <span class="desc-toggle-txt">Ver más</span>
+                        </button>
+                        <?php endif; ?>
                     </div>
                 </div>
 
-                <div class="accordion-item">
-                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                <div class="accordion-item desc-item<?= $es_modo_edicion ? ' desc-abierta' : '' ?>">
+                    <div class="accordion-header accordion-header-fijo">
                         <span data-editable="true">Garantía y Devoluciones</span>
-                        <span>▾</span>
-                    </button>
-                    <div class="accordion-body">
-                        <p data-editable="true">Todos nuestros productos cuentan con garantia de 3 años contra defectos de fabrica. Si no estas 100% satisfecho(a), te devolvemos tu dinero.</p>
                     </div>
-                </div>
+                    <div class="accordion-body open">
+                        <div class="desc-cuerpo">
+                            <p data-editable="true">Todos nuestros productos cuentan con garantía de 3 años contra defectos de fábrica. Si no estás 100% satisfecho(a), te devolvemos tu dinero.</p>
 
-                <!-- SECURE PAYMENT -->
-                <div class="secure-trust-box">
-                    <div class="secure-trust-header">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                            <path d="m9 12 2 2 4-4"></path>
-                        </svg>
-                        <span data-editable="true">Secure Payment</span>
+                            <h4 class="desc-subtitulo" data-editable="true">Qué cubre la garantía</h4>
+                            <ul class="desc-lista">
+                                <li data-editable="true">Fallas de fábrica en el sensor, el estabilizador y la batería.</li>
+                                <li data-editable="true">Defectos en la pantalla táctil o en los puertos de conexión.</li>
+                                <li data-editable="true">Accesorios del Creator Combo con fallas de origen.</li>
+                            </ul>
+
+                            <h4 class="desc-subtitulo" data-editable="true">Devoluciones</h4>
+                            <ul class="desc-lista">
+                                <li data-editable="true">Tienes 30 días desde que recibes el pedido para solicitar la devolución.</li>
+                                <li data-editable="true">El producto debe estar completo, con sus accesorios y su empaque original.</li>
+                                <li data-editable="true">El reembolso se hace por el mismo medio de pago, dentro de los 10 días hábiles siguientes.</li>
+                            </ul>
+
+                            <h4 class="desc-subtitulo" data-editable="true">Qué no cubre</h4>
+                            <ul class="desc-lista">
+                                <li data-editable="true">Daños por golpes, caídas, humedad o uso indebido.</li>
+                                <li data-editable="true">Desgaste normal de la batería con el paso del tiempo.</li>
+                                <li data-editable="true">Reparaciones hechas por terceros no autorizados.</li>
+                            </ul>
+                        </div>
+                        <?php if (!$es_modo_edicion): ?>
+                        <button type="button" class="desc-toggle" onclick="toggleDescripcion(this)" aria-expanded="false">
+                            <svg class="desc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="m6 9 6 6 6-6"></path>
+                            </svg>
+                            <span class="desc-toggle-txt">Ver más</span>
+                        </button>
+                        <?php endif; ?>
                     </div>
-                    <ul class="secure-trust-list">
-                        <li><span class="check-icon">✓</span> <span data-editable="true"><b>Pago Contra Entrega disponible:</b> Paga en efectivo cuando recibas tu pedido en la puerta de tu casa.</span></li>
-                        <li><span class="check-icon">✓</span> <span data-editable="true">Tus datos y compras están protegidos con cifrado de seguridad.</span></li>
-                        <li><span class="check-icon">✓</span> <span data-editable="true"><?= htmlspecialchars('DJI') ?> comparte información de pago únicamente con proveedores de pago confiables comprometidos con proteger tus datos.</span></li>
-                    </ul>
                 </div>
             </section>
 
@@ -3003,8 +3329,8 @@ Aviso legal<br />
     <section class="video-reviews-section" id="videoReviewsSection">
         <div class="video-reviews-header">
             <div class="video-reviews-title-wrap">
-                <h2 class="video-reviews-main-title" data-editable="true">Reviews with videos</h2>
-                <span class="video-reviews-subtitle" data-editable="true">Opiniones y unboxings en video verificados</span>
+                <h2 class="video-reviews-main-title" data-editable="true">Opiniones en video</h2>
+                <span class="video-reviews-subtitle" data-editable="true">Mira experiencias y unboxings de compradores reales</span>
             </div>
             <div class="video-reviews-controls">
                 <?php if ($es_modo_edicion): ?>
@@ -3013,186 +3339,188 @@ Aviso legal<br />
             </div>
         </div>
 
+        <div class="video-carousel-wrap">
         <div class="video-reviews-carousel-track" id="videoReviewsTrack">
-            <div class="video-review-card" data-youtube-id="epRh_cminDM" data-video-title="" onclick="manejarClickVideoCard(this, event)">
-                <img class="video-card-thumb" src="https://i.ytimg.com/vi/epRh_cminDM/hqdefault.jpg" referrerpolicy="no-referrer" alt="" loading="lazy">
-                <div class="video-card-gradient"></div>
-                <div class="video-card-badge-play">▶</div>
-                <div class="video-card-info">
-                    <div class="video-card-stars">★★★★★</div>
-                    
-                    <div class="video-card-title-text" data-editable="true"></div>
+<?php if ($videos_locales): ?>
+            <?php foreach ($videos_locales as $i_vid => $src_vid): ?>
+            <article class="video-review-card" data-video-src="<?= htmlspecialchars($src_vid, ENT_QUOTES, 'UTF-8') ?>">
+                <div class="vs-media">
+                    <!-- preload="metadata" trae solo la cabecera y el primer
+                         fotograma: sirve de portada sin descargar el video. Al
+                         llegar al centro se sube a "auto". -->
+                    <video class="vs-video" src="<?= htmlspecialchars($src_vid, ENT_QUOTES, 'UTF-8') ?>"
+                           preload="metadata" muted loop playsinline
+                           disablepictureinpicture controlslist="nodownload noplaybackrate"></video>
+                    <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
+                        <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6"/><path d="m17 9 6 6"/>
+                        </svg>
+                        <svg class="vs-ico vs-ico-audio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+                        </svg>
+                    </button>
                 </div>
-                <?php if ($es_modo_edicion): ?>
-                <div class="video-card-admin-bar" onclick="event.stopPropagation()">
-                    <button type="button" class="btn-vcard-edit" onclick="editarVideoCard(this.closest('.video-review-card'))" title="Editar link de YouTube">✏️ Editar</button>
-                    <button type="button" class="btn-vcard-del" onclick="eliminarVideoCard(this.closest('.video-review-card'))" title="Eliminar video">🗑️</button>
+            </article>
+            <?php endforeach; ?>
+<?php else: ?>
+            <article class="video-review-card" data-youtube-id="ZEIAI6248rE" data-video-title="¿Vale la pena el DJI Osmo Pocket 3?">
+                <div class="vs-media">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/ZEIAI6248rE/oar2.jpg" referrerpolicy="no-referrer" alt="¿Vale la pena el DJI Osmo Pocket 3?" loading="lazy">
+                    <div class="vs-player"></div>
+                    <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
+                        <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6"/><path d="m17 9 6 6"/>
+                        </svg>
+                        <svg class="vs-ico vs-ico-audio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+                        </svg>
+                    </button>
                 </div>
-                <?php endif; ?>
+            </article>
+            <article class="video-review-card" data-youtube-id="m9q7Y8XgeFY" data-video-title="¿Vale la pena el DJI Osmo Pocket 3 en 2025?">
+                <div class="vs-media">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/m9q7Y8XgeFY/oar2.jpg" referrerpolicy="no-referrer" alt="¿Vale la pena el DJI Osmo Pocket 3 en 2025?" loading="lazy">
+                    <div class="vs-player"></div>
+                    <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
+                        <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6"/><path d="m17 9 6 6"/>
+                        </svg>
+                        <svg class="vs-ico vs-ico-audio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+                        </svg>
+                    </button>
+                </div>
+            </article>
+            <article class="video-review-card" data-youtube-id="Cu6c5yubH-0" data-video-title="Osmo Pocket 3 para principiantes">
+                <div class="vs-media">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/Cu6c5yubH-0/oar2.jpg" referrerpolicy="no-referrer" alt="Osmo Pocket 3 para principiantes" loading="lazy">
+                    <div class="vs-player"></div>
+                    <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
+                        <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6"/><path d="m17 9 6 6"/>
+                        </svg>
+                        <svg class="vs-ico vs-ico-audio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+                        </svg>
+                    </button>
+                </div>
+            </article>
+            <article class="video-review-card" data-youtube-id="y_aeaNdX5KQ" data-video-title="Pros y contras de la DJI Osmo Pocket 3">
+                <div class="vs-media">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/y_aeaNdX5KQ/oar2.jpg" referrerpolicy="no-referrer" alt="Pros y contras de la DJI Osmo Pocket 3" loading="lazy">
+                    <div class="vs-player"></div>
+                    <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
+                        <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6"/><path d="m17 9 6 6"/>
+                        </svg>
+                        <svg class="vs-ico vs-ico-audio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+                        </svg>
+                    </button>
+                </div>
+            </article>
+            <article class="video-review-card" data-youtube-id="NLrCV7gGOns" data-video-title="¿Por qué todos tienen esta cámara?">
+                <div class="vs-media">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/NLrCV7gGOns/oar2.jpg" referrerpolicy="no-referrer" alt="¿Por qué todos tienen esta cámara?" loading="lazy">
+                    <div class="vs-player"></div>
+                    <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
+                        <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6"/><path d="m17 9 6 6"/>
+                        </svg>
+                        <svg class="vs-ico vs-ico-audio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+                        </svg>
+                    </button>
+                </div>
+            </article>
+            <article class="video-review-card" data-youtube-id="mfvtASeI8sY" data-video-title="DJI Osmo Pocket 3 vs iPhone para vlogs">
+                <div class="vs-media">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/mfvtASeI8sY/oar2.jpg" referrerpolicy="no-referrer" alt="DJI Osmo Pocket 3 vs iPhone para vlogs" loading="lazy">
+                    <div class="vs-player"></div>
+                    <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
+                        <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6"/><path d="m17 9 6 6"/>
+                        </svg>
+                        <svg class="vs-ico vs-ico-audio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+                        </svg>
+                    </button>
+                </div>
+            </article>
+            <article class="video-review-card" data-youtube-id="oPou2xqlWlo" data-video-title="¿La mejor cámara de bolsillo?">
+                <div class="vs-media">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/oPou2xqlWlo/oar2.jpg" referrerpolicy="no-referrer" alt="¿La mejor cámara de bolsillo?" loading="lazy">
+                    <div class="vs-player"></div>
+                    <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
+                        <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6"/><path d="m17 9 6 6"/>
+                        </svg>
+                        <svg class="vs-ico vs-ico-audio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+                        </svg>
+                    </button>
+                </div>
+            </article>
+            <article class="video-review-card" data-youtube-id="f1-JQou-jZI" data-video-title="Desempaquetando mi nueva cámara para vlogs">
+                <div class="vs-media">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/f1-JQou-jZI/oar2.jpg" referrerpolicy="no-referrer" alt="Desempaquetando mi nueva cámara para vlogs" loading="lazy">
+                    <div class="vs-player"></div>
+                    <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
+                        <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6"/><path d="m17 9 6 6"/>
+                        </svg>
+                        <svg class="vs-ico vs-ico-audio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+                        </svg>
+                    </button>
+                </div>
+            </article>
+            <article class="video-review-card" data-youtube-id="M0BUo2ntniI" data-video-title="NO compres el DJI Pocket 3">
+                <div class="vs-media">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/M0BUo2ntniI/oar2.jpg" referrerpolicy="no-referrer" alt="NO compres el DJI Pocket 3" loading="lazy">
+                    <div class="vs-player"></div>
+                    <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
+                        <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6"/><path d="m17 9 6 6"/>
+                        </svg>
+                        <svg class="vs-ico vs-ico-audio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+                        </svg>
+                    </button>
+                </div>
+            </article>
+            <article class="video-review-card" data-youtube-id="o5mGJLLTi4Y" data-video-title="Truco para grabar en 4K horizontal">
+                <div class="vs-media">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/o5mGJLLTi4Y/oar2.jpg" referrerpolicy="no-referrer" alt="Truco para grabar en 4K horizontal" loading="lazy">
+                    <div class="vs-player"></div>
+                    <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
+                        <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6"/><path d="m17 9 6 6"/>
+                        </svg>
+                        <svg class="vs-ico vs-ico-audio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+                        </svg>
+                    </button>
+                </div>
+            </article>
+<?php endif; ?>
             </div>
-            <div class="video-review-card" data-youtube-id="IPtdB3FCLpU" data-video-title="" onclick="manejarClickVideoCard(this, event)">
-                <img class="video-card-thumb" src="https://i.ytimg.com/vi/IPtdB3FCLpU/hqdefault.jpg" referrerpolicy="no-referrer" alt="" loading="lazy">
-                <div class="video-card-gradient"></div>
-                <div class="video-card-badge-play">▶</div>
-                <div class="video-card-info">
-                    <div class="video-card-stars">★★★★★</div>
-                    
-                    <div class="video-card-title-text" data-editable="true"></div>
-                </div>
-                <?php if ($es_modo_edicion): ?>
-                <div class="video-card-admin-bar" onclick="event.stopPropagation()">
-                    <button type="button" class="btn-vcard-edit" onclick="editarVideoCard(this.closest('.video-review-card'))" title="Editar link de YouTube">✏️ Editar</button>
-                    <button type="button" class="btn-vcard-del" onclick="eliminarVideoCard(this.closest('.video-review-card'))" title="Eliminar video">🗑️</button>
-                </div>
-                <?php endif; ?>
-            </div>
-            <div class="video-review-card" data-youtube-id="XauDnVINoRU" data-video-title="" onclick="manejarClickVideoCard(this, event)">
-                <img class="video-card-thumb" src="https://i.ytimg.com/vi/XauDnVINoRU/hqdefault.jpg" referrerpolicy="no-referrer" alt="" loading="lazy">
-                <div class="video-card-gradient"></div>
-                <div class="video-card-badge-play">▶</div>
-                <div class="video-card-info">
-                    <div class="video-card-stars">★★★★★</div>
-                    
-                    <div class="video-card-title-text" data-editable="true"></div>
-                </div>
-                <?php if ($es_modo_edicion): ?>
-                <div class="video-card-admin-bar" onclick="event.stopPropagation()">
-                    <button type="button" class="btn-vcard-edit" onclick="editarVideoCard(this.closest('.video-review-card'))" title="Editar link de YouTube">✏️ Editar</button>
-                    <button type="button" class="btn-vcard-del" onclick="eliminarVideoCard(this.closest('.video-review-card'))" title="Eliminar video">🗑️</button>
-                </div>
-                <?php endif; ?>
-            </div>
-            <div class="video-review-card" data-youtube-id="dS2s-r24H1g" data-video-title="" onclick="manejarClickVideoCard(this, event)">
-                <img class="video-card-thumb" src="https://i.ytimg.com/vi/dS2s-r24H1g/hqdefault.jpg" referrerpolicy="no-referrer" alt="" loading="lazy">
-                <div class="video-card-gradient"></div>
-                <div class="video-card-badge-play">▶</div>
-                <div class="video-card-info">
-                    <div class="video-card-stars">★★★★★</div>
-                    
-                    <div class="video-card-title-text" data-editable="true"></div>
-                </div>
-                <?php if ($es_modo_edicion): ?>
-                <div class="video-card-admin-bar" onclick="event.stopPropagation()">
-                    <button type="button" class="btn-vcard-edit" onclick="editarVideoCard(this.closest('.video-review-card'))" title="Editar link de YouTube">✏️ Editar</button>
-                    <button type="button" class="btn-vcard-del" onclick="eliminarVideoCard(this.closest('.video-review-card'))" title="Eliminar video">🗑️</button>
-                </div>
-                <?php endif; ?>
-            </div>
-            <div class="video-review-card" data-youtube-id="epNWrPqg-rY" data-video-title="" onclick="manejarClickVideoCard(this, event)">
-                <img class="video-card-thumb" src="https://i.ytimg.com/vi/epNWrPqg-rY/hqdefault.jpg" referrerpolicy="no-referrer" alt="" loading="lazy">
-                <div class="video-card-gradient"></div>
-                <div class="video-card-badge-play">▶</div>
-                <div class="video-card-info">
-                    <div class="video-card-stars">★★★★★</div>
-                    
-                    <div class="video-card-title-text" data-editable="true"></div>
-                </div>
-                <?php if ($es_modo_edicion): ?>
-                <div class="video-card-admin-bar" onclick="event.stopPropagation()">
-                    <button type="button" class="btn-vcard-edit" onclick="editarVideoCard(this.closest('.video-review-card'))" title="Editar link de YouTube">✏️ Editar</button>
-                    <button type="button" class="btn-vcard-del" onclick="eliminarVideoCard(this.closest('.video-review-card'))" title="Eliminar video">🗑️</button>
-                </div>
-                <?php endif; ?>
-            </div>
-            <div class="video-review-card" data-youtube-id="arDjjafTZzo" data-video-title="" onclick="manejarClickVideoCard(this, event)">
-                <img class="video-card-thumb" src="https://i.ytimg.com/vi/arDjjafTZzo/hqdefault.jpg" referrerpolicy="no-referrer" alt="" loading="lazy">
-                <div class="video-card-gradient"></div>
-                <div class="video-card-badge-play">▶</div>
-                <div class="video-card-info">
-                    <div class="video-card-stars">★★★★★</div>
-                    
-                    <div class="video-card-title-text" data-editable="true"></div>
-                </div>
-                <?php if ($es_modo_edicion): ?>
-                <div class="video-card-admin-bar" onclick="event.stopPropagation()">
-                    <button type="button" class="btn-vcard-edit" onclick="editarVideoCard(this.closest('.video-review-card'))" title="Editar link de YouTube">✏️ Editar</button>
-                    <button type="button" class="btn-vcard-del" onclick="eliminarVideoCard(this.closest('.video-review-card'))" title="Eliminar video">🗑️</button>
-                </div>
-                <?php endif; ?>
-            </div>
-            <div class="video-review-card" data-youtube-id="x8WuJLORd24" data-video-title="" onclick="manejarClickVideoCard(this, event)">
-                <img class="video-card-thumb" src="https://i.ytimg.com/vi/x8WuJLORd24/hqdefault.jpg" referrerpolicy="no-referrer" alt="" loading="lazy">
-                <div class="video-card-gradient"></div>
-                <div class="video-card-badge-play">▶</div>
-                <div class="video-card-info">
-                    <div class="video-card-stars">★★★★★</div>
-                    
-                    <div class="video-card-title-text" data-editable="true"></div>
-                </div>
-                <?php if ($es_modo_edicion): ?>
-                <div class="video-card-admin-bar" onclick="event.stopPropagation()">
-                    <button type="button" class="btn-vcard-edit" onclick="editarVideoCard(this.closest('.video-review-card'))" title="Editar link de YouTube">✏️ Editar</button>
-                    <button type="button" class="btn-vcard-del" onclick="eliminarVideoCard(this.closest('.video-review-card'))" title="Eliminar video">🗑️</button>
-                </div>
-                <?php endif; ?>
-            </div>
-            <div class="video-review-card" data-youtube-id="eFn-oo2EJzo" data-video-title="" onclick="manejarClickVideoCard(this, event)">
-                <img class="video-card-thumb" src="https://i.ytimg.com/vi/eFn-oo2EJzo/hqdefault.jpg" referrerpolicy="no-referrer" alt="" loading="lazy">
-                <div class="video-card-gradient"></div>
-                <div class="video-card-badge-play">▶</div>
-                <div class="video-card-info">
-                    <div class="video-card-stars">★★★★★</div>
-                    
-                    <div class="video-card-title-text" data-editable="true"></div>
-                </div>
-                <?php if ($es_modo_edicion): ?>
-                <div class="video-card-admin-bar" onclick="event.stopPropagation()">
-                    <button type="button" class="btn-vcard-edit" onclick="editarVideoCard(this.closest('.video-review-card'))" title="Editar link de YouTube">✏️ Editar</button>
-                    <button type="button" class="btn-vcard-del" onclick="eliminarVideoCard(this.closest('.video-review-card'))" title="Eliminar video">🗑️</button>
-                </div>
-                <?php endif; ?>
-            </div>
-            <div class="video-review-card" data-youtube-id="DS8GwEMaRZc" data-video-title="" onclick="manejarClickVideoCard(this, event)">
-                <img class="video-card-thumb" src="https://i.ytimg.com/vi/DS8GwEMaRZc/hqdefault.jpg" referrerpolicy="no-referrer" alt="" loading="lazy">
-                <div class="video-card-gradient"></div>
-                <div class="video-card-badge-play">▶</div>
-                <div class="video-card-info">
-                    <div class="video-card-stars">★★★★★</div>
-                    
-                    <div class="video-card-title-text" data-editable="true"></div>
-                </div>
-                <?php if ($es_modo_edicion): ?>
-                <div class="video-card-admin-bar" onclick="event.stopPropagation()">
-                    <button type="button" class="btn-vcard-edit" onclick="editarVideoCard(this.closest('.video-review-card'))" title="Editar link de YouTube">✏️ Editar</button>
-                    <button type="button" class="btn-vcard-del" onclick="eliminarVideoCard(this.closest('.video-review-card'))" title="Eliminar video">🗑️</button>
-                </div>
-                <?php endif; ?>
-            </div>
-            <div class="video-review-card" data-youtube-id="Em6jpC-vqy8" data-video-title="" onclick="manejarClickVideoCard(this, event)">
-                <img class="video-card-thumb" src="https://i.ytimg.com/vi/Em6jpC-vqy8/hqdefault.jpg" referrerpolicy="no-referrer" alt="" loading="lazy">
-                <div class="video-card-gradient"></div>
-                <div class="video-card-badge-play">▶</div>
-                <div class="video-card-info">
-                    <div class="video-card-stars">★★★★★</div>
-                    
-                    <div class="video-card-title-text" data-editable="true"></div>
-                </div>
-                <?php if ($es_modo_edicion): ?>
-                <div class="video-card-admin-bar" onclick="event.stopPropagation()">
-                    <button type="button" class="btn-vcard-edit" onclick="editarVideoCard(this.closest('.video-review-card'))" title="Editar link de YouTube">✏️ Editar</button>
-                    <button type="button" class="btn-vcard-del" onclick="eliminarVideoCard(this.closest('.video-review-card'))" title="Eliminar video">🗑️</button>
-                </div>
-                <?php endif; ?>
-            </div>
+        </div>
+        </div>
+
+        <div class="video-carousel-progreso" role="presentation">
+            <span class="vc-barra" id="videoCarruselBarra"></span>
         </div>
     </section>
 
     <!-- VIDEO MODAL LIGHTBOX -->
-    <div id="videoModalLightbox" class="video-modal-backdrop" onclick="cerrarVideoModal(event)">
-        <div class="video-modal-container" onclick="event.stopPropagation()">
-            <button type="button" class="video-modal-close-btn" onclick="cerrarVideoModal(event)" aria-label="Cerrar video">✕</button>
-            <div class="video-modal-iframe-wrapper">
-                <iframe id="videoModalIframe" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-            </div>
-        </div>
-    </div>
-
     <!-- 5.5 CUSTOMER REVIEWS SECTION (ESTILO AMAZON) -->
     <section class="customer-reviews-section" id="customerReviewsSection">
         <div class="customer-reviews-grid">
             <!-- COLUMNA IZQUIERDA: RESUMEN AMAZON-STYLE -->
             <div class="reviews-summary-card" id="reviewsSummaryCard">
                 <h2 class="reviews-sidebar-title" data-editable="true">Opiniones de clientes</h2>
+                <span class="reviews-sidebar-subtitle" data-editable="true">Conoce qué opinan sobre este producto</span>
                 
                 <div class="reviews-score-hero">
                     <div class="reviews-stars-hero" id="reviewsHeroStars">★★★★★</div>
@@ -3203,48 +3531,22 @@ Aviso legal<br />
                 
                 <div class="reviews-total-ratings-sub" id="reviewsTotalCountSub">48 calificaciones globales</div>
 
-                <div class="reviews-sidebar-divider"></div>
-
-                <!-- SECCIÓN ESCRIBIR OPINIÓN -->
-                <div class="write-review-block">
-                    <h3 class="write-review-title">Escribir opinión de este producto</h3>
-                    <p class="write-review-subtitle">Comparte tu opinión con otros clientes</p>
-                    <button type="button" class="btn-write-review" onclick="abrirModalEscribirOpinion()">
-                        Escribir mi opinión
-                    </button>
-                </div>
             </div>
 
             <!-- COLUMNA DERECHA: FILTROS Y LISTA DE OPINIONES -->
             <div class="reviews-feed-column">
-                <div class="reviews-filters-row">
-                    <div class="filters-left-group">
-                        
-                        <div class="review-filter-pill">
-                            <span>Calificación</span>
-                            <select class="filter-select-box" id="filterRating" onchange="renderReviews()">
-                                <option value="All">Todas</option>
-                                <option value="5">5 Estrellas</option>
-                                <option value="4">4 Estrellas</option>
-                                <option value="3">3 Estrellas</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="filters-right-group">
-                        <div class="review-filter-pill">
-                            <span>Ordenar por</span>
-                            <select class="filter-select-box" id="filterSort" onchange="renderReviews()">
-                                <option value="Default">Predeterminado</option>
-                                <option value="Most Recent">Más recientes</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="reviews-list-wrap" id="reviewsListContainer"></div>
 
                 <div class="reviews-pagination-row" id="reviewsPaginationContainer"></div>
+
+                <!-- ESCRIBIR OPINIÓN: cierra la lista, cuando ya se leyeron las demás -->
+                <div class="write-review-block">
+                    <h3 class="write-review-title">Cuéntanos qué te pareció</h3>
+                    <p class="write-review-subtitle">Comparte tu experiencia y recibe un 10% de descuento en tu próxima compra.</p>
+                    <button type="button" class="btn-write-review" onclick="abrirModalEscribirOpinion()">
+                        Compartir mi experiencia
+                    </button>
+                </div>
             </div>
         </div>
     </section>
@@ -3278,44 +3580,6 @@ Aviso legal<br />
                     </button>
                 </div>
 
-                <form id="writeReviewForm" onsubmit="guardarNuevaOpinion(event)" class="write-review-form">
-                    <!-- PUNTUACIÓN DE ESTRELLAS -->
-                    <div class="form-group">
-                        <label class="form-label">Calificación general <span class="required">*</span></label>
-                        <div class="star-rating-picker" id="starRatingPicker">
-                            <span class="star-pick selected" data-val="1" onmouseover="hoverStars(1)" onmouseout="resetStars()" onclick="selectStars(1)">★</span>
-                            <span class="star-pick selected" data-val="2" onmouseover="hoverStars(2)" onmouseout="resetStars()" onclick="selectStars(2)">★</span>
-                            <span class="star-pick selected" data-val="3" onmouseover="hoverStars(3)" onmouseout="resetStars()" onclick="selectStars(3)">★</span>
-                            <span class="star-pick selected" data-val="4" onmouseover="hoverStars(4)" onmouseout="resetStars()" onclick="selectStars(4)">★</span>
-                            <span class="star-pick selected" data-val="5" onmouseover="hoverStars(5)" onmouseout="resetStars()" onclick="selectStars(5)">★</span>
-                            <span class="star-rating-text" id="starRatingLabel">Excelente (5 de 5)</span>
-                        </div>
-                        <input type="hidden" id="reviewRatingInput" value="5">
-                    </div>
-
-                    <!-- NOMBRE -->
-                    <div class="form-group">
-                        <label class="form-label" for="reviewAuthorInput">Tu nombre o alias <span class="required">*</span></label>
-                        <input type="text" id="reviewAuthorInput" class="form-input" placeholder="Ej. Carlos M. o Andrés Gómez" required maxlength="40">
-                    </div>
-
-                    <!-- TÍTULO -->
-                    <div class="form-group">
-                        <label class="form-label" for="reviewTitleInput">Título de la reseña <span class="optional">(opcional)</span></label>
-                        <input type="text" id="reviewTitleInput" class="form-input" placeholder="Ej. ¡Excelente estabilización y calidad en 4K!" maxlength="80">
-                    </div>
-
-                    <!-- COMENTARIO -->
-                    <div class="form-group">
-                        <label class="form-label" for="reviewCommentInput">Escribe tu opinión <span class="required">*</span></label>
-                        <textarea id="reviewCommentInput" class="form-textarea" rows="4" placeholder="¿Qué te pareció el producto? ¿Cómo fue tu experiencia de uso y envío?" required minlength="6" maxlength="800"></textarea>
-                    </div>
-
-                    <div class="write-review-modal-actions">
-                        <button type="button" class="btn-review-cancel" onclick="cerrarModalEscribirOpinion()">Cancelar</button>
-                        <button type="submit" class="btn-review-submit">Publicar opinión</button>
-                    </div>
-                </form>
             </div>
 
             <!-- VISTA 2: FORMULARIO DE VERIFICACIÓN DE COMPRA -->
@@ -3349,12 +3613,12 @@ Aviso legal<br />
             <div id="reviewModalViewUpsell" class="review-modal-view">
                 <div class="upsell-result-box">
                     <div class="upsell-logo-wrap">
-                        <?php if (file_exists(__DIR__ . '/logo.svg')): ?>
-                            <img src="logo.svg" alt="<?= htmlspecialchars($nombre_marca) ?>" class="upsell-brand-logo">
-                        <?php elseif (file_exists(__DIR__ . '/logo.webp')): ?>
-                            <img src="logo.webp" alt="<?= htmlspecialchars($nombre_marca) ?>" class="upsell-brand-logo">
-                        <?php elseif (file_exists(__DIR__ . '/logo.png')): ?>
-                            <img src="logo.png" alt="<?= htmlspecialchars($nombre_marca) ?>" class="upsell-brand-logo">
+                        <?php if (file_exists(__DIR__ . '/assets/marca/logo.svg')): ?>
+                            <img src="assets/marca/logo.svg" alt="<?= htmlspecialchars($nombre_marca) ?>" class="upsell-brand-logo">
+                        <?php elseif (file_exists(__DIR__ . '/assets/marca/logo.webp')): ?>
+                            <img src="assets/marca/logo.webp" alt="<?= htmlspecialchars($nombre_marca) ?>" class="upsell-brand-logo">
+                        <?php elseif (file_exists(__DIR__ . '/assets/marca/logo.png')): ?>
+                            <img src="assets/marca/logo.png" alt="<?= htmlspecialchars($nombre_marca) ?>" class="upsell-brand-logo">
                         <?php else: ?>
                             <h2 class="upsell-brand-logo-text"><?= htmlspecialchars($nombre_marca) ?></h2>
                         <?php endif; ?>
@@ -3382,44 +3646,24 @@ Aviso legal<br />
        href="<?= htmlspecialchars($url_pasarela_meli) ?>/index.php?token=<?= $landing_token ?>">
         <div class="ml-banner-inner">
             <div class="ml-banner-left">
-                <?php if (file_exists(__DIR__ . '/mercadito.webp')): ?>
-                    <img src="mercadito.webp" alt="Mercado Libre" class="ml-logo-img">
+                <?php if (file_exists(__DIR__ . '/assets/marca/mercadito.webp')): ?>
+                    <img src="assets/marca/mercadito.webp" alt="Mercado Libre" class="ml-logo-img">
                 <?php elseif (file_exists(__DIR__ . '/../../mercadito.webp')): ?>
-                    <img src="../../mercadito.webp" alt="Mercado Libre" class="ml-logo-img">
+                    <img src="assets/marca/mercadito.webp" alt="Mercado Libre" class="ml-logo-img">
                 <?php else: ?>
-                    <img src="/mercadito.webp" alt="Mercado Libre" class="ml-logo-img">
+                    <img src="assets/marca/mercadito.webp" alt="Mercado Libre" class="ml-logo-img">
                 <?php endif; ?>
             </div>
 
             <div class="ml-banner-divider"></div>
 
             <div class="ml-banner-center">
-                <span class="ml-kicker">
-                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82L8.6 22.5l3.4-1.47 3.4 1.46 1.89-3.19 3.61-.82-.34-3.69L23 12zm-12.91 4.72l-3.8-3.81 1.48-1.48 2.32 2.33 5.85-5.87 1.48 1.48-7.33 7.35z"></path></svg>
-                    Distribuidor autorizado
-                </span>
-                <span class="ml-product-name"><?= htmlspecialchars('DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1"') ?></span>
-                <span class="ml-trust-line">Compra Protegida &middot; Pagas con Mercado Pago</span>
+                <span class="ml-headline">También nos encuentras en Mercado Libre</span>
+                <span class="ml-subline">Encuentra este mismo producto en nuestra publicación</span>
             </div>
 
             <div class="ml-banner-right">
-                <?php
-                    $ml_ship_img = null;
-                    foreach (['envio_gratis.png', 'envio_gratis.webp', 'envio_gratis.svg', 'envio_gratis.jpg'] as $__f) {
-                        if (file_exists(__DIR__ . '/' . $__f))            { $ml_ship_img = $__f; break; }
-                        if (file_exists(__DIR__ . '/../../' . $__f))      { $ml_ship_img = '../../' . $__f; break; }
-                    }
-                ?>
-                <?php if ($ml_ship_img): ?>
-                    <img src="<?= htmlspecialchars($ml_ship_img) ?>" alt="Envío gratis en tu primera compra" class="ml-shipping-img">
-                <?php else: ?>
-                    <div class="ml-ship-pill">
-                        <span class="pill-dark">ENVÍO GRATIS</span>
-                        <span class="pill-white">EN TU <b>PRIMERA COMPRA</b></span>
-                    </div>
-                <?php endif; ?>
-
-                <span class="ml-cta">Comprar en web de Mercado Libre</span>
+                <span class="ml-cta">Ver producto en Mercado Libre</span>
             </div>
         </div>
     </a>
@@ -3434,7 +3678,8 @@ Aviso legal<br />
                 <?php if (!empty($otros_productos)): ?>
                     <?php foreach ($otros_productos as $o): ?>
                     <a href="<?= htmlspecialchars($o['url']) ?>" class="more-card">
-                        <img src="<?= htmlspecialchars($o['img']) ?>" class="more-card-img" alt="<?= htmlspecialchars($o['nombre']) ?>">
+                        <img src="<?= htmlspecialchars($o['img']) ?>" class="more-card-img" alt="<?= htmlspecialchars($o['nombre']) ?>"
+                             loading="lazy" onerror="this.onerror=null; this.src='img/img_1.webp';">
                         <div class="more-card-title"><?= htmlspecialchars($o['nombre']) ?></div>
                         <div class="more-card-stars">★★★★★</div>
                         <div class="more-card-price"><?= htmlspecialchars($o['precio'] ?? 'Ver Oferta ➔') ?></div>
@@ -3455,15 +3700,15 @@ Aviso legal<br />
             <!-- BENEFICIOS / TRUST BAR: 1. PAGA EN LÍNEA, 2. COMPRAS SEGURAS, 3. ACUMULAS PUNTOS COLOMBIA -->
             <div class="footer-trust-benefits-bar">
                 <div class="trust-benefit-col">
-                    <img src="tarjeta.svg" alt="Paga en línea o en efectivo" class="trust-benefit-icon">
+                    <img src="assets/pago/tarjeta.svg" alt="Paga en línea o en efectivo" class="trust-benefit-icon">
                     <span class="trust-benefit-text" data-editable="true">Paga en línea<br>o en efectivo</span>
                 </div>
                 <div class="trust-benefit-col">
-                    <img src="escudo_candado.svg" alt="Compras seguras" class="trust-benefit-icon">
+                    <img src="assets/sellos/escudo_candado.svg" alt="Compras seguras" class="trust-benefit-icon">
                     <span class="trust-benefit-text" data-editable="true">Compras<br>seguras</span>
                 </div>
                 <div class="trust-benefit-col">
-                    <img src="puntos_colombia.svg" alt="Acumulas Puntos Colombia" class="trust-benefit-icon">
+                    <img src="assets/sellos/puntos_colombia.svg" alt="Acumulas Puntos Colombia" class="trust-benefit-icon">
                     <span class="trust-benefit-text" data-editable="true">Acumulas<br>Puntos Colombia</span>
                 </div>
             </div>
@@ -3472,47 +3717,47 @@ Aviso legal<br />
             <div class="footer-payments-row">
                 <!-- AMERICAN EXPRESS -->
                 <div class="footer-payment-badge badge-amex" title="American Express">
-                    <img src="amex.svg" alt="American Express">
+                    <img src="assets/pago/amex.svg" alt="American Express">
                 </div>
                 <!-- VISA -->
                 <div class="footer-payment-badge badge-visa" title="Visa">
-                    <img src="visa.svg" alt="Visa">
+                    <img src="assets/pago/visa.svg" alt="Visa">
                 </div>
                 <!-- MASTERCARD -->
                 <div class="footer-payment-badge badge-master" title="Mastercard">
-                    <img src="maste.svg" alt="Mastercard">
+                    <img src="assets/pago/maste.svg" alt="Mastercard">
                 </div>
                 <!-- PSE -->
                 <div class="footer-payment-badge badge-pse" title="PSE">
-                    <img src="pse.png" alt="PSE">
+                    <img src="assets/pago/pse.png" alt="PSE">
                 </div>
                 <!-- NEQUI -->
                 <div class="footer-payment-badge badge-nequi" title="Nequi">
-                    <img src="Nequi_Colombia_logo.svg.webp" alt="Nequi">
+                    <img src="assets/pago/Nequi_Colombia_logo.svg.webp" alt="Nequi">
                 </div>
                 <!-- CONTRAENTREGA -->
                 <div class="footer-payment-badge badge-contraentrega" title="Pago Contraentrega">
-                    <img src="contraentrega.png" alt="Pago Contraentrega">
+                    <img src="assets/pago/contraentrega.png" alt="Pago Contraentrega">
                 </div>
             </div>
 
             <!-- SUPERINTENDENCIA (BLANCO) & CÁMARA DE COMERCIO -->
             <div class="footer-legal-row">
-                <?php if (file_exists(__DIR__ . '/sic_blanco.png')): ?>
+                <?php if (file_exists(__DIR__ . '/assets/sellos/sic.png')): ?>
                     <div class="footer-sic-badge" title="Superintendencia de Industria y Comercio">
-                        <img src="sic_blanco.png" alt="Superintendencia de Industria y Comercio">
+                        <img src="assets/sellos/sic.png" alt="Superintendencia de Industria y Comercio">
                     </div>
-                <?php elseif (file_exists(__DIR__ . '/sic.png')): ?>
+                <?php elseif (file_exists(__DIR__ . '/assets/sellos/sic.png')): ?>
                     <div class="footer-sic-badge" title="Superintendencia de Industria y Comercio">
-                        <img src="sic.png" alt="Superintendencia de Industria y Comercio">
+                        <img src="assets/sellos/sic.png" alt="Superintendencia de Industria y Comercio">
                     </div>
                 <?php else: ?>
                     <span class="footer-legal-text" data-editable="true">Superintendencia de Industria y Comercio</span>
                 <?php endif; ?>
 
-                <?php if (file_exists(__DIR__ . '/comerciocamara.png')): ?>
+                <?php if (file_exists(__DIR__ . '/assets/sellos/comerciocamara.png')): ?>
                     <div class="footer-camara-badge" title="Cámara Colombiana de Comercio Electrónico">
-                        <img src="comerciocamara.png" alt="Cámara Colombiana de Comercio Electrónico">
+                        <img src="assets/sellos/comerciocamara.png" alt="Cámara Colombiana de Comercio Electrónico">
                     </div>
                 <?php else: ?>
                     <span class="footer-legal-text" data-editable="true">Cámara Colombiana de Comercio Electrónico</span>
@@ -3608,7 +3853,9 @@ Aviso legal<br />
         let activeImgIndex = 0;
         let lightboxIndex = 0;
         let currentReviewPage = 1;
-        const REVIEWS_PER_PAGE = 5;
+        /* Con 5 opiniones y 5 por pagina salia una sola pagina y el paginador
+           se pintaba vacio (totalPages <= 1). A 3 por pagina quedan dos. */
+        const REVIEWS_PER_PAGE = 3;
         let cartState = { qty: 0, hasAdded: false, variant: "", size: "1 Unidad" };
 
         function toggleNavMenu() {
@@ -3785,13 +4032,31 @@ Aviso legal<br />
             });
         }
 
-        function toggleAccordion(btn) {
-            const body = btn.nextElementSibling;
-            if (body) {
-                body.classList.toggle('open');
-                const arrow = btn.querySelector('span:last-child');
-                if (arrow) arrow.textContent = body.classList.contains('open') ? '▾' : '▸';
-            }
+        /* Despliega o repliega la descripcion larga. El recorte y el giro de la
+           flecha los hace la CSS, asi que aqui solo se conmuta la clase.
+           El texto se cambia en su <span>, no en el boton entero: escribir
+           sobre btn.textContent borraria el SVG de la flecha. */
+        /* Un "Ver mas" que no revela nada es un boton roto: si el texto ya
+           cabe entero en la altura recortada, se retira. Se recalcula al
+           cambiar el ancho porque el texto reflui­do puede pasar a desbordar. */
+        function ajustarBotonesVerMas() {
+            document.querySelectorAll('.desc-item').forEach((item) => {
+                const cuerpo = item.querySelector('.desc-cuerpo');
+                const btn = item.querySelector('.desc-toggle');
+                if (!cuerpo || !btn) return;
+                if (item.classList.contains('desc-abierta')) return;
+                const sobra = cuerpo.scrollHeight > cuerpo.clientHeight + 1;
+                btn.style.display = sobra ? '' : 'none';
+            });
+        }
+
+        function toggleDescripcion(btn) {
+            const item = btn.closest('.desc-item');
+            if (!item) return;
+            const abierto = item.classList.toggle('desc-abierta');
+            const txt = btn.querySelector('.desc-toggle-txt');
+            if (txt) txt.textContent = abierto ? 'Ver menos' : 'Ver más';
+            btn.setAttribute('aria-expanded', abierto ? 'true' : 'false');
         }
 
                                 const CART_STORAGE_KEY = 'tridente_global_cart';
@@ -3931,16 +4196,11 @@ Aviso legal<br />
             }, 1100);
         }
 
-        function agregarAlCarrito(e) {
-            if (ES_MODO_EDICION) return;
-            let clickedBtn = null;
-            if (e) {
-                clickedBtn = e.currentTarget || (e.target ? e.target.closest('button') : null);
-            }
-            if (!clickedBtn) {
-                clickedBtn = document.querySelector('.btn-add-desktop') || document.getElementById('btnAddToCart');
-            }
-
+        /* Logica compartida por "Agregar al carrito" y "Comprar ahora":
+           mete (o incrementa) el item actual en globalCart. Antes vivia
+           duplicada dentro de agregarAlCarrito; se extrae para que
+           comprarAhora pueda usar exactamente el mismo camino de datos. */
+        function agregarItemActualAlCarrito() {
             const mainImg = document.getElementById('mainImage');
             let imgSrc = mainImg ? mainImg.src : ((typeof IMAGENES !== 'undefined' && IMAGENES.length > 0) ? IMAGENES[0] : 'producto.png');
             try { imgSrc = new URL(imgSrc, window.location.href).href; } catch(e) {}
@@ -3975,6 +4235,19 @@ Aviso legal<br />
 
             guardarCarritoEnStorage();
             actualizarControlesPagina();
+        }
+
+        function agregarAlCarrito(e) {
+            if (ES_MODO_EDICION) return;
+            let clickedBtn = null;
+            if (e) {
+                clickedBtn = e.currentTarget || (e.target ? e.target.closest('button') : null);
+            }
+            if (!clickedBtn) {
+                clickedBtn = document.querySelector('.btn-add-desktop') || document.getElementById('btnAddToCart');
+            }
+
+            agregarItemActualAlCarrito();
 
             animarVueloAlCarrito(clickedBtn, () => {
                 renderCart();
@@ -3984,6 +4257,19 @@ Aviso legal<br />
                     document.body.style.overflow = 'hidden';
                 }
             });
+        }
+
+        /* "Comprar ahora": se asegura de que el producto este en el carrito y
+           va directo a la pasarela, sin abrir el cajon.
+           Solo lo agrega si aun no estaba: si el comprador ya fijo una
+           cantidad con el selector, hay que respetarla en vez de sumarle
+           una unidad de mas camino al pago.
+           procederAlCheckout() ya arma la URL con token y cantidad. */
+        function comprarAhora() {
+            if (ES_MODO_EDICION) return;
+            const yaEnCarrito = globalCart.some(i => i.token === LANDING_TOKEN);
+            if (!yaEnCarrito) agregarItemActualAlCarrito();
+            procederAlCheckout();
         }
 
         function cambiarCantidadItem(token, delta) {
@@ -4040,6 +4326,9 @@ Aviso legal<br />
             }
             const drawerTitle = document.getElementById('cartDrawerTitle');
             if (drawerTitle) drawerTitle.textContent = `Tu Carrito (${totalUnits})`;
+            // El aviso de envio gratis solo tiene sentido si hay algo que enviar.
+            const avisoEnvio = document.querySelector('.shipping-progress-wrap');
+            if (avisoEnvio) avisoEnvio.classList.toggle('visible', totalUnits > 0);
             const subtotalEl = document.getElementById('cartSubtotal');
             if (subtotalEl) subtotalEl.textContent = fmtTotal;
             const totalEl = document.getElementById('cartTotal');
@@ -4115,7 +4404,6 @@ Aviso legal<br />
 
         // ─── SISTEMA DE OPINIONES DE CLIENTES (LOCALSTORAGE + ESTADÍSTICAS AMAZON) ───
         const USER_REVIEWS_KEY = 'dji_user_custom_reviews_v1';
-        let selectedStarRating = 5;
         const starLabelsMap = {
             1: "Malo (1 de 5)",
             2: "Regular (2 de 5)",
@@ -4205,7 +4493,6 @@ Aviso legal<br />
                 mostrarVistaEscribirOpinion();
                 modal.classList.add('open');
                 document.body.style.overflow = 'hidden';
-                selectStars(5);
                 const nameInput = document.getElementById('reviewAuthorInput');
                 if (nameInput) nameInput.focus();
             }
@@ -4221,31 +4508,8 @@ Aviso legal<br />
             }
         }
 
-        function hoverStars(val) {
-            const stars = document.querySelectorAll('#starRatingPicker .star-pick');
-            stars.forEach((s, idx) => {
-                s.classList.toggle('hovered', idx < val);
-            });
-            const lbl = document.getElementById('starRatingLabel');
-            if (lbl) lbl.textContent = starLabelsMap[val] || `${val} de 5`;
-        }
 
-        function resetStars() {
-            const stars = document.querySelectorAll('#starRatingPicker .star-pick');
-            stars.forEach((s, idx) => {
-                s.classList.remove('hovered');
-                s.classList.toggle('selected', idx < selectedStarRating);
-            });
-            const lbl = document.getElementById('starRatingLabel');
-            if (lbl) lbl.textContent = starLabelsMap[selectedStarRating] || `${selectedStarRating} de 5`;
-        }
 
-        function selectStars(val) {
-            selectedStarRating = val;
-            const input = document.getElementById('reviewRatingInput');
-            if (input) input.value = val;
-            resetStars();
-        }
 
         function toggleExplanationReviews(btn) {
             const box = document.getElementById('reviewsExplanationBox');
@@ -4256,16 +4520,6 @@ Aviso legal<br />
             }
         }
 
-        function filtrarPorEstrellasDirecto(starCount) {
-            const selectRating = document.getElementById('filterRating');
-            if (selectRating) {
-                selectRating.value = starCount.toString();
-                currentReviewPage = 1;
-                renderReviews();
-                const section = document.getElementById('customerReviewsSection');
-                if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }
 
         function calcularEstadisticasReviews() {
             // Distribución realista estilo Amazon de 48 calificaciones globales
@@ -4315,92 +4569,6 @@ Aviso legal<br />
             }
         }
 
-        function guardarNuevaOpinion(e) {
-            if (e) e.preventDefault();
-            const submitBtn = document.querySelector('#writeReviewForm .btn-review-submit');
-            const authorInput = document.getElementById('reviewAuthorInput');
-            const titleInput = document.getElementById('reviewTitleInput');
-            const commentInput = document.getElementById('reviewCommentInput');
-
-            const author = (authorInput ? authorInput.value.trim() : '') || 'Cliente Verificado';
-            const title = titleInput ? titleInput.value.trim() : '';
-            const comment = commentInput ? commentInput.value.trim() : '';
-            const starsNum = selectedStarRating || 5;
-
-            if (!comment) {
-                alert('Por favor escribe un comentario para tu opinión.');
-                return;
-            }
-
-            // Estado de carga con delay
-            const origSubmitText = submitBtn ? submitBtn.textContent : 'Publicar opinión';
-            if (submitBtn) {
-                submitBtn.textContent = 'Publicando opinión...';
-                submitBtn.disabled = true;
-                submitBtn.style.opacity = '0.7';
-                submitBtn.style.cursor = 'not-allowed';
-            }
-
-            setTimeout(() => {
-                const now = new Date();
-                const year = now.getFullYear();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const day = String(now.getDate()).padStart(2, '0');
-                const dateFormatted = `${year}.${month}.${day}`;
-
-                let fullComment = comment;
-                if (title) {
-                    fullComment = `<b>${title}</b><br>${comment}`;
-                }
-
-                const newReviewObj = {
-                    id: 'rev_' + Date.now(),
-                    author: author,
-                    color: "Creator Combo",
-                    size: "Kit Completo 6 en 1",
-                    stars: "★".repeat(starsNum) + "☆".repeat(5 - starsNum),
-                    ratingNum: starsNum,
-                    comment: fullComment,
-                    date: dateFormatted,
-                    isUserVerified: isPurchaseVerifiedSuccessfully
-                };
-
-                // Guardar en localStorage
-                try {
-                    let savedReviews = [];
-                    const existing = localStorage.getItem(USER_REVIEWS_KEY);
-                    if (existing) savedReviews = JSON.parse(existing);
-                    savedReviews.unshift(newReviewObj);
-                    localStorage.setItem(USER_REVIEWS_KEY, JSON.stringify(savedReviews));
-                } catch (err) {}
-
-                // Añadir al inicio del arreglo en memoria
-                REVIEWS_LIST.unshift(newReviewObj);
-
-                // Limpiar formulario y restaurar botón
-                if (authorInput) authorInput.value = '';
-                if (titleInput) titleInput.value = '';
-                if (commentInput) commentInput.value = '';
-                if (submitBtn) {
-                    submitBtn.textContent = origSubmitText;
-                    submitBtn.disabled = false;
-                    submitBtn.style.opacity = '';
-                    submitBtn.style.cursor = '';
-                }
-                cerrarModalEscribirOpinion();
-
-                // Renderizar y saltar a la primera página
-                currentReviewPage = 1;
-                renderReviews();
-
-                // Notificación elegante sin emojis
-                const alertBox = document.createElement('div');
-                alertBox.style.cssText = 'position:fixed; bottom:24px; right:24px; background:#1d1d1f; color:#ffffff; padding:14px 22px; border-radius:12px; font-weight:600; font-size:14px; z-index:999999; box-shadow:0 10px 30px rgba(0,0,0,0.3); display:flex; align-items:center; gap:8px; animation: modalFadeIn 0.3s ease;';
-                alertBox.innerHTML = '<span>Tu opinión ha sido publicada exitosamente.</span>';
-                document.body.appendChild(alertBox);
-                setTimeout(() => { if (alertBox.parentNode) alertBox.parentNode.removeChild(alertBox); }, 3800);
-            }, 850);
-        }
 
         function eliminarOpinionUsuario(reviewId) {
             if (!reviewId) return;
@@ -4446,30 +4614,155 @@ Aviso legal<br />
             }
         }
 
+        /* Nombre corto del producto para la ficha de cada opinion. */
+        const PRODUCTO_CORTO = 'DJI Osmo Pocket 4 Creator Combo';
+
+        /* ─── FOTO DE PERFIL DE QUIEN OPINA ───
+           Se pide a una API, no se guarda ninguna imagen en el proyecto: al
+           generar otra landing las fotos salen solas.
+
+           pravatar sirve fotografias reales, no dibujos. Su catalogo tiene 70
+           imagenes numeradas del 1 al 70.
+
+           Ojo con la semilla de texto (?u=nombre): COLISIONA. Al probarla,
+           "victor m" y "andres p" recibian exactamente la misma foto, y dos
+           opiniones con la misma cara delatan que estan inventadas. Por eso el
+           numero se reparte aqui: se calcula del nombre, pero se usa ?img=N,
+           que apunta a una imagen concreta del catalogo. */
+        const AVATAR_TOTAL = 70;
+
+        /* El numero de foto sale del INDICE de la opinion, no de un hash del
+           nombre. Con hash habia colisiones reales: "Laura T" y "Andres P"
+           caian en la misma imagen, y dos opiniones con la misma cara delatan
+           que estan inventadas. Por indice no se repite ninguna mientras haya
+           menos de 70 opiniones.
+           El desplazamiento inicial se deriva de la landing, para que dos
+           landings distintas no acaben con la misma tanda de caras. */
+        function desplazamientoAvatar() {
+            const base = String(typeof LANDING_SLUG !== 'undefined' ? LANDING_SLUG : 'landing');
+            let n = 0;
+            for (let i = 0; i < base.length; i++) n = (n * 31 + base.charCodeAt(i)) % 100000;
+            return n % AVATAR_TOTAL;
+        }
+
+        function avatarDe(indice) {
+            const n = ((desplazamientoAvatar() + (indice || 0)) % AVATAR_TOTAL) + 1;
+            return 'https://i.pravatar.cc/160?img=' + n;
+        }
+
+        function estrellasSvg(cantidad) {
+            /* Estrella que ocupa todo el marco: es la silueta gruesa de
+               Amazon. La anterior era mas fina y dejaba aire alrededor, por
+               eso se veian separadas. */
+            const trazo = 'M12 .587l3.668 7.431 8.332 1.151-6.064 5.828 1.48 8.279L12 18.896l-7.416 4.38 1.48-8.279L0 9.169l8.332-1.151z';
+            let html = '';
+            for (let i = 1; i <= 5; i++) {
+                html += '<svg viewBox="0 0 24 24" fill="currentColor" class="' + (i <= cantidad ? 'llena' : 'vacia') + '" aria-hidden="true"><path d="' + trazo + '"/></svg>';
+            }
+            return '<span class="rev-estrellas" role="img" aria-label="' + cantidad + ' de 5 estrellas">' + html + '</span>';
+        }
+
+        function contarEstrellas(valor) {
+            if (typeof valor === 'number') return Math.max(1, Math.min(5, valor));
+            const texto = String(valor || '');
+            const llenas = (texto.match(/★/g) || []).length;
+            return llenas ? Math.min(5, llenas) : 5;
+        }
+
+        const MESES_ES = ['enero','febrero','marzo','abril','mayo','junio',
+                          'julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+        /* Fecha aleatoria dentro del ultimo ano, pero ESTABLE: se calcula una
+           sola vez por opinion y se guarda. Si se sorteara en cada pintado
+           cambiaria al filtrar o al pasar de pagina, y eso se nota. */
+        function fechaCertificacion(r, indice) {
+            if (r._fechaTexto) return r._fechaTexto;
+            const hoy = new Date();
+            // Semilla a partir del indice y del autor: reparte las fechas sin
+            // depender de Math.random, asi son distintas pero reproducibles.
+            const semilla = (indice * 37 + String(r.author || '').length * 13) % 330;
+            const d = new Date(hoy.getTime() - (12 + semilla) * 86400000);
+            r._fechaTexto = d.getDate() + ' de ' + MESES_ES[d.getMonth()] + ' de ' + d.getFullYear();
+            return r._fechaTexto;
+        }
+
+        /* Muestra "Leer mas" solo si el texto de verdad se sale: un boton que
+           no revela nada es un boton roto. */
+        function ajustarLeerMas(scope) {
+            (scope || document).querySelectorAll('.review-card-item').forEach(function (item) {
+                const txt = item.querySelector('.rev-texto');
+                const btn = item.querySelector('.rev-leer-mas');
+                if (!txt || !btn) return;
+                if (item.classList.contains('rev-abierta')) return;
+                btn.style.display = (txt.scrollHeight > txt.clientHeight + 1) ? '' : 'none';
+            });
+        }
+
+        /* Boton "Util". Antes solo estaba el contador, sin nada que pulsar.
+           El voto se guarda en el navegador de quien lo da: no hay servidor
+           donde sumarlo, y sin recordarlo se podria votar sin parar. */
+        const UTILES_KEY = 'dji_opiniones_utiles_v1';
+
+        function utilesVotados() {
+            try { return JSON.parse(localStorage.getItem(UTILES_KEY) || '[]'); }
+            catch (e) { return []; }
+        }
+
+        function marcarUtil(btn) {
+            const item = btn.closest('.review-card-item');
+            const cuenta = item ? item.querySelector('.rev-util-cuenta') : null;
+            if (!cuenta) return;
+
+            const clave = (item.querySelector('.rev-nombre') || {}).textContent || '';
+            const votados = utilesVotados();
+            const yaVotado = btn.getAttribute('aria-pressed') === 'true';
+
+            const base = parseInt(cuenta.dataset.base || cuenta.textContent, 10) || 0;
+            if (!cuenta.dataset.base) cuenta.dataset.base = base;
+
+            const nuevo = yaVotado ? base : base + 1;
+            cuenta.textContent = nuevo + (nuevo === 1 ? ' persona encontró esto útil' : ' personas encontraron esto útil');
+            btn.setAttribute('aria-pressed', yaVotado ? 'false' : 'true');
+            btn.classList.toggle('votado', !yaVotado);
+
+            const sin = votados.filter(function (v) { return v !== clave; });
+            if (!yaVotado) sin.push(clave);
+            try { localStorage.setItem(UTILES_KEY, JSON.stringify(sin)); } catch (e) {}
+        }
+
+        /* Al repintar la lista hay que devolver el estado de los votos ya dados. */
+        function restaurarUtiles(scope) {
+            const votados = utilesVotados();
+            (scope || document).querySelectorAll('.review-card-item').forEach(function (item) {
+                const btn = item.querySelector('.rev-util');
+                const cuenta = item.querySelector('.rev-util-cuenta');
+                if (!btn || !cuenta) return;
+                const clave = (item.querySelector('.rev-nombre') || {}).textContent || '';
+                if (votados.indexOf(clave) === -1) return;
+                const base = parseInt(cuenta.textContent, 10) || 0;
+                cuenta.dataset.base = base;
+                cuenta.textContent = (base + 1) + ' personas encontraron esto útil';
+                btn.setAttribute('aria-pressed', 'true');
+                btn.classList.add('votado');
+            });
+        }
+
+        function alternarOpinion(btn) {
+            const item = btn.closest('.review-card-item');
+            if (!item) return;
+            const abierta = item.classList.toggle('rev-abierta');
+            const etiqueta = btn.querySelector('span');
+            if (etiqueta) etiqueta.textContent = abierta ? 'Leer menos' : 'Leer más';
+            btn.setAttribute('aria-expanded', abierta ? 'true' : 'false');
+        }
+
         function renderReviews() {
             const container = document.getElementById('reviewsListContainer');
             const paginationContainer = document.getElementById('reviewsPaginationContainer');
             if (!container || !REVIEWS_LIST || REVIEWS_LIST.length === 0) return;
 
-            const filterColor = document.getElementById('filterColor') ? document.getElementById('filterColor').value : 'All';
-            const filterRating = document.getElementById('filterRating') ? document.getElementById('filterRating').value : 'All';
-            const sortBy = document.getElementById('filterSort') ? document.getElementById('filterSort').value : 'Default';
-
-            let filtered = [...REVIEWS_LIST];
-
-            if (filterColor !== 'All') {
-                filtered = filtered.filter(r => r.color === filterColor);
-            }
-            if (filterRating !== 'All') {
-                const targetRating = parseInt(filterRating, 10);
-                filtered = filtered.filter(r => {
-                    const starsCount = r.ratingNum || (r.stars ? (r.stars.match(/★/g) || []).length : 5);
-                    return starsCount === targetRating;
-                });
-            }
-            if (sortBy === 'Most Recent') {
-                filtered.sort((a, b) => b.date.localeCompare(a.date));
-            }
+            // Sin filtros: se muestran todas, en el orden en que vienen.
+            const filtered = [...REVIEWS_LIST];
 
             const totalPages = Math.max(1, Math.ceil(filtered.length / REVIEWS_PER_PAGE));
             if (currentReviewPage > totalPages) currentReviewPage = 1;
@@ -4486,56 +4779,73 @@ Aviso legal<br />
                     </div>
                 `;
             } else {
-                pageItems.forEach(r => {
+                pageItems.forEach((r, idx) => {
                     const item = document.createElement('div');
                     item.className = 'review-card-item';
+                    const nEstrellas = contarEstrellas(r.estrellas || r.stars);
+                    const inicial = String(r.author || '?').trim().charAt(0).toUpperCase();
+                    const foto = avatarDe(idx + (currentReviewPage - 1) * REVIEWS_PER_PAGE);
+                    const fotos = [r.img, r.img2].filter(Boolean);
                     item.innerHTML = `
-                        <div class="reviewer-col">
-                            <span class="reviewer-name" data-editable="true">
-                                ${r.author}
-                                ${(!r.id || r.isUserVerified === true) ? '<span class="reviewer-badge-verified">Compra verificada</span>' : ''}
-                            </span>
-                            ${r.size ? `<span class="reviewer-meta" data-editable="true">Size: ${r.size}</span>` : ''}
-                            ${r.ubicacion ? `<span class="reviewer-meta reviewer-place">${r.ubicacion}</span>` : ''}
+                        <div class="rev-cabecera">
+                            <img class="rev-avatar" src="${foto}" alt="" loading="lazy" aria-hidden="true"
+                                 onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'rev-avatar',textContent:'${inicial}'}))">
+                            <span class="rev-nombre" data-editable="true">${r.author}</span>
                         </div>
-                        <div class="review-content-col">
-                            <div class="review-stars-row">${r.stars}</div>
-                            ${r.titulo ? `<div class="review-title-text" data-editable="true">${r.titulo}</div>` : ''}
-                            <p class="review-comment-text" data-editable="true">${r.comment}</p>
-                            ${(r.img || r.img2) ? `<div class="review-photos">${[r.img, r.img2].filter(Boolean).map(u => `<img src="${u}" class="review-photo" loading="lazy" alt="Foto de la opinión" onclick="abrirFotoOpinion('${u}')">`).join('')}</div>` : ''}
-                            ${r.likes ? `<div class="review-helpful">${r.likes} personas encontraron esto útil</div>` : ''}
+                        <div class="rev-valoracion">
+                            ${estrellasSvg(nEstrellas)}
+                            ${r.titulo ? `<span class="rev-titulo" data-editable="true">${r.titulo}</span>` : ''}
                         </div>
+                        <div class="rev-meta">Certificado en Colombia el ${fechaCertificacion(r, idx)}</div>
+                        <div class="rev-meta">Producto: <b>${PRODUCTO_CORTO}</b></div>
+                        <div class="rev-verificada">Compra verificada</div>
+                        ${fotos.length ? `<div class="review-photos">${fotos.map(u => `<img src="${u}" class="review-photo" loading="lazy" alt="Foto de la opinión" onclick="abrirFotoOpinion(this)">`).join('')}</div>` : ''}
+                        <p class="rev-texto" data-editable="true">${r.comment}</p>
+                        <button type="button" class="rev-leer-mas" onclick="alternarOpinion(this)" aria-expanded="false">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                            <span>Leer más</span>
+                        </button>
+                        <div class="rev-util-fila">
+                            <button type="button" class="rev-util" onclick="marcarUtil(this)" aria-pressed="false">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M7 22V11l5-9a2.5 2.5 0 0 1 2.4 3.2L13.5 9H20a2 2 0 0 1 2 2.3l-1.3 8A2.5 2.5 0 0 1 18.2 22H7z"/>
+                                    <path d="M7 11H4a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3"/>
+                                </svg>
+                                <span class="rev-util-txt">Útil</span>
+                            </button>
+                            <span class="rev-util-cuenta">${r.likes || 0} personas encontraron esto útil</span>
+                        </div>
+                        ${r.id ? `
                         <div class="review-actions-wrap">
-                            <div class="review-date-badge" data-editable="true">${r.fechaTexto || r.date}</div>
-                            ${r.id ? `
-                                <button type="button" class="btn-delete-user-review" onclick="eliminarOpinionUsuario('${r.id}')" title="Eliminar mi opinión" aria-label="Eliminar opinión">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M3 6h18"></path>
-                                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                                        <line x1="10" y1="11" x2="10" y2="17"></line>
-                                        <line x1="14" y1="11" x2="14" y2="17"></line>
-                                    </svg>
-                                </button>
-                            ` : ''}
-                        </div>
+                            <button type="button" class="btn-delete-user-review" onclick="eliminarOpinionUsuario('${r.id}')" title="Eliminar mi opinión" aria-label="Eliminar opinión">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 6h18"></path>
+                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                            </button>
+                        </div>` : ''}
                     `;
                     container.appendChild(item);
                 });
             }
 
+            ajustarLeerMas(container);
+            restaurarUtiles(container);
+
             if (paginationContainer) {
+                container.classList.toggle('con-paginador', totalPages > 1);
                 if (totalPages <= 1) {
                     paginationContainer.innerHTML = '';
                 } else {
-                    let pagesHtml = `<span>Total <b>${totalPages}</b> Páginas</span>`;
-                    pagesHtml += `<button class="page-btn" onclick="cambiarPaginaReviews(${currentReviewPage - 1}, ${totalPages})" ${currentReviewPage === 1 ? 'disabled style="opacity:0.35;cursor:not-allowed;"' : ''}>&lt;</button>`;
-                    
+                    // Solo las burbujas numeradas: el rotulo y las flechas
+                    // sobraban con dos paginas.
+                    let pagesHtml = '';
                     for (let i = 1; i <= totalPages; i++) {
-                        pagesHtml += `<button class="page-btn ${i === currentReviewPage ? 'active' : ''}" onclick="cambiarPaginaReviews(${i}, ${totalPages})">${i}</button>`;
+                        pagesHtml += `<button class="page-btn ${i === currentReviewPage ? 'active' : ''}" onclick="cambiarPaginaReviews(${i}, ${totalPages})" aria-label="Pagina ${i}" aria-current="${i === currentReviewPage ? 'page' : 'false'}">${i}</button>`;
                     }
-
-                    pagesHtml += `<button class="page-btn" onclick="cambiarPaginaReviews(${currentReviewPage + 1}, ${totalPages})" ${currentReviewPage === totalPages ? 'disabled style="opacity:0.35;cursor:not-allowed;"' : ''}>&gt;</button>`;
                     paginationContainer.innerHTML = pagesHtml;
                 }
             }
@@ -4544,14 +4854,41 @@ Aviso legal<br />
             initModoEdicion();
         }
 
+        /* Se pintan YA, sin esperar a DOMContentLoaded. Hasta que ese evento
+           llegaba (1,5 s con la API de YouTube y las imagenes en vuelo) la
+           seccion de opiniones era un titulo sobre 200 px de vacio, y en movil
+           el usuario lo lee como el final de la pagina y no sigue bajando.
+           El script va despues de la seccion en el documento, asi que los
+           contenedores ya existen. */
+        if (document.getElementById('reviewsListContainer')) {
+            try { renderReviews(); } catch (e) {}
+        }
+
 
         function cambiarPaginaReviews(nuevaPagina, totalPages) {
             if (nuevaPagina < 1 || nuevaPagina > totalPages) return;
             currentReviewPage = nuevaPagina;
             renderReviews();
+            /* scrollIntoView deja el titulo debajo de la navbar fija y se ve
+               asomar la seccion anterior. Se calcula el destino restando lo que
+               ocupan el anuncio y la navbar. */
             const section = document.getElementById('customerReviewsSection');
             if (section) {
-                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                var calcular = function () {
+                    var anuncio = document.querySelector('.top-announcement');
+                    var navbar  = document.querySelector('.navbar');
+                    var fijo = (anuncio ? anuncio.offsetHeight : 0) + (navbar ? navbar.offsetHeight : 0);
+                    return Math.max(0, section.getBoundingClientRect().top + window.scrollY - fijo - 12);
+                };
+                window.scrollTo({ top: calcular(), behavior: 'smooth' });
+                /* Lo que hay por encima (el carrusel, las imagenes que aun
+                   cargan) se reacomoda mientras dura la animacion y el destino
+                   se queda corto. Se corrige al terminar, sin animacion: el
+                   ajuste es de pocos pixeles y no se percibe. */
+                setTimeout(function () {
+                    var d = calcular();
+                    if (Math.abs(d - window.scrollY) > 4) window.scrollTo({ top: d, behavior: 'auto' });
+                }, 620);
             }
         }
 
@@ -4631,11 +4968,11 @@ Aviso legal<br />
 
                 const h = Math.floor(restante / (1000 * 60 * 60));
                 const m = Math.floor((restante % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((restante % (1000 * 60)) / 1000);
 
                 const el = document.getElementById('shippingCountdown');
                 if (el) {
-                    el.textContent = `${h} h ${m < 10 ? '0' + m : m} min ${s < 10 ? '0' + s : s} s`;
+                    // Sin segundero: solo horas y minutos.
+                    el.textContent = `${h} h ${m < 10 ? '0' + m : m} min`;
                 }
             }
 
@@ -4686,24 +5023,42 @@ Aviso legal<br />
             let lastScrollY = 0;
             let ticking = false;
 
+            // La barra flotante no puede convivir con el boton de carrito en
+            // linea: mientras ese siga en pantalla habria dos botones de compra
+            // compitiendo. Se mide la geometria en el mismo rAF del scroll.
+            function carritoEnLineaALaVista() {
+                const enLinea = document.querySelector('.direct-purchase-row .btn-add-cart-outline');
+                if (!enLinea) return false;
+                const c = enLinea.getBoundingClientRect();
+                if (!c.width && !c.height) return false;   // oculto: no estorba
+                const alto = window.innerHeight || document.documentElement.clientHeight;
+                return c.bottom > 0 && c.top < alto;
+            }
+
             function updateNavScroll() {
                 const currentScrollY = Math.max(0, window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0);
                 const navbar = document.querySelector('.navbar');
                 const stickyBar = document.querySelector('.sticky-footer-bar');
                 const delta = currentScrollY - lastScrollY;
+                const tapada = carritoEnLineaALaVista();
 
                 if (currentScrollY <= 10) {
                     // En la cima → siempre visible
                     if (navbar) navbar.classList.remove('nav-hidden');
-                    if (stickyBar) stickyBar.classList.remove('bar-hidden');
+                    if (stickyBar) stickyBar.classList.toggle('bar-hidden', tapada);
                 } else if (delta < -2) {
-                    // Scroll UP (delta negativo) → mostrar
+                    // Scroll UP (delta negativo) → mostrar, salvo que el boton
+                    // en linea siga a la vista
                     if (navbar) navbar.classList.remove('nav-hidden');
-                    if (stickyBar) stickyBar.classList.remove('bar-hidden');
+                    if (stickyBar) stickyBar.classList.toggle('bar-hidden', tapada);
                 } else if (delta > 4 && currentScrollY > 60) {
                     // Scroll DOWN (delta positivo, superada zona inicial) → ocultar
                     if (navbar) navbar.classList.add('nav-hidden');
                     if (stickyBar) stickyBar.classList.add('bar-hidden');
+                } else if (tapada && stickyBar) {
+                    // Sin cambio de direccion, pero el boton en linea acaba de
+                    // entrar en pantalla: la barra cede igualmente.
+                    stickyBar.classList.add('bar-hidden');
                 }
 
                 lastScrollY = currentScrollY;
@@ -4718,6 +5073,8 @@ Aviso legal<br />
             }
 
             window.addEventListener('scroll', onScroll, { passive: true });
+            window.addEventListener('resize', onScroll, { passive: true });
+            updateNavScroll();   // estado correcto ya en la primera pintura
         })();
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -4732,7 +5089,11 @@ Aviso legal<br />
             initShippingCountdown();
             initRecommendedProductsSlider();
             initReviewsScrollObserver();
+            ajustarBotonesVerMas();
+            initVideoCarrusel();
+            initShorts();
         });
+        window.addEventListener('resize', ajustarBotonesVerMas);
     
         // ─── GESTOS TÁCTILES (SWIPE) PARA MÓVIL EN GALERÍA Y LIGHTBOX ───
         (function() {
@@ -4784,74 +5145,581 @@ Aviso legal<br />
             return url;
         }
 
-        function abrirVideoModal(youtubeId) {
-            const modal = document.getElementById('videoModalLightbox');
-            const iframe = document.getElementById('videoModalIframe');
-            if (!modal || !iframe || !youtubeId) return;
-            iframe.src = 'https://www.youtube.com/embed/' + youtubeId + '?autoplay=1&rel=0&modestbranding=1&playsinline=1';
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
+        /* ═══════════════ SHORTS: REPRODUCCION AUTOMATICA ═══════════════
+           Todos los reproductores se crean por adelantado, en silencio y
+           ocultos tras la miniatura. Cada uno arranca y, en cuanto entrega su
+           primer fotograma, se pausa y vuelve al segundo cero: asi queda
+           cargado y con la careta inicial de YouTube ya pasada.
+           Cuando una tarjeta se vuelve la activa solo hay que reanudar, no
+           crear un iframe: no da tiempo a que asome la interfaz de YouTube. */
+        /* 'local' si la carpeta videos/ tiene archivos; si no, 'youtube'. */
+        const MOTOR_SHORTS = '<?= $videos_locales ? 'local' : 'youtube' ?>';
+        let ytApiLista = (MOTOR_SHORTS === 'local'), ytApiPedida = false;
+        const reproductoresShort = new Map();
+        const shortsListos = new Set();
+        let tarjetaShortActiva = null;
+        let sonidoShorts = false;
+        let seccionShortsVisible = false;
+
+        function pedirApiYouTube() {
+            if (MOTOR_SHORTS === 'local') return;   // no se carga nada de YouTube
+            if (ytApiLista || ytApiPedida) return;
+            ytApiPedida = true;
+            const et = document.createElement('script');
+            et.src = 'https://www.youtube.com/iframe_api';
+            document.head.appendChild(et);
         }
 
-        function cerrarVideoModal(e) {
-            if (e && e.target && e.target.classList && e.target.classList.contains('video-modal-container')) {
+        window.onYouTubeIframeAPIReady = function () {
+            ytApiLista = true;
+            precargarShorts();
+        };
+
+        /* Tarjetas a las que el navegador no dejo sonar: no se insiste hasta
+           que el usuario vuelva a tocar el boton de sonido. */
+        const sonidoBloqueado = new Set();
+
+        /* Segundo en el que YouTube ya ha retirado su interfaz (titulo, canal,
+           boton de reproduccion). Todos los shorts se dejan aparcados aqui, no
+           en 0, para que al aparecer no se vea ni un fotograma de esa UI. */
+        const ARRANQUE_SHORT = <?= $videos_locales ? '0' : '1.2' ?>;
+
+        function aplicarSonido(rep, card) {
+            try {
+                if (sonidoShorts && !(card && sonidoBloqueado.has(card))) {
+                    rep.unMute();
+                    rep.setVolume(75);
+                    /* Imprescindible volver a pedir play. Quitar el mute revoca
+                       el permiso de reproduccion silenciosa que tenia el video y
+                       el navegador lo PAUSA en el acto. Comprobado con Playwright
+                       bajo la politica de Chrome en Android: solo unMute() deja
+                       el short congelado; unMute() + playVideo() lo mantiene
+                       sonando. Era la causa de que al pasar de short con el
+                       volumen abierto se quedara todo parado. */
+                    rep.playVideo();
+                } else {
+                    rep.mute();
+                }
+            } catch (e) { /* el reproductor aun no responde */ }
+            if (card) card.classList.toggle('con-sonido', sonidoShorts);
+        }
+
+        /* Adaptador con la MISMA superficie que YT.Player. Envolver el <video>
+           en esta interfaz permite que toda la maquinaria del carrusel
+           -activarTarjetaShort, aplicarSonido, revelarShort, vigilarReproduccion,
+           el bucle infinito y los gestos- siga funcionando sin tocar una linea,
+           y que las pruebas automaticas valgan igual para los dos motores. */
+        function crearReproductorLocal(card) {
+            const v = card.querySelector('video');
+            if (!v) return;
+
+            const rep = {
+                playVideo()  { const pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); },
+                pauseVideo() { try { v.pause(); } catch (e) {} },
+                mute()       { v.muted = true; },
+                unMute()     { v.muted = false; },
+                isMuted()    { return v.muted; },
+                setVolume(n) { v.volume = Math.max(0, Math.min(1, (n || 0) / 100)); },
+                getVolume()  { return Math.round(v.volume * 100); },
+                seekTo(seg)  { try { v.currentTime = seg || 0; } catch (e) {} },
+                getCurrentTime() { return v.currentTime || 0; },
+                /* Mismos codigos que YouTube: 0 fin, 1 reproduciendo,
+                   2 pausado, 3 cargando. */
+                getPlayerState() {
+                    if (v.ended) return 0;
+                    if (v.paused) return 2;
+                    return v.readyState < 3 ? 3 : 1;
+                },
+                destroy() { try { v.pause(); } catch (e) {} },
+                elemento: v,
+            };
+
+            // Equivalente a onStateChange -> PLAYING.
+            v.addEventListener('playing', function () {
+                if (!shortsListos.has(card)) {
+                    shortsListos.add(card);
+                    if (card !== tarjetaShortActiva) {
+                        // Precargada: se deja lista y quieta, sin gastar red.
+                        try { v.pause(); v.currentTime = ARRANQUE_SHORT; } catch (e) {}
+                        return;
+                    }
+                }
+                if (card === tarjetaShortActiva) {
+                    aplicarSonido(rep, card);
+                    revelarShort(card, rep);
+                }
+            });
+
+            reproductoresShort.set(card, rep);
+            /* Basta con la cabecera para tener portada; el clip completo se
+               descarga cuando la tarjeta llega al centro. */
+            try { v.load(); } catch (e) {}
+        }
+
+        function crearReproductorShort(card) {
+            if (MOTOR_SHORTS === 'local') {
+                if (card && !reproductoresShort.has(card)) crearReproductorLocal(card);
                 return;
             }
-            if (e) e.stopPropagation();
-            const modal = document.getElementById('videoModalLightbox');
-            const iframe = document.getElementById('videoModalIframe');
-            if (!modal) return;
-            modal.classList.remove('active');
-            if (iframe) iframe.src = '';
-            document.body.style.overflow = '';
+            if (!ytApiLista || !card || reproductoresShort.has(card)) return;
+            if (typeof YT === 'undefined' || !YT.Player) return;
+            const hueco = card.querySelector('.vs-player');
+            const id = card.getAttribute('data-youtube-id');
+            if (!hueco || !id) return;
+
+            hueco.innerHTML = '<div></div>';
+            const rep = new YT.Player(hueco.firstElementChild, {
+                videoId: id,
+                playerVars: {
+                    autoplay: 1, mute: 1, controls: 0, playsinline: 1,
+                    rel: 0, modestbranding: 1, fs: 0, disablekb: 1,
+                    iv_load_policy: 3,
+                    loop: 1, playlist: id
+                },
+                events: {
+                    onReady: function (e) {
+                        e.target.mute();
+                        e.target.playVideo();
+                    },
+                    onStateChange: function (e) {
+                        if (e.data === YT.PlayerState.PLAYING) {
+                            if (!shortsListos.has(card)) {
+                                shortsListos.add(card);
+                                if (card !== tarjetaShortActiva) {
+                                    // Aparcado pasada la UI de YouTube, listo para aparecer limpio.
+                                    try { e.target.pauseVideo(); e.target.seekTo(ARRANQUE_SHORT, true); } catch (err) {}
+                                    return;
+                                }
+                            }
+                            if (card === tarjetaShortActiva) {
+                                aplicarSonido(e.target, card);
+                                revelarShort(card, e.target);
+                            }
+                        } else if (e.data === YT.PlayerState.ENDED) {
+                            e.target.playVideo();
+                        }
+                    }
+                }
+            });
+            reproductoresShort.set(card, rep);
         }
 
-        function manejarClickVideoCard(card, event) {
-            if (typeof ES_MODO_EDICION !== 'undefined' && ES_MODO_EDICION) {
-                return;
+        /* Se crean escalonados: diez iframes a la vez saturarian la red y el
+           navegador justo cuando el usuario esta llegando a la seccion. */
+        function precargarShorts() {
+            if (!ytApiLista) return;
+            document.querySelectorAll('.video-review-card').forEach(function (c, i) {
+                setTimeout(function () { crearReproductorShort(c); }, i * 220);
+            });
+        }
+
+        function pausarShort(card) {
+            if (!card) return;
+            card.classList.remove('reproduciendo');
+            const rep = reproductoresShort.get(card);
+            if (!rep) return;
+            /* Se vuelve al punto limpio, no a 0. Y NO se silencia: si el
+               usuario tiene el sonido abierto, los reproductores deben seguir
+               desmuteados para que el siguiente suene sin pedir permiso otra
+               vez (el permiso solo se concede dentro de un gesto). */
+            try { rep.pauseVideo(); rep.seekTo(ARRANQUE_SHORT, true); } catch (e) {}
+        }
+
+        function pausarTodosLosShorts() {
+            reproductoresShort.forEach(function (rep, card) { pausarShort(card); });
+        }
+
+        function activarTarjetaShort(card) {
+            if (card === tarjetaShortActiva) return;
+            if (tarjetaShortActiva) {
+                tarjetaShortActiva.classList.remove('activa');
+                pausarShort(tarjetaShortActiva);
             }
-            const ytid = card.getAttribute('data-youtube-id');
-            if (ytid) {
-                abrirVideoModal(ytid);
+            document.querySelectorAll('.video-review-card.activa').forEach(function (c) { c.classList.remove('activa'); });
+
+            tarjetaShortActiva = card || null;
+            if (!card) return;
+            card.classList.add('activa');
+            card.classList.toggle('con-sonido', sonidoShorts);
+            if (!seccionShortsVisible) return;
+
+            const rep = reproductoresShort.get(card);
+            if (rep) {
+                /* El sonido se aplica AQUI, dentro del gesto que trajo esta
+                   tarjeta al centro. Un movil solo concede audio si la llamada
+                   nace de la interaccion del usuario: hacerlo desde un
+                   setTimeout posterior ya cuenta como autoplay con sonido, el
+                   navegador lo bloquea y el video se queda pausado. Ese era el
+                   fallo al pasar de short con el volumen abierto.
+                   aplicarSonido hace unMute + setVolume + playVideo, o mute()
+                   si el sonido esta apagado. */
+                aplicarSonido(rep, card);
+                try { rep.playVideo(); } catch (e) {}
+                /* Aqui NO se destapa: el video sigue pausado en su punto de
+                   arranque y se veria la caratula. Lo hara revelarShort en
+                   cuanto el reproductor confirme que rueda. */
+                vigilarReproduccion(rep, card);
+            } else {
+                pedirApiYouTube();
+                crearReproductorShort(card);
             }
         }
 
-        function desplazarVideoCarrusel(direccion) {
+        /* Ningun short puede quedarse congelado en el centro: si tras varios
+           intentos el navegador sigue sin arrancarlo con sonido, se reproduce
+           mudo. Ver un video sin sonido es aceptable; verlo parado, no.
+           La tarjeta se apunta en sonidoBloqueado para que onStateChange no
+           vuelva a desmutearla y entre en bucle desmutear-pausar. */
+        /* Unica puerta por la que se destapa el iframe, y solo cuando el video
+           RUEDA de verdad. Antes se destapaba al activar la tarjeta, con el
+           video todavia pausado, y se veia la caratula estatica de YouTube
+           -boton de reproduccion incluido-. Medido: a +120 ms del gesto el
+           reproductor estaba al 50% de opacidad en estado "cargando". */
+        function revelarShort(card, rep) {
+            setTimeout(function () {
+                if (card !== tarjetaShortActiva) return;
+                try { if (!rep || !rep.getPlayerState || rep.getPlayerState() !== 1) return; } catch (e) { return; }
+                card.classList.add('reproduciendo');
+            }, 220);
+        }
+
+        function vigilarReproduccion(rep, card) {
+            let intentos = 0;
+            (function revisar() {
+                if (card !== tarjetaShortActiva) return;
+                let estado = null;
+                try { estado = rep.getPlayerState ? rep.getPlayerState() : null; } catch (e) { return; }
+                if (estado === 1) { revelarShort(card, rep); return; }   // ya rueda
+                if (estado === 3 && intentos < 6) { intentos++; setTimeout(revisar, 400); return; }
+                intentos++;
+                try {
+                    if (intentos >= 3 && sonidoShorts) {
+                        // Se rinde con el audio: la tarjeta deja de anunciarlo.
+                        sonidoBloqueado.add(card); rep.mute(); card.classList.remove('con-sonido');
+                    }
+                    rep.playVideo();
+                } catch (e) {}
+                if (intentos < 6) setTimeout(revisar, 450);
+            })();
+        }
+
+        function tarjetaShortCentrada() {
             const track = document.getElementById('videoReviewsTrack');
-            if (track) {
-                track.scrollBy({ left: direccion * 320, behavior: 'smooth' });
+            if (!track) return null;
+            const centro = track.scrollLeft + track.clientWidth / 2;
+            let mejor = null, dist = Infinity;
+            track.querySelectorAll('.video-review-card').forEach(function (c) {
+                const d = Math.abs((c.offsetLeft + c.offsetWidth / 2) - centro);
+                if (d < dist) { dist = d; mejor = c; }
+            });
+            return mejor;
+        }
+
+        function alternarSonidoShort(ev) {
+            ev.stopPropagation();
+            sonidoShorts = !sonidoShorts;
+            // Es un gesto real del usuario: vuelve a haber permiso de audio.
+            sonidoBloqueado.clear();
+            /* Se aplica a TODOS los reproductores, no solo al visible. El
+               navegador concede el audio dentro del gesto y por iframe: si se
+               deja para cuando el usuario deslice, ese permiso ya no existe y
+               el siguiente short aparece "con sonido" pero mudo de verdad.
+               Desmutearlos ahora, mientras el dedo sigue en el boton, es lo que
+               hace que el sonido viaje al resto del carrusel. */
+            reproductoresShort.forEach(function (r, c) {
+                try {
+                    if (sonidoShorts) { r.unMute(); r.setVolume(75); }
+                    else { r.mute(); }
+                } catch (e) {}
+            });
+            const rep = tarjetaShortActiva ? reproductoresShort.get(tarjetaShortActiva) : null;
+            if (rep) aplicarSonido(rep, tarjetaShortActiva);
+            document.querySelectorAll('.video-review-card').forEach(function (c) { c.classList.toggle('con-sonido', sonidoShorts); });
+            document.querySelectorAll('.vs-sonido').forEach(function (b) {
+                b.setAttribute('aria-pressed', sonidoShorts ? 'true' : 'false');
+                b.setAttribute('aria-label', sonidoShorts ? 'Silenciar' : 'Activar sonido');
+            });
+        }
+
+
+        /* ─── BUCLE INFINITO ───
+           No se clonan tarjetas: se RECIRCULAN. Cuando la primera queda muy a
+           la izquierda se manda al final, y se descuenta su ancho del scroll,
+           asi que a la vista no se mueve nada. Con eso siempre hay vecinas a
+           ambos lados y no aparece el hueco blanco de los extremos.
+           Solo se recolocan tarjetas alejadas de la activa: mover un nodo con
+           un iframe dentro lo obliga a recargarse, y no queremos que eso le
+           pase al video que se esta viendo. */
+        function pasoCarrusel(track) {
+            const card = track.querySelector('.video-review-card');
+            if (!card) return 0;
+            const hueco = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap || 14) || 14;
+            return card.offsetWidth + hueco;
+        }
+
+        /* ─── ORDEN VISUAL SIN TOCAR EL DOM ───
+           Mover un nodo que contiene un <iframe> obliga al navegador a
+           recargarlo: la ventana anterior se descarta y el objeto YT.Player
+           se queda apuntando a ella, asi que cada mute()/playVideo()
+           posterior falla con "postMessage ... target origin does not match"
+           y esa tarjeta deja de responder al boton de sonido.
+           La pista es flex, de modo que el orden visual se cambia con la
+           propiedad `order` y el iframe nunca se entera: el video sigue
+           cargado, en su posicion y sonando. */
+        let ordenCarrusel = [];
+
+        function aplicarOrdenCarrusel() {
+            ordenCarrusel.forEach(function (c, i) { c.style.order = i; });
+        }
+
+        function recolocar(card, alFinal) {
+            const i = ordenCarrusel.indexOf(card);
+            if (i === -1) return;
+            ordenCarrusel.splice(i, 1);
+            if (alFinal) ordenCarrusel.push(card);
+            else ordenCarrusel.unshift(card);
+            aplicarOrdenCarrusel();
+        }
+
+        /* Una tarjeta se puede recolocar si esta fuera de la vista (con una
+           tarjeta de holgura). Mover un nodo con iframe lo obliga a recargar,
+           y eso solo es aceptable donde nadie lo esta mirando.
+           Antes la guarda era "no muevas la activa", pero tras un
+           desplazamiento largo la activa acaba siendo la primera del DOM y el
+           bucle se atascaba justo al llegar al extremo. */
+        function fueraDeLaVista(card, track) {
+            const paso = pasoCarrusel(track);
+            const izq = card.offsetLeft;
+            const der = izq + card.offsetWidth;
+            return der < track.scrollLeft - paso || izq > track.scrollLeft + track.clientWidth + paso;
+        }
+
+        function reciclarCarrusel() {
+            const track = document.getElementById('videoReviewsTrack');
+            if (!track) return;
+            const paso = pasoCarrusel(track);
+            if (!paso) return;
+            const margen = paso * 2;
+            let vueltas = 0;
+
+            while (track.scrollLeft < margen && vueltas++ < 12) {
+                const ultima = ordenCarrusel[ordenCarrusel.length - 1];
+                if (!ultima || !fueraDeLaVista(ultima, track)) break;
+                recolocar(ultima, false);
+                track.scrollLeft += paso;
             }
+            vueltas = 0;
+            while (track.scrollLeft > track.scrollWidth - track.clientWidth - margen && vueltas++ < 12) {
+                const primera = ordenCarrusel[0];
+                if (!primera || !fueraDeLaVista(primera, track)) break;
+                recolocar(primera, true);
+                track.scrollLeft -= paso;
+            }
+        }
+
+        /* Deja la tarjeta indicada en el centro exacto de la pista. */
+        function centrarTarjeta(card, suave) {
+            const track = card.parentElement;
+            const destino = card.offsetLeft - (track.clientWidth - card.offsetWidth) / 2;
+            track.scrollTo({ left: Math.max(0, destino), behavior: suave ? 'smooth' : 'auto' });
+        }
+
+        /* Al arrancar se llevan varias del final al principio para que la
+           primera tenga vecinas a su izquierda y pueda quedar centrada. */
+        function prepararBucle() {
+            const track = document.getElementById('videoReviewsTrack');
+            if (!track) return null;
+            // Se numeran ANTES de reordenar: el orden del DOM es el orden
+            // real de los videos y ya no vuelve a cambiar.
+            ordenCarrusel = Array.prototype.slice.call(track.querySelectorAll('.video-review-card'));
+            ordenCarrusel.forEach(function (c, i) { c.dataset.orden = i; });
+            if (ordenCarrusel.length < 4) {
+                aplicarOrdenCarrusel();
+                return ordenCarrusel[0] || null;
+            }
+            const primeraOriginal = ordenCarrusel[0];
+            for (let i = 0; i < 3; i++) {
+                ordenCarrusel.unshift(ordenCarrusel.pop());
+            }
+            aplicarOrdenCarrusel();
+            centrarTarjeta(primeraOriginal, false);
+            return primeraOriginal;
+        }
+
+        /* ─── UN VIDEO POR GESTO ───
+           El desplazamiento nativo se apaga (overflow-x: hidden) y el gesto lo
+           gobernamos nosotros. Dos motivos:
+           1. Con impulso nativo un deslizamiento fuerte recorre varias tarjetas.
+           2. Reciclar el bucle toca scrollLeft, y hacerlo mientras el navegador
+              anima su propio impulso produce el tiron que se veia.
+           Ahora el movimiento es siempre de una tarjeta y el reciclado ocurre
+           entre gestos, nunca durante. */
+        let carruselAnimando = false;
+
+        function moverCarrusel(direccion) {
+            if (carruselAnimando) return;
+            const track = document.getElementById('videoReviewsTrack');
+            if (!track) return;
+
+            // Se recicla ANTES de movernos para garantizar que haya vecina
+            reciclarCarrusel();
+
+            const actual = tarjetaShortActiva || tarjetaShortCentrada();
+            if (!actual) return;
+            const pos = ordenCarrusel.indexOf(actual);
+            const destino = pos === -1 ? null : ordenCarrusel[pos + (direccion > 0 ? 1 : -1)];
+            if (!destino) return;
+
+            carruselAnimando = true;
+            centrarTarjeta(destino, true);
+            activarTarjetaShort(destino);
+            actualizarIndicadorVideo();
+
+            // Al terminar la animacion se recicla, ya sin pelear con nadie
+            setTimeout(function () {
+                carruselAnimando = false;
+                reciclarCarrusel();
+            }, 430);
+        }
+
+        function initGestosCarrusel(track) {
+            let x0 = 0, y0 = 0, activo = false;
+
+            track.addEventListener('touchstart', function (e) {
+                if (!e.touches || e.touches.length !== 1) return;
+                x0 = e.touches[0].clientX;
+                y0 = e.touches[0].clientY;
+                activo = true;
+            }, { passive: true });
+
+            track.addEventListener('touchend', function (e) {
+                if (!activo || !e.changedTouches || e.changedTouches.length !== 1) return;
+                activo = false;
+                const dx = e.changedTouches[0].clientX - x0;
+                const dy = e.changedTouches[0].clientY - y0;
+                // Solo cuenta si el gesto es claramente horizontal: si no, el
+                // usuario esta desplazando la pagina y no hay que estorbarle.
+                if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+                    moverCarrusel(dx < 0 ? 1 : -1);
+                }
+            }, { passive: true });
+
+            /* Rueda o panel tactil horizontal: una tarjeta por impulso.
+               El bloqueo evita que un solo gesto de trackpad, que dispara
+               decenas de eventos, recorra medio carrusel. */
+            let ruedaBloqueada = false;
+            track.addEventListener('wheel', function (e) {
+                if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;   // gesto vertical: es de la pagina
+                e.preventDefault();
+                if (ruedaBloqueada || carruselAnimando) return;
+                ruedaBloqueada = true;
+                moverCarrusel(e.deltaX > 0 ? 1 : -1);
+                setTimeout(function () { ruedaBloqueada = false; }, 460);
+            }, { passive: false });
+
+            /* Teclado, para quien navegue sin raton. */
+            track.setAttribute('tabindex', '0');
+            track.addEventListener('keydown', function (e) {
+                if (e.key === 'ArrowRight') { e.preventDefault(); moverCarrusel(1); }
+                else if (e.key === 'ArrowLeft') { e.preventDefault(); moverCarrusel(-1); }
+            });
+        }
+
+        function initShorts() {
+            const track = document.getElementById('videoReviewsTrack');
+            const seccion = document.getElementById('videoReviewsSection');
+            if (!track || !seccion) return;
+            if (typeof ES_MODO_EDICION !== 'undefined' && ES_MODO_EDICION) return;
+
+            // Coloca la primera en el centro con vecinas a los dos lados
+            const primera = prepararBucle();
+            tarjetaShortActiva = primera || tarjetaShortCentrada();
+            if (tarjetaShortActiva) tarjetaShortActiva.classList.add('activa');
+
+            /* La carga empieza ANTES de que la seccion se vea: con 600px de
+               margen los videos llegan preparados cuando el usuario aterriza. */
+            const obsCarga = new IntersectionObserver(function (entradas) {
+                entradas.forEach(function (en) {
+                    if (en.isIntersecting) {
+                        pedirApiYouTube();
+                        if (ytApiLista) precargarShorts();
+                        obsCarga.disconnect();
+                    }
+                });
+            }, { rootMargin: '600px 0px' });
+            obsCarga.observe(seccion);
+
+            const obsVista = new IntersectionObserver(function (entradas) {
+                entradas.forEach(function (en) {
+                    seccionShortsVisible = en.isIntersecting;
+                    if (en.isIntersecting) {
+                        const c = tarjetaShortActiva || tarjetaShortCentrada();
+                        if (c) { tarjetaShortActiva = null; activarTarjetaShort(c); }
+                    } else {
+                        pausarTodosLosShorts();
+                    }
+                });
+            }, { threshold: 0.35 });
+            obsVista.observe(seccion);
+
+            initGestosCarrusel(track);
+            actualizarIndicadorVideo();
+
+            document.addEventListener('visibilitychange', function () {
+                if (document.hidden) { pausarTodosLosShorts(); return; }
+                if (!seccionShortsVisible || !tarjetaShortActiva) return;
+                const rep = reproductoresShort.get(tarjetaShortActiva);
+                if (rep) { try { rep.playVideo(); } catch (e) {} }
+            });
+        }
+
+        /* Barra de progreso del carrusel. Sin flechas, es la unica pista de
+           cuanto queda por recorrer. */
+        /* En un carrusel en bucle no hay "cuanto llevas recorrido": el scroll
+           se recicla constantemente. La barra se calcula del numero de video
+           activo, que si es estable porque cada tarjeta guarda su orden
+           original en data-orden. */
+        function actualizarIndicadorVideo() {
+            const barra = document.getElementById('videoCarruselBarra');
+            if (!barra) return;
+            const total = document.querySelectorAll('.video-review-card').length;
+            if (!total) return;
+
+            const orden = tarjetaShortActiva ? parseInt(tarjetaShortActiva.dataset.orden || '0', 10) : 0;
+            const ancho = Math.max(12, 100 / total);
+            const avance = total > 1 ? orden / (total - 1) : 0;
+            barra.style.width = ancho + '%';
+            barra.style.left = (avance * (100 - ancho)) + '%';
+        }
+
+        function initVideoCarrusel() {
+            const track = document.getElementById('videoReviewsTrack');
+            if (!track) return;
+            actualizarIndicadorVideo();
+            track.addEventListener('scroll', actualizarIndicadorVideo, { passive: true });
+            window.addEventListener('resize', actualizarIndicadorVideo);
         }
 
         function editarVideoCard(card) {
             if (!card) return;
             const currentId = card.getAttribute('data-youtube-id') || '';
-            const currentDurElem = card.querySelector('.video-duration-text');
-            const currentTitleElem = card.querySelector('.video-card-title-text');
-            
-            const currentDur = currentDurElem ? currentDurElem.innerText.trim() : '1:30';
-            const currentTitle = currentTitleElem ? currentTitleElem.innerText.trim() : 'Review DJI Pocket 3';
 
-            const newUrl = prompt('Ingresa el Link de YouTube o ID del video:\n(Ej: https://www.youtube.com/watch?v=... o https://youtu.be/... o https://youtube.com/shorts/...)', currentId ? 'https://www.youtube.com/watch?v=' + currentId : '');
+            const newUrl = prompt('Pega el link del Short de YouTube:\n(Ej: https://youtube.com/shorts/... o https://youtu.be/...)', currentId ? 'https://www.youtube.com/shorts/' + currentId : '');
             if (newUrl === null) return;
-            
+
             const parsedId = extraerYouTubeId(newUrl);
             if (!parsedId) {
                 alert('No se pudo reconocer un ID de YouTube válido.');
                 return;
             }
 
-            const newDur = prompt('Duración del video (ej. 1:45):', currentDur) || currentDur;
-            const newTitle = prompt('Título o descripción corta:', currentTitle) || currentTitle;
-
             card.setAttribute('data-youtube-id', parsedId);
-            const thumb = card.querySelector('.video-card-thumb');
+            const thumb = card.querySelector('.vs-thumb');
             if (thumb) {
-                thumb.src = 'https://i.ytimg.com/vi/' + parsedId + '/hqdefault.jpg';
+                // oar2 es el recorte vertical: es el que cuadra con un Short
+                thumb.src = 'https://i.ytimg.com/vi/' + parsedId + '/oar2.jpg';
                 thumb.setAttribute('referrerpolicy', 'no-referrer');
             }
-            if (currentDurElem) currentDurElem.innerText = newDur;
-            if (currentTitleElem) currentTitleElem.innerText = newTitle;
 
             alert('✅ Video actualizado. Recuerda hacer clic en "💾 Guardar Cambios" para guardar.');
         }
@@ -4871,26 +5739,24 @@ Aviso legal<br />
                 alert('Link de YouTube no válido.');
                 return;
             }
-            const dur = prompt('Duración del video (ej. 1:30):', '1:30') || '1:30';
-            const title = prompt('Título / Resumen:', 'Opinión DJI Osmo Pocket 3') || 'Opinión DJI Osmo Pocket 3';
-
             const track = document.getElementById('videoReviewsTrack');
             if (!track) return;
 
-            const card = document.createElement('div');
+            const card = document.createElement('article');
             card.className = 'video-review-card';
             card.setAttribute('data-youtube-id', id);
-            card.setAttribute('onclick', 'manejarClickVideoCard(this, event)');
             card.innerHTML = `
-                <img class="video-card-thumb" src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" referrerpolicy="no-referrer" alt="Video Review" loading="lazy">
-                <div class="video-card-gradient"></div>
-                <div class="video-card-badge-play">▶</div>
-                <div class="video-card-info">
-                    <div class="video-card-stars">★★★★★</div>
-                    <div class="video-card-duration">
-                        <span class="play-icon-mini">▶</span> <span class="video-duration-text" data-editable="true">${dur}</span>
-                    </div>
-                    <div class="video-card-title-text" data-editable="true">${title}</div>
+                <div class="vs-media">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/${id}/oar2.jpg" referrerpolicy="no-referrer" alt="" loading="lazy">
+                    <div class="vs-player"></div>
+                    <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
+                        <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6"/><path d="m17 9 6 6"/>
+                        </svg>
+                        <svg class="vs-ico vs-ico-audio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+                        </svg>
+                    </button>
                 </div>
                 <div class="video-card-admin-bar" onclick="event.stopPropagation()">
                     <button type="button" class="btn-vcard-edit" onclick="editarVideoCard(this.closest('.video-review-card'))" title="Editar link de YouTube">✏️ Editar</button>
@@ -4903,12 +5769,6 @@ Aviso legal<br />
             }
             alert('✅ Video agregado al carrusel. Recuerda hacer clic en "💾 Guardar Cambios" para guardar permanentemente.');
         }
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                cerrarVideoModal();
-            }
-        });
 
         // ─── ACTUALIZACIÓN EN TIEMPO REAL AL PUBLICAR NUEVA VERSIÓN ───
         (function() {
@@ -4954,22 +5814,60 @@ Aviso legal<br />
         })();
 
     </script>
-    <div class="review-photo-backdrop" id="reviewPhotoBackdrop" onclick="this.classList.remove('open')">
-        <img id="reviewPhotoBig" src="" alt="Foto de la opinión ampliada">
+    <div class="review-photo-backdrop" id="reviewPhotoBackdrop" onclick="if (event.target === this) cerrarFotoOpinion()">
+        <button type="button" class="rvf-cerrar" onclick="cerrarFotoOpinion()" aria-label="Cerrar">&#10005;</button>
+        <div class="rvf-pista" id="reviewPhotoTrack" onscroll="actualizarPuntosFoto()"></div>
+        <div class="rvf-puntos" id="reviewPhotoDots"></div>
     </div>
     <script>
-        function abrirFotoOpinion(url) {
+        /* Se recibe la <img> pulsada, no su url: asi se sacan del propio DOM
+           todas las fotos de esa opinion y en que posicion esta la tocada. */
+        function abrirFotoOpinion(img) {
             var b = document.getElementById('reviewPhotoBackdrop');
-            var i = document.getElementById('reviewPhotoBig');
-            if (!b || !i) return;
-            i.src = url;
+            var pista = document.getElementById('reviewPhotoTrack');
+            var puntos = document.getElementById('reviewPhotoDots');
+            if (!b || !pista || !img || !img.parentElement) return;
+
+            var fotos = [].slice.call(img.parentElement.querySelectorAll('.review-photo'));
+            if (!fotos.length) fotos = [img];
+            var indice = fotos.indexOf(img);
+            if (indice < 0) indice = 0;
+
+            pista.innerHTML = fotos.map(function (f) {
+                return '<div class="rvf-slide"><img src="' + f.src + '" alt="Foto de la opinión ampliada"></div>';
+            }).join('');
+            puntos.innerHTML = fotos.length > 1 ? fotos.map(function (_, i) {
+                return '<span class="rvf-punto' + (i === indice ? ' activo' : '') + '"></span>';
+            }).join('') : '';
+
             b.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            // Sin animacion: debe abrirse ya sobre la foto que se toco.
+            pista.scrollLeft = pista.clientWidth * indice;
+            actualizarPuntosFoto();
         }
+
+        function actualizarPuntosFoto() {
+            var pista = document.getElementById('reviewPhotoTrack');
+            var puntos = document.getElementById('reviewPhotoDots');
+            if (!pista || !puntos || !puntos.children.length) return;
+            var i = Math.round(pista.scrollLeft / Math.max(1, pista.clientWidth));
+            [].forEach.call(puntos.children, function (p, n) { p.classList.toggle('activo', n === i); });
+        }
+
+        function cerrarFotoOpinion() {
+            var b = document.getElementById('reviewPhotoBackdrop');
+            if (b) b.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') {
-                var b = document.getElementById('reviewPhotoBackdrop');
-                if (b) b.classList.remove('open');
-            }
+            var b = document.getElementById('reviewPhotoBackdrop');
+            if (!b || !b.classList.contains('open')) return;
+            var pista = document.getElementById('reviewPhotoTrack');
+            if (e.key === 'Escape') { cerrarFotoOpinion(); }
+            else if (e.key === 'ArrowRight' && pista) { pista.scrollBy({ left: pista.clientWidth, behavior: 'smooth' }); }
+            else if (e.key === 'ArrowLeft' && pista) { pista.scrollBy({ left: -pista.clientWidth, behavior: 'smooth' }); }
         });
     </script>
 </body>
