@@ -1125,13 +1125,13 @@ Características princip">
             padding: 0;
             box-sizing: border-box;
         }
-        /* En movil el resumen se reduce al titulo: la nota y el recuento
-           ya viajan dentro de cada opinion y duplicaban la lectura. */
+        /* El resumen se reduce al titulo en todos los anchos: la nota y el
+           recuento ya viajan dentro de cada opinion y duplicaban la lectura. */
+        .reviews-summary-card .reviews-score-hero,
+        .reviews-summary-card .reviews-total-ratings-sub { display: none; }
+        .reviews-summary-card .reviews-sidebar-subtitle { margin-bottom: 0; }
         @media (max-width: 991px) {
             .customer-reviews-grid { gap: 18px; }
-            .reviews-summary-card .reviews-score-hero,
-            .reviews-summary-card .reviews-total-ratings-sub { display: none; }
-            .reviews-summary-card .reviews-sidebar-subtitle { margin-bottom: 0; }
         }
         /* Titulo de seccion, nivel 1: mismo tamano y peso que
            "Opiniones en video" y "Tambien compraron". */
@@ -1272,6 +1272,7 @@ Características princip">
         /* SECCIÓN ESCRIBIR OPINIÓN */
         .write-review-block {
             margin-top: 8px;
+            text-align: center;
         }
         /* Titulo de bloque, nivel 2: igual que "Detalles del producto". */
         .write-review-title {
@@ -2976,7 +2977,7 @@ Características princip">
     </style>
     <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
 </head>
-<body class="<?= $es_modo_edicion ? 'modo-edicion-activo' : '' ?>
+<body class="<?= $es_modo_edicion ? 'modo-edicion-activo' : '' ?>" style="<?= $es_modo_edicion ? 'margin-top: 50px;' : '' ?>">
 <?php if (!$es_modo_edicion): ?>
     <!-- ═══ SKELETON DE CARGA ═══
          Cubre la pagina desde el primer pintado con siluetas de lo que viene
@@ -3044,7 +3045,6 @@ Características princip">
         })();
     </script>
     <?php endif; ?>
-" style="<?= $es_modo_edicion ? 'margin-top: 50px;' : '' ?>">
 
     <?php if ($es_modo_edicion): ?>
     <div class="editor-top-toolbar" id="editorToolbar">
