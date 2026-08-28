@@ -5,7 +5,7 @@
  */
 if (!defined('LANDING_SLUG'))      define('LANDING_SLUG', 'dji-osmo-pocket-4-creater-combo');
 if (!defined('LANDING_TOKEN'))     define('LANDING_TOKEN', 'c384598dcd43f72d5e5d943491288cfd');
-if (!defined('PRODUCTO_NOMBRE'))   define('PRODUCTO_NOMBRE', 'DJI Osmo Pocket 4 Creater Combo');
+if (!defined('PRODUCTO_NOMBRE'))   define('PRODUCTO_NOMBRE', 'DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1\"');
 if (!defined('PRODUCTO_PRECIO'))   define('PRODUCTO_PRECIO', 1127980);
 if (!defined('WHATSAPP_NUMERO'))   define('WHATSAPP_NUMERO', '');
 
@@ -55,7 +55,9 @@ define('URL_PASARELA', 'https://pago-bold.com');
 define('URL_PASARELA_MERCADOLIBRE', 'https://pagos-mercadopago.com');
 
 /* Puntos Colombia: pesos de compra que equivalen a 1 punto.
-   Tasa oficial de acumulacion vigente (1 punto por cada $700). */
+   Tasa oficial de acumulacion vigente (1 punto por cada $700).
+   Si Puntos Colombia la cambia, se ajusta AQUI y todas las landings
+   que compartan este config lo toman sin tocar el HTML. */
 if (!defined('PUNTOS_COLOMBIA_PESOS_POR_PUNTO')) define('PUNTOS_COLOMBIA_PESOS_POR_PUNTO', 700);
 
 /* =========================================
