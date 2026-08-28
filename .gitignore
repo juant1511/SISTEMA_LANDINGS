@@ -13,3 +13,9 @@
 *.log
 .DS_Store
 Thumbs.db
+
+# Videos de las landings: se sirven desde el volumen, no desde git
+*.mp4
+*.mov
+*.m4v
+*.webm
