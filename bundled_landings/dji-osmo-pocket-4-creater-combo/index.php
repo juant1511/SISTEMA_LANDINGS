@@ -3390,9 +3390,9 @@ Características princip">
             </article>
             <?php endforeach; ?>
 <?php else: ?>
-            <article class="video-review-card" data-youtube-id="oPou2xqlWlo" data-video-title="¿La mejor cámara de bolsillo? | Review DJI Pocket">
+            <article class="video-review-card" data-youtube-id="ZSqH0WNw87I" data-video-title="OJO, que no te engañen: DJI Osmo Pocket 4 Pro">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/oPou2xqlWlo/hqdefault.jpg" referrerpolicy="no-referrer" alt="¿La mejor cámara de bolsillo? | Review DJI Pocket" loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/ZSqH0WNw87I/oar2.jpg" referrerpolicy="no-referrer" alt="OJO, que no te engañen: DJI Osmo Pocket 4 Pro" loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3404,9 +3404,9 @@ Características princip">
                     </button>
                 </div>
             </article>
-            <article class="video-review-card" data-youtube-id="f1-JQou-jZI" data-video-title="Unboxing cámara para vlogs DJI Osmo Pocket">
+            <article class="video-review-card" data-youtube-id="yD-401gi7eQ" data-video-title="Mi experiencia con la DJI Osmo Pocket 4P: ¿éxito o decepción?">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/f1-JQou-jZI/hqdefault.jpg" referrerpolicy="no-referrer" alt="Unboxing cámara para vlogs DJI Osmo Pocket" loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/yD-401gi7eQ/oar2.jpg" referrerpolicy="no-referrer" alt="Mi experiencia con la DJI Osmo Pocket 4P: ¿éxito o decepción?" loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3418,9 +3418,9 @@ Características princip">
                     </button>
                 </div>
             </article>
-            <article class="video-review-card" data-youtube-id="M0BUo2ntniI" data-video-title="NO compres el DJI Pocket sin ver esto">
+            <article class="video-review-card" data-youtube-id="jDW9MBLrH2A" data-video-title="DJI rompe el mercado con la nueva Osmo Pocket 4P">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/M0BUo2ntniI/hqdefault.jpg" referrerpolicy="no-referrer" alt="NO compres el DJI Pocket sin ver esto" loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/jDW9MBLrH2A/oar2.jpg" referrerpolicy="no-referrer" alt="DJI rompe el mercado con la nueva Osmo Pocket 4P" loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3432,9 +3432,9 @@ Características princip">
                     </button>
                 </div>
             </article>
-            <article class="video-review-card" data-youtube-id="o5mGJLLTi4Y" data-video-title="Truco para grabar en 4K horizontal">
+            <article class="video-review-card" data-youtube-id="cypAm89SfrM" data-video-title="¿Vale la pena la Osmo Pocket 4?">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/o5mGJLLTi4Y/hqdefault.jpg" referrerpolicy="no-referrer" alt="Truco para grabar en 4K horizontal" loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/cypAm89SfrM/oar2.jpg" referrerpolicy="no-referrer" alt="¿Vale la pena la Osmo Pocket 4?" loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3446,9 +3446,9 @@ Características princip">
                     </button>
                 </div>
             </article>
-            <article class="video-review-card" data-youtube-id="xqv8b84g9iM" data-video-title="DJI Osmo Pocket Unboxing + Setup">
+            <article class="video-review-card" data-youtube-id="DiLyH6StrY0" data-video-title="DJI Osmo Pocket 4: ¿vale la pena?">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/xqv8b84g9iM/hqdefault.jpg" referrerpolicy="no-referrer" alt="DJI Osmo Pocket Unboxing + Setup" loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/DiLyH6StrY0/oar2.jpg" referrerpolicy="no-referrer" alt="DJI Osmo Pocket 4: ¿vale la pena?" loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3460,9 +3460,9 @@ Características princip">
                     </button>
                 </div>
             </article>
-            <article class="video-review-card" data-youtube-id="epRh_cminDM" data-video-title="DJI Osmo Pocket 4 Review en Movimiento">
+            <article class="video-review-card" data-youtube-id="SRcw2RqUq84" data-video-title="La nueva DJI Osmo Pocket 4: buenos colores, pero...">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/epRh_cminDM/hqdefault.jpg" referrerpolicy="no-referrer" alt="DJI Osmo Pocket 4 Review en Movimiento" loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/SRcw2RqUq84/oar2.jpg" referrerpolicy="no-referrer" alt="La nueva DJI Osmo Pocket 4: buenos colores, pero..." loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3474,9 +3474,9 @@ Características princip">
                     </button>
                 </div>
             </article>
-            <article class="video-review-card" data-youtube-id="arDjjafTZzo" data-video-title="DJI Pocket Cinematic Test en Español">
+            <article class="video-review-card" data-youtube-id="ky8klHTL2Ig" data-video-title="DJI Osmo Pocket 4P: la doble cámara que todos pedíamos">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/arDjjafTZzo/hqdefault.jpg" referrerpolicy="no-referrer" alt="DJI Pocket Cinematic Test en Español" loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/ky8klHTL2Ig/oar2.jpg" referrerpolicy="no-referrer" alt="DJI Osmo Pocket 4P: la doble cámara que todos pedíamos" loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3488,9 +3488,9 @@ Características princip">
                     </button>
                 </div>
             </article>
-            <article class="video-review-card" data-youtube-id="XauDnVINoRU" data-video-title="DJI Osmo Pocket Creator Combo: Tips &amp; Audio">
+            <article class="video-review-card" data-youtube-id="xezLqoTEIno" data-video-title="Esta es la Osmo Pocket 4">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/XauDnVINoRU/hqdefault.jpg" referrerpolicy="no-referrer" alt="DJI Osmo Pocket Creator Combo: Tips &amp; Audio" loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/xezLqoTEIno/oar2.jpg" referrerpolicy="no-referrer" alt="Esta es la Osmo Pocket 4" loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3502,9 +3502,9 @@ Características princip">
                     </button>
                 </div>
             </article>
-            <article class="video-review-card" data-youtube-id="dS2s-r24H1g" data-video-title="Unboxing &amp; Setup del Creator Combo">
+            <article class="video-review-card" data-youtube-id="79S4mVWIqzc" data-video-title="DJI Osmo Pocket 4: análisis a fondo">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/dS2s-r24H1g/hqdefault.jpg" referrerpolicy="no-referrer" alt="Unboxing &amp; Setup del Creator Combo" loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/79S4mVWIqzc/oar2.jpg" referrerpolicy="no-referrer" alt="DJI Osmo Pocket 4: análisis a fondo" loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3516,9 +3516,9 @@ Características princip">
                     </button>
                 </div>
             </article>
-            <article class="video-review-card" data-youtube-id="epNWrPqg-rY" data-video-title="Prueba de Mic 2 &amp; ActiveTrack 6.0">
+            <article class="video-review-card" data-youtube-id="F_8yrTAzONU" data-video-title="Nadie esperaba esto: DJI Osmo Pocket 4P">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/epNWrPqg-rY/hqdefault.jpg" referrerpolicy="no-referrer" alt="Prueba de Mic 2 &amp; ActiveTrack 6.0" loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/F_8yrTAzONU/oar2.jpg" referrerpolicy="no-referrer" alt="Nadie esperaba esto: DJI Osmo Pocket 4P" loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
