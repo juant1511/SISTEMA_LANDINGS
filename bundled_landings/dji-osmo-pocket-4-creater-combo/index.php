@@ -29,7 +29,7 @@ $precio_fmt    = '1.127.980';
    generar y queda fijo aqui: si cambiara en cada carga no seria creible.
    De este mismo numero salen los dos formatos: "6 K+" en movil y
    "Mas de 6.000" en escritorio. */
-$compras_mes   = '6 K+';
+$compras_mes   = '1';
 $es_modo_edicion = isset($_GET['modo_edicion']) && $_GET['modo_edicion'] == '1';
 $app_version   = file_exists(__FILE__) ? md5_file(__FILE__) : (string)time();
 
@@ -3180,9 +3180,15 @@ Características princip">
                    que corresponde, asi que el lector nunca ve las dos. */
                 $detalles_producto = [
                     'Marca'     => $nombre_marca,
-                    'Modelo'    => 'DJI Osmo Pocket 4 Creater Combo Cámara para',
+                    'Modelo' => 'DJI Osmo Pocket 4 Creator Combo',
+                    'Sensor' => 'CMOS de 1"',
+                    'Resolución de video' => '4K a 120 fps',
+                    'Estabilización' => 'Mecánica de 3 ejes',
+                    'Zoom' => '2X sin pérdida',
+                    'Almacenamiento interno' => '107 GB',
+                    'Audio' => 'Compatible con DJI Mic 3',
                     'Contenido' => '1 Unidad',
-                    'Garant\u00eda'  => '3 a\u00f1os',
+                    'Garantía'  => '3 años',
                 ];
             ?>
 
@@ -3299,24 +3305,11 @@ Características princip">
                     </div>
                     <div class="accordion-body open">
                         <div class="desc-cuerpo"><p data-editable="true">Una cámara compacta y profesional, perfecta para creadores de contenido, viajes, vlogs, redes sociales y videos de alta calidad.</p>
-                            <p data-editable="true">Características principales</p>
-                            <p data-editable="true">Sensor CMOS de 1&quot; para imágenes claras y detalladas.</p>
-                            <p data-editable="true">Video en 4K para una excelente calidad de grabación.</p>
-                            <p data-editable="true">Estabilización mecánica de 3 ejes para videos suaves y estables.</p>
-                            <p data-editable="true">Pantalla táctil giratoria para grabar fácilmente en vertical u horizontal.</p>
-                            <p data-editable="true">ActiveTrack para realizar seguimiento inteligente del sujeto.</p>
-                            <p data-editable="true">Zoom 2X sin pérdida.</p>
-                            <p data-editable="true">Almacenamiento interno de 107 GB.</p>
-                            <p data-editable="true">Grabación en 10-bit D-Log para mayor detalle y mejores colores.</p>
-                            <p data-editable="true">Compatible con DJI Mic 3 para obtener audio de alta calidad.</p>
-                            <p data-editable="true">Creator Combo incluye</p>
-                            <p data-editable="true">DJI Osmo Pocket 4</p>
-                            <p data-editable="true">Transmisor DJI Mic 3</p>
-                            <p data-editable="true">Luz de relleno</p>
-                            <p data-editable="true">Lente gran angular</p>
-                            <p data-editable="true">Mini trípode</p>
-                            <p data-editable="true">Accesorios para transporte y protección</p>
-                            <p data-editable="true">Aviso legal</p>
+                            <h4 class="desc-subtitulo" data-editable="true">Características principales</h4>
+                            <ul class="desc-lista"><li data-editable="true">Sensor CMOS de 1&quot; para imágenes claras y detalladas.</li><li data-editable="true">Video en 4K para una excelente calidad de grabación.</li><li data-editable="true">Estabilización mecánica de 3 ejes para videos suaves y estables.</li><li data-editable="true">Pantalla táctil giratoria para grabar fácilmente en vertical u horizontal.</li><li data-editable="true">ActiveTrack para realizar seguimiento inteligente del sujeto.</li><li data-editable="true">Zoom 2X sin pérdida.</li><li data-editable="true">Almacenamiento interno de 107 GB.</li><li data-editable="true">Grabación en 10-bit D-Log para mayor detalle y mejores colores.</li><li data-editable="true">Compatible con DJI Mic 3 para obtener audio de alta calidad.</li></ul>
+                            <h4 class="desc-subtitulo" data-editable="true">Creator Combo incluye</h4>
+                            <ul class="desc-lista"><li data-editable="true">DJI Osmo Pocket 4</li><li data-editable="true">Transmisor DJI Mic 3</li><li data-editable="true">Luz de relleno</li><li data-editable="true">Lente gran angular</li><li data-editable="true">Mini trípode</li><li data-editable="true">Accesorios para transporte y protección</li></ul>
+                            <h4 class="desc-subtitulo" data-editable="true">Aviso legal</h4>
                             <ul class="desc-lista"><li data-editable="true">La duración de la batería depende del uso que se le dé al producto.</li></ul></div>
                         <?php if (!$es_modo_edicion): ?>
                         <button type="button" class="desc-toggle" onclick="toggleDescripcion(this)" aria-expanded="false">
@@ -3335,7 +3328,13 @@ Características princip">
                         <span data-editable="true">Garantía y Devoluciones</span>
                     </div>
                     <div class="accordion-body open">
-                        <div class="desc-cuerpo"><p data-editable="true">Todos nuestros productos cuentan con garantia de 3 años contra defectos de fabrica. Si no estas 100% satisfecho(a), te devolvemos tu dinero.</p></div>
+                        <div class="desc-cuerpo"><p data-editable="true">Todos nuestros productos cuentan con garantía de 3 años contra defectos de fábrica. Si no estás 100% satisfecho(a), te devolvemos tu dinero.</p>
+                            <h4 class="desc-subtitulo" data-editable="true">Qué cubre la garantía</h4>
+                            <ul class="desc-lista"><li data-editable="true">Fallas de fábrica en el sensor, el estabilizador y la batería.</li><li data-editable="true">Defectos en la pantalla táctil o en los puertos de conexión.</li><li data-editable="true">Accesorios del Creator Combo con fallas de origen.</li></ul>
+                            <h4 class="desc-subtitulo" data-editable="true">Devoluciones</h4>
+                            <ul class="desc-lista"><li data-editable="true">Tienes 30 días desde que recibes el pedido para solicitar la devolución.</li><li data-editable="true">El producto debe estar completo, con sus accesorios y su empaque original.</li><li data-editable="true">El reembolso se hace por el mismo medio de pago, dentro de los 10 días hábiles siguientes.</li></ul>
+                            <h4 class="desc-subtitulo" data-editable="true">Qué no cubre</h4>
+                            <ul class="desc-lista"><li data-editable="true">Daños por golpes, caídas, humedad o uso indebido.</li><li data-editable="true">Desgaste normal de la batería con el paso del tiempo.</li><li data-editable="true">Reparaciones hechas por terceros no autorizados.</li></ul></div>
                         <?php if (!$es_modo_edicion): ?>
                         <button type="button" class="desc-toggle" onclick="toggleDescripcion(this)" aria-expanded="false">
                             <svg class="desc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -4625,7 +4624,7 @@ Características princip">
         }
 
         /* Nombre corto del producto para la ficha de cada opinion. */
-        const PRODUCTO_CORTO = "DJI Osmo Pocket 4 Creater Combo Cámara para";
+        const PRODUCTO_CORTO = "DJI Osmo Pocket 4 Creater Combo Cámara";
 
         /* ─── FOTO DE PERFIL DE QUIEN OPINA ───
            Se pide a una API, no se guarda ninguna imagen en el proyecto: al
