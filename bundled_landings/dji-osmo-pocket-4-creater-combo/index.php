@@ -14,6 +14,14 @@ try {
         if (!empty($row_m['marca'])) { $nombre_marca = $row_m['marca']; }
     }
 } catch (Exception $e) {}
+try {
+    if (isset($pdo)) {
+        $stmt_m = $pdo->prepare("SELECT marca FROM landings WHERE slug = ?");
+        $stmt_m->execute([$landing_slug]);
+        $row_m = $stmt_m->fetch(PDO::FETCH_ASSOC);
+        if (!empty($row_m['marca'])) { $nombre_marca = $row_m['marca']; }
+    }
+} catch (Exception $e) {}
 $landing_token = 'c384598dcd43f72d5e5d943491288cfd';
 $precio_num    = 1127980;
 $precio_fmt    = '1.127.980';
@@ -21,7 +29,7 @@ $precio_fmt    = '1.127.980';
    generar y queda fijo aqui: si cambiara en cada carga no seria creible.
    De este mismo numero salen los dos formatos: "6 K+" en movil y
    "Mas de 6.000" en escritorio. */
-$compras_mes   = '6';
+$compras_mes   = '6 K+';
 $es_modo_edicion = isset($_GET['modo_edicion']) && $_GET['modo_edicion'] == '1';
 $app_version   = file_exists(__FILE__) ? md5_file(__FILE__) : (string)time();
 
@@ -877,22 +885,6 @@ Características princip">
         .swatch-circle.active { border-color: var(--primary); transform: scale(1.08); }
 
         .size-block { margin-bottom: 20px; }
-        .size-pills-row { display: flex; gap: 10px; }
-        .size-pill {
-            padding: 8px 18px;
-            border: 1.5px solid var(--primary);
-            background: rgba(0, 113, 227, 0.05);
-            color: var(--primary);
-            border-radius: 980px;
-            font-size: 13px;
-            font-weight: 600;
-            font-family: var(--font-body);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .size-pill:hover {
-            background: rgba(0, 113, 227, 0.1);
-        }
 
         .desktop-action-row { display: none; gap: 16px; align-items: center; margin-bottom: 22px; }
         .qty-label { font-size: 13px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.01em; }
@@ -3147,9 +3139,7 @@ Características princip">
                 <a href="#customerReviewsSection" class="nav-menu-link" onclick="navegarSeccion(event, 'customerReviewsSection')">
                     Opiniones de clientes
                 </a>
-                <a href="#recommendedProductsSection" class="nav-menu-link" onclick="navegarSeccion(event, 'recommendedProductsSection')">
-                    Tambien compraron
-                </a>
+                
             </nav>
         </div>
     </div>
@@ -3171,7 +3161,7 @@ Características princip">
                     <div class="rating-row">
                         <span class="rating-number">4.9</span>
                         <div class="stars-container">★★★★★</div>
-                        <span class="reviews-count" data-editable="true">(48<span class="rc-word"> opiniones</span>)</span>
+                        <span class="reviews-count" data-editable="true">(48)</span>)</span>
                     </div>
                 </div>
                 <?php if (trim($compras_mes) !== ''): ?>
@@ -3189,16 +3179,10 @@ Características princip">
                    dentro del flujo, sobre la descripcion. La CSS enseña solo la
                    que corresponde, asi que el lector nunca ve las dos. */
                 $detalles_producto = [
-                    'Marca'                  => $nombre_marca,
-                    'Modelo'                 => 'Osmo Pocket 4 Creator Combo',
-                    'Sensor'                 => 'CMOS de 1"',
-                    'Resolución de video'    => '4K a 120 fps',
-                    'Estabilización'         => 'Mecánica de 3 ejes',
-                    'Zoom'                   => '2X sin pérdida',
-                    'Almacenamiento interno' => '107 GB',
-                    'Audio'                  => 'Compatible con DJI Mic 3',
-                    'Contenido'              => '1 Unidad',
-                    'Garantía'               => '3 años',
+                    'Marca'     => $nombre_marca,
+                    'Modelo'    => 'DJI Osmo Pocket 4 Creater Combo Cámara para',
+                    'Contenido' => '1 Unidad',
+                    'Garant\u00eda'  => '3 a\u00f1os',
                 ];
             ?>
 
@@ -3314,37 +3298,26 @@ Características princip">
                         <span data-editable="true">Descripción y Beneficios</span>
                     </div>
                     <div class="accordion-body open">
-                        <div class="desc-cuerpo">
-                            <p data-editable="true">Una cámara compacta y profesional, perfecta para creadores de contenido, viajes, vlogs, redes sociales y videos de alta calidad.</p>
-
-                            <h4 class="desc-subtitulo" data-editable="true">Características principales</h4>
-                            <ul class="desc-lista">
-                                <li data-editable="true">Sensor CMOS de 1&quot; para imágenes claras y detalladas.</li>
-                                <li data-editable="true">Video en 4K para una excelente calidad de grabación.</li>
-                                <li data-editable="true">Estabilización mecánica de 3 ejes para videos suaves y estables.</li>
-                                <li data-editable="true">Pantalla táctil giratoria para grabar fácilmente en vertical u horizontal.</li>
-                                <li data-editable="true">ActiveTrack para realizar seguimiento inteligente del sujeto.</li>
-                                <li data-editable="true">Zoom 2X sin pérdida.</li>
-                                <li data-editable="true">Almacenamiento interno de 107 GB.</li>
-                                <li data-editable="true">Grabación en 10-bit D-Log para mayor detalle y mejores colores.</li>
-                                <li data-editable="true">Compatible con DJI Mic 3 para obtener audio de alta calidad.</li>
-                            </ul>
-
-                            <h4 class="desc-subtitulo" data-editable="true">Creator Combo incluye</h4>
-                            <ul class="desc-lista">
-                                <li data-editable="true">DJI Osmo Pocket 4</li>
-                                <li data-editable="true">Transmisor DJI Mic 3</li>
-                                <li data-editable="true">Luz de relleno</li>
-                                <li data-editable="true">Lente gran angular</li>
-                                <li data-editable="true">Mini trípode</li>
-                                <li data-editable="true">Accesorios para transporte y protección</li>
-                            </ul>
-
-                            <h4 class="desc-subtitulo" data-editable="true">Aviso legal</h4>
-                            <ul class="desc-lista">
-                                <li data-editable="true">La duración de la batería depende del uso que se le dé al producto.</li>
-                            </ul>
-                        </div>
+                        <div class="desc-cuerpo"><p data-editable="true">Una cámara compacta y profesional, perfecta para creadores de contenido, viajes, vlogs, redes sociales y videos de alta calidad.</p>
+                            <p data-editable="true">Características principales</p>
+                            <p data-editable="true">Sensor CMOS de 1&quot; para imágenes claras y detalladas.</p>
+                            <p data-editable="true">Video en 4K para una excelente calidad de grabación.</p>
+                            <p data-editable="true">Estabilización mecánica de 3 ejes para videos suaves y estables.</p>
+                            <p data-editable="true">Pantalla táctil giratoria para grabar fácilmente en vertical u horizontal.</p>
+                            <p data-editable="true">ActiveTrack para realizar seguimiento inteligente del sujeto.</p>
+                            <p data-editable="true">Zoom 2X sin pérdida.</p>
+                            <p data-editable="true">Almacenamiento interno de 107 GB.</p>
+                            <p data-editable="true">Grabación en 10-bit D-Log para mayor detalle y mejores colores.</p>
+                            <p data-editable="true">Compatible con DJI Mic 3 para obtener audio de alta calidad.</p>
+                            <p data-editable="true">Creator Combo incluye</p>
+                            <p data-editable="true">DJI Osmo Pocket 4</p>
+                            <p data-editable="true">Transmisor DJI Mic 3</p>
+                            <p data-editable="true">Luz de relleno</p>
+                            <p data-editable="true">Lente gran angular</p>
+                            <p data-editable="true">Mini trípode</p>
+                            <p data-editable="true">Accesorios para transporte y protección</p>
+                            <p data-editable="true">Aviso legal</p>
+                            <ul class="desc-lista"><li data-editable="true">La duración de la batería depende del uso que se le dé al producto.</li></ul></div>
                         <?php if (!$es_modo_edicion): ?>
                         <button type="button" class="desc-toggle" onclick="toggleDescripcion(this)" aria-expanded="false">
                             <svg class="desc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -3362,30 +3335,7 @@ Características princip">
                         <span data-editable="true">Garantía y Devoluciones</span>
                     </div>
                     <div class="accordion-body open">
-                        <div class="desc-cuerpo">
-                            <p data-editable="true">Todos nuestros productos cuentan con garantía de 3 años contra defectos de fábrica. Si no estás 100% satisfecho(a), te devolvemos tu dinero.</p>
-
-                            <h4 class="desc-subtitulo" data-editable="true">Qué cubre la garantía</h4>
-                            <ul class="desc-lista">
-                                <li data-editable="true">Fallas de fábrica en el sensor, el estabilizador y la batería.</li>
-                                <li data-editable="true">Defectos en la pantalla táctil o en los puertos de conexión.</li>
-                                <li data-editable="true">Accesorios del Creator Combo con fallas de origen.</li>
-                            </ul>
-
-                            <h4 class="desc-subtitulo" data-editable="true">Devoluciones</h4>
-                            <ul class="desc-lista">
-                                <li data-editable="true">Tienes 30 días desde que recibes el pedido para solicitar la devolución.</li>
-                                <li data-editable="true">El producto debe estar completo, con sus accesorios y su empaque original.</li>
-                                <li data-editable="true">El reembolso se hace por el mismo medio de pago, dentro de los 10 días hábiles siguientes.</li>
-                            </ul>
-
-                            <h4 class="desc-subtitulo" data-editable="true">Qué no cubre</h4>
-                            <ul class="desc-lista">
-                                <li data-editable="true">Daños por golpes, caídas, humedad o uso indebido.</li>
-                                <li data-editable="true">Desgaste normal de la batería con el paso del tiempo.</li>
-                                <li data-editable="true">Reparaciones hechas por terceros no autorizados.</li>
-                            </ul>
-                        </div>
+                        <div class="desc-cuerpo"><p data-editable="true">Todos nuestros productos cuentan con garantia de 3 años contra defectos de fabrica. Si no estas 100% satisfecho(a), te devolvemos tu dinero.</p></div>
                         <?php if (!$es_modo_edicion): ?>
                         <button type="button" class="desc-toggle" onclick="toggleDescripcion(this)" aria-expanded="false">
                             <svg class="desc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -3406,8 +3356,8 @@ Características princip">
     <section class="video-reviews-section" id="videoReviewsSection">
         <div class="video-reviews-header">
             <div class="video-reviews-title-wrap">
-                <h2 class="video-reviews-main-title" data-editable="true">Opiniones en video</h2>
-                <span class="video-reviews-subtitle" data-editable="true">Mira experiencias y unboxings de compradores reales</span>
+                <h2 class="video-reviews-main-title" data-editable="true">Opiniones y unboxings en video</h2>
+                <span class="video-reviews-subtitle" data-editable="true">Mira la experiencia real de compradores verificados</span>
             </div>
             <div class="video-reviews-controls">
                 <?php if ($es_modo_edicion): ?>
@@ -3440,9 +3390,9 @@ Características princip">
             </article>
             <?php endforeach; ?>
 <?php else: ?>
-            <article class="video-review-card" data-youtube-id="ZSqH0WNw87I" data-video-title="OJO, que no te engañen: DJI Osmo Pocket 4 Pro">
+            <article class="video-review-card" data-youtube-id="oPou2xqlWlo" data-video-title="¿La mejor cámara de bolsillo? | Review DJI Pocket">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/ZSqH0WNw87I/oar2.jpg" referrerpolicy="no-referrer" alt="OJO, que no te engañen: DJI Osmo Pocket 4 Pro" loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/oPou2xqlWlo/hqdefault.jpg" referrerpolicy="no-referrer" alt="¿La mejor cámara de bolsillo? | Review DJI Pocket" loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3454,9 +3404,9 @@ Características princip">
                     </button>
                 </div>
             </article>
-            <article class="video-review-card" data-youtube-id="yD-401gi7eQ" data-video-title="Mi experiencia con la DJI Osmo Pocket 4P: ¿éxito o decepción?">
+            <article class="video-review-card" data-youtube-id="f1-JQou-jZI" data-video-title="Unboxing cámara para vlogs DJI Osmo Pocket">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/yD-401gi7eQ/oar2.jpg" referrerpolicy="no-referrer" alt="Mi experiencia con la DJI Osmo Pocket 4P: ¿éxito o decepción?" loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/f1-JQou-jZI/hqdefault.jpg" referrerpolicy="no-referrer" alt="Unboxing cámara para vlogs DJI Osmo Pocket" loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3468,9 +3418,9 @@ Características princip">
                     </button>
                 </div>
             </article>
-            <article class="video-review-card" data-youtube-id="jDW9MBLrH2A" data-video-title="DJI rompe el mercado con la nueva Osmo Pocket 4P">
+            <article class="video-review-card" data-youtube-id="M0BUo2ntniI" data-video-title="NO compres el DJI Pocket sin ver esto">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/jDW9MBLrH2A/oar2.jpg" referrerpolicy="no-referrer" alt="DJI rompe el mercado con la nueva Osmo Pocket 4P" loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/M0BUo2ntniI/hqdefault.jpg" referrerpolicy="no-referrer" alt="NO compres el DJI Pocket sin ver esto" loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3482,9 +3432,9 @@ Características princip">
                     </button>
                 </div>
             </article>
-            <article class="video-review-card" data-youtube-id="cypAm89SfrM" data-video-title="¿Vale la pena la Osmo Pocket 4?">
+            <article class="video-review-card" data-youtube-id="o5mGJLLTi4Y" data-video-title="Truco para grabar en 4K horizontal">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/cypAm89SfrM/oar2.jpg" referrerpolicy="no-referrer" alt="¿Vale la pena la Osmo Pocket 4?" loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/o5mGJLLTi4Y/hqdefault.jpg" referrerpolicy="no-referrer" alt="Truco para grabar en 4K horizontal" loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3496,9 +3446,9 @@ Características princip">
                     </button>
                 </div>
             </article>
-            <article class="video-review-card" data-youtube-id="DiLyH6StrY0" data-video-title="DJI Osmo Pocket 4: ¿vale la pena?">
+            <article class="video-review-card" data-youtube-id="xqv8b84g9iM" data-video-title="DJI Osmo Pocket Unboxing + Setup">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/DiLyH6StrY0/oar2.jpg" referrerpolicy="no-referrer" alt="DJI Osmo Pocket 4: ¿vale la pena?" loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/xqv8b84g9iM/hqdefault.jpg" referrerpolicy="no-referrer" alt="DJI Osmo Pocket Unboxing + Setup" loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3510,9 +3460,9 @@ Características princip">
                     </button>
                 </div>
             </article>
-            <article class="video-review-card" data-youtube-id="SRcw2RqUq84" data-video-title="La nueva DJI Osmo Pocket 4: buenos colores, pero...">
+            <article class="video-review-card" data-youtube-id="epRh_cminDM" data-video-title="DJI Osmo Pocket 4 Review en Movimiento">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/SRcw2RqUq84/oar2.jpg" referrerpolicy="no-referrer" alt="La nueva DJI Osmo Pocket 4: buenos colores, pero..." loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/epRh_cminDM/hqdefault.jpg" referrerpolicy="no-referrer" alt="DJI Osmo Pocket 4 Review en Movimiento" loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3524,9 +3474,9 @@ Características princip">
                     </button>
                 </div>
             </article>
-            <article class="video-review-card" data-youtube-id="ky8klHTL2Ig" data-video-title="DJI Osmo Pocket 4P: la doble cámara que todos pedíamos">
+            <article class="video-review-card" data-youtube-id="arDjjafTZzo" data-video-title="DJI Pocket Cinematic Test en Español">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/ky8klHTL2Ig/oar2.jpg" referrerpolicy="no-referrer" alt="DJI Osmo Pocket 4P: la doble cámara que todos pedíamos" loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/arDjjafTZzo/hqdefault.jpg" referrerpolicy="no-referrer" alt="DJI Pocket Cinematic Test en Español" loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3538,9 +3488,9 @@ Características princip">
                     </button>
                 </div>
             </article>
-            <article class="video-review-card" data-youtube-id="xezLqoTEIno" data-video-title="Esta es la Osmo Pocket 4">
+            <article class="video-review-card" data-youtube-id="XauDnVINoRU" data-video-title="DJI Osmo Pocket Creator Combo: Tips &amp; Audio">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/xezLqoTEIno/oar2.jpg" referrerpolicy="no-referrer" alt="Esta es la Osmo Pocket 4" loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/XauDnVINoRU/hqdefault.jpg" referrerpolicy="no-referrer" alt="DJI Osmo Pocket Creator Combo: Tips &amp; Audio" loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3552,9 +3502,9 @@ Características princip">
                     </button>
                 </div>
             </article>
-            <article class="video-review-card" data-youtube-id="79S4mVWIqzc" data-video-title="DJI Osmo Pocket 4: análisis a fondo">
+            <article class="video-review-card" data-youtube-id="dS2s-r24H1g" data-video-title="Unboxing &amp; Setup del Creator Combo">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/79S4mVWIqzc/oar2.jpg" referrerpolicy="no-referrer" alt="DJI Osmo Pocket 4: análisis a fondo" loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/dS2s-r24H1g/hqdefault.jpg" referrerpolicy="no-referrer" alt="Unboxing &amp; Setup del Creator Combo" loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3566,9 +3516,9 @@ Características princip">
                     </button>
                 </div>
             </article>
-            <article class="video-review-card" data-youtube-id="F_8yrTAzONU" data-video-title="Nadie esperaba esto: DJI Osmo Pocket 4P">
+            <article class="video-review-card" data-youtube-id="epNWrPqg-rY" data-video-title="Prueba de Mic 2 &amp; ActiveTrack 6.0">
                 <div class="vs-media">
-                    <img class="vs-thumb" src="https://i.ytimg.com/vi/F_8yrTAzONU/oar2.jpg" referrerpolicy="no-referrer" alt="Nadie esperaba esto: DJI Osmo Pocket 4P" loading="lazy">
+                    <img class="vs-thumb" src="https://i.ytimg.com/vi/epNWrPqg-rY/hqdefault.jpg" referrerpolicy="no-referrer" alt="Prueba de Mic 2 &amp; ActiveTrack 6.0" loading="lazy">
                     <div class="vs-player"></div>
                     <button type="button" class="vs-sonido" onclick="alternarSonidoShort(event)" aria-label="Activar sonido" aria-pressed="false">
                         <svg class="vs-ico vs-ico-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3580,6 +3530,7 @@ Características princip">
                     </button>
                 </div>
             </article>
+
 <?php endif; ?>
             </div>
         </div>
@@ -3748,30 +3699,7 @@ Características princip">
 <?php endif; ?>
 
     <!-- 6. SECCIÓN QUIENES VIERON ESTE PRODUCTO TAMBIÉN COMPRARON -->
-    <section class="more-to-love-section" id="recommendedProductsSection">
-        <h2 class="section-heading-center" data-editable="true">Quienes vieron este producto también compraron</h2>
-
-        <div class="more-slider-wrapper" style="padding: 0 10px;">
-            <button type="button" class="more-slider-arrow prev" onclick="slideRecommendedProducts(-1)" aria-label="Anterior">❮</button>
-            <div class="more-grid" id="recommendedProductsTrack">
-                <?php if (!empty($otros_productos)): ?>
-                    <?php foreach ($otros_productos as $o): ?>
-                    <a href="<?= htmlspecialchars($o['url']) ?>" class="more-card">
-                        <img src="<?= htmlspecialchars($o['img']) ?>" class="more-card-img" alt="<?= htmlspecialchars($o['nombre']) ?>"
-                             loading="lazy" onerror="this.onerror=null; this.src='img/img_1.webp';">
-                        <div class="more-card-title"><?= htmlspecialchars($o['nombre']) ?></div>
-                        <div class="more-card-stars">★★★★★</div>
-                        <div class="more-card-price"><?= htmlspecialchars($o['precio'] ?? 'Ver Oferta ➔') ?></div>
-                    </a>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-            <button type="button" class="more-slider-arrow next" onclick="slideRecommendedProducts(1)" aria-label="Siguiente">❯</button>
-        </div>
-
-        <!-- PUNTICOS INDICADORES DEL CARRUSEL DE PRODUCTOS -->
-        <div class="more-products-dots" id="recommendedProductsDots"></div>
-    </section>
+    
 
     <!-- 7. FOOTER MODERNO ESTILO SHEGLAM -->
     <footer class="generic-footer">
@@ -3921,7 +3849,7 @@ Características princip">
         ?>
         const IMAGENES = <?= json_encode($supabaseImages) ?>;
         const SWATCHES = [];
-        const REVIEWS_LIST = [{"author":"Victor M","size":"1 Unidad","stars":"★★★★★","comment":"Comparada con la versión 3, es mucho mejor. Aprobada por el staff del podcast \"como gordas en tobogán\".","date":"2026.08.20","fechaTexto":"Hace 5 días","titulo":"Profesional","ubicacion":"Pereira, Colombia","likes":36,"img":"img_reviews/dji_rev_1.webp","img2":"img_reviews/dji_rev_2.webp"},{"author":"Laura T","size":"1 Unidad","stars":"★★★★★","comment":"Llegó todo bien cuidado, mi primera pocket, amo la marca dji y sé que no me decepcionará 🥰♥️.","date":"2026.08.14","fechaTexto":"Hace 1 semana","titulo":"Hermosaa","ubicacion":"Cúcuta, Colombia","likes":9,"img":"img_reviews/dji_rev_3.webp","img2":"img_reviews/dji_rev_4.webp"},{"author":"Jose F","size":"1 Unidad","stars":"★★★★★","comment":"Está muy compacta, ideal para el día a día. Realmente se nota la calidad.","date":"2026.08.08","fechaTexto":"Hace 2 semanas","titulo":"Muy completa, la recomiendo","ubicacion":"Cali, Colombia","likes":22,"img":"img_reviews/dji_rev_5.webp","img2":"img_reviews/dji_rev_6.webp"},{"author":"Andres P","size":"1 Unidad","stars":"★★★★★","comment":"Excelente compra calidad dji, viene completamente sellado.","date":"2026.08.02","fechaTexto":"Hace 2 semanas","titulo":"La original","ubicacion":"Pereira, Colombia","likes":35,"img":"img_reviews/dji_rev_7.webp","img2":"img_reviews/dji_rev_8.webp"},{"author":"Fernanda C","size":"1 Unidad","stars":"★★★★★","comment":"Llegó todo bien en caja bien empacado, ya la empecé a utilizar y graba muy bien. Es la primera osmo pocket que me compro, el micrófono también me gustó mucho.","date":"2026.07.27","fechaTexto":"Hace 3 semanas","titulo":"Fue rapido el envio","ubicacion":"Cúcuta, Colombia","likes":8,"img":"img_reviews/dji_rev_9.webp","img2":"img_reviews/dji_rev_10.webp"}];
+        const REVIEWS_LIST = [{"author":"Victor M","size":"1 Unidad","stars":"★★★★★","comment":"Comparada con la versión 3, es mucho mejor. Aprobada por el staff del podcast \"como gordas en tobogán\".","date":"2026.08.23","fechaTexto":"Hace 5 días","titulo":"Profesional","ubicacion":"Pereira, Colombia","likes":36,"img":"img_reviews/dji_rev_1.webp","img2":"img_reviews/dji_rev_2.webp"},{"author":"Laura T","size":"1 Unidad","stars":"★★★★★","comment":"Llegó todo bien cuidado, mi primera pocket, amo la marca dji y sé que no me decepcionará 🥰♥️.","date":"2026.08.17","fechaTexto":"Hace 1 semana","titulo":"Hermosaa","ubicacion":"Cúcuta, Colombia","likes":9,"img":"img_reviews/dji_rev_3.webp","img2":"img_reviews/dji_rev_4.webp"},{"author":"Jose F","size":"1 Unidad","stars":"★★★★★","comment":"Está muy compacta, ideal para el día a día. Realmente se nota la calidad.","date":"2026.08.11","fechaTexto":"Hace 2 semanas","titulo":"Muy completa, la recomiendo","ubicacion":"Cali, Colombia","likes":22,"img":"img_reviews/dji_rev_5.webp","img2":"img_reviews/dji_rev_6.webp"},{"author":"Andres P","size":"1 Unidad","stars":"★★★★★","comment":"Excelente compra calidad dji, viene completamente sellado.","date":"2026.08.05","fechaTexto":"Hace 2 semanas","titulo":"La original","ubicacion":"Pereira, Colombia","likes":35,"img":"img_reviews/dji_rev_7.webp","img2":"img_reviews/dji_rev_8.webp"},{"author":"Fernanda C","size":"1 Unidad","stars":"★★★★★","comment":"Llegó todo bien en caja bien empacado, ya la empecé a utilizar y graba muy bien. Es la primera osmo pocket que me compro, el micrófono también me gustó mucho.","date":"2026.07.30","fechaTexto":"Hace 3 semanas","titulo":"Fue rapido el envio","ubicacion":"Cúcuta, Colombia","likes":8,"img":"img_reviews/dji_rev_9.webp","img2":"img_reviews/dji_rev_10.webp"}];
         const PRECIO_UNITARIO = 1127980;
         const PRODUCTO_TITULO = "DJI Osmo Pocket 4 Creater Combo Cámara para Vlogs 4K 120 fps CMOS 1\"";
         const LANDING_TOKEN = "<?= $landing_token ?>";
@@ -4697,7 +4625,7 @@ Características princip">
         }
 
         /* Nombre corto del producto para la ficha de cada opinion. */
-        const PRODUCTO_CORTO = 'DJI Osmo Pocket 4 Creator Combo';
+        const PRODUCTO_CORTO = "DJI Osmo Pocket 4 Creater Combo Cámara para";
 
         /* ─── FOTO DE PERFIL DE QUIEN OPINA ───
            Se pide a una API, no se guarda ninguna imagen en el proyecto: al
