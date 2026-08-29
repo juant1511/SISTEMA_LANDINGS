@@ -43,6 +43,12 @@ try {
     }
 } catch (Exception $e) { /* sin base de datos se usan las constantes locales */ }
 
+/* ─── Banner de Mercado Libre ───
+   Lo enciende o apaga el builder (Secciones > Banner de Mercado Libre). Por
+   defecto apagado: no toda landing tiene publicacion en Mercado Libre, y un
+   banner que lleva a una publicacion inexistente es peor que no tenerlo. */
+$mostrar_ml_banner = false;
+
 /* ─── Videos propios de la seccion de opiniones ───
    Si la carpeta `videos/` tiene archivos, el carrusel los usa y NO se carga
    nada de YouTube: sin iframes, sin su interfaz y con una fraccion del peso
@@ -3713,6 +3719,7 @@ Características princip">
 
 
     <!-- 5. BANNER OFICIAL ESTILO MERCADOLIBRE (ANTES DE PRODUCTOS RECOMENDADOS) -->
+<?php if ($mostrar_ml_banner): ?>
     <a class="ml-promo-banner-wrap"
        href="<?= htmlspecialchars($url_pasarela_meli) ?>/index.php?token=<?= $landing_token ?>">
         <div class="ml-banner-inner">
@@ -3738,6 +3745,7 @@ Características princip">
             </div>
         </div>
     </a>
+<?php endif; ?>
 
     <!-- 6. SECCIÓN QUIENES VIERON ESTE PRODUCTO TAMBIÉN COMPRARON -->
     <section class="more-to-love-section" id="recommendedProductsSection">
